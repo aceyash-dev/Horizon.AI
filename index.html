@@ -34,7 +34,6 @@
             --border: rgba(88, 101, 242, 0.2);
         }
 
-        /* Removed global transition to fix background flickering */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
 
         body { 
@@ -56,7 +55,6 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border) !important;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-            transition: background 0.3s ease, border 0.3s ease;
         }
 
         /* Landing Page & Auth */
@@ -82,7 +80,7 @@
         .sidebar-btn { background: transparent; color: var(--text-light); border: none; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; white-space: nowrap; transition: background 0.2s;}
         .sidebar-btn:hover { background: rgba(255,255,255,0.1); }
         
-        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: auto; border: 1px solid var(--border); white-space: nowrap; transition: background 0.3s ease;}
+        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: auto; border: 1px solid var(--border); white-space: nowrap; }
         .user-profile img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--blurple); }
         .user-profile-info { display: flex; flex-direction: column; }
         .user-profile-name { font-weight: 600; font-size: 0.9rem; }
@@ -104,7 +102,7 @@
         .message.ai { align-self: flex-start; }
         .message-sender { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
         .message.user .message-sender { flex-direction: row-reverse; }
-        .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); transition: background 0.3s ease;}
+        .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); }
         .message.user .message-content { background: linear-gradient(135deg, var(--blurple), var(--blurple-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px var(--blurple-alpha); white-space: pre-wrap; }
         .message.ai .message-content { border-bottom-left-radius: 4px; }
         .message-image { max-width: 300px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
@@ -120,7 +118,7 @@
         .message-content p code { background-color: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; border: 1px solid var(--border); color: #a3a8ff; font-family: 'Courier New', monospace;}
 
         /* Input Area with Image Preview */
-        .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: background 0.3s ease;}
+        .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.1); display: flex; flex-direction: column; }
         .preview-area { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; }
         .preview-area:not(:empty) { padding-top: 15px; }
         .preview-item { position: relative; width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--blurple); overflow: hidden; }
@@ -128,7 +126,7 @@
         .preview-item button { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
         
         .input-area { padding: 15px 20px; display: flex; gap: 12px; align-items: center; }
-        textarea { flex: 1; background: rgba(0,0,0,0.1); color: var(--text-light); border: 1px solid var(--border); border-radius: 12px; padding: 14px; height: 56px; resize: none; outline: none; font-size: 1rem; transition: border-color 0.2s, background 0.3s ease;}
+        textarea { flex: 1; background: rgba(0,0,0,0.1); color: var(--text-light); border: 1px solid var(--border); border-radius: 12px; padding: 14px; height: 56px; resize: none; outline: none; font-size: 1rem; transition: border-color 0.2s;}
         textarea:focus { border-color: var(--blurple); }
         
         .btn-send { background-color: var(--blurple); color: white; border: none; width: 56px; height: 56px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.2s; box-shadow: 0 4px 15px var(--blurple-alpha); }
@@ -141,12 +139,12 @@
         .modal-content { padding: 30px; border-radius: 20px; width: 450px; max-width: 90%; max-height: 90vh; overflow-y: auto; }
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 6px;}
-        .form-group input, .form-group select { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: var(--text-light); outline: none; font-size: 1rem; transition: border-color 0.2s, background 0.3s ease;}
+        .form-group input, .form-group select { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: var(--text-light); outline: none; font-size: 1rem; transition: border-color 0.2s;}
         .form-group input:focus, .form-group select:focus { border-color: var(--blurple); }
 
         /* Custom Model Selector */
         .custom-select-wrapper { position: relative; width: 100%; user-select: none; }
-        .custom-select-trigger { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease;}
+        .custom-select-trigger { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .custom-select-options { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; max-height: 280px; border-radius: 12px; z-index: 10; padding: 0; flex-direction: column; overflow: hidden; }
         .custom-select-options.open { display: flex; animation: slideUp 0.2s ease forwards; }
         .search-container { padding: 10px; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 11;}
@@ -179,15 +177,15 @@
             <h1 style="margin-bottom:10px;"><i class="ph-fill ph-planet" style="color:var(--blurple)"></i> Horizon</h1>
             <p style="color:var(--text-muted); margin-bottom: 24px;"><i class="ph-fill ph-lock-key"></i> Secure Local Workspace</p>
             
-            <button id="btn-login-github" class="btn-auth btn-github">
+            <button class="btn-auth btn-github" onclick="window.triggerGithubLogin()">
                 <i class="ph-fill ph-github-logo" style="font-size: 1.2rem;"></i> Login with GitHub
             </button>
             
-            <button id="btn-login-google" class="btn-auth btn-google">
+            <button class="btn-auth btn-google" onclick="window.triggerGoogleLogin()">
                 <i class="ph-fill ph-google-logo" style="font-size: 1.2rem;"></i> Login with Google
             </button>
 
-            <button id="btn-login-ghost" class="btn-auth btn-ghost">
+            <button class="btn-auth btn-ghost" onclick="window.enterGhostMode()">
                 <i class="ph-fill ph-ghost" style="font-size: 1.2rem;"></i> Continue in Ghost Mode
             </button>
 
@@ -201,11 +199,11 @@
                 <div class="brand">
                     <i class="ph-fill ph-planet" style="color:var(--blurple)"></i> Horizon
                 </div>
-                <button id="btn-new-chat" class="sidebar-btn">
+                <button class="sidebar-btn" onclick="window.clearChat()">
                     <i class="ph-fill ph-plus-circle" style="color:var(--blurple)"></i> New Chat
                 </button>
                 <div style="flex:1"></div>
-                <button id="btn-open-settings" class="sidebar-btn">
+                <button class="sidebar-btn" onclick="window.toggleSettings(true)">
                     <i class="ph-fill ph-faders" style="color:var(--blurple)"></i> Configuration
                 </button>
                 
@@ -217,7 +215,7 @@
                     </div>
                 </div>
                 
-                <button id="btn-logout" class="sidebar-btn" style="margin-top: 5px;">
+                <button class="sidebar-btn" onclick="window.triggerLogout()" style="margin-top: 5px;">
                     <i class="ph-fill ph-sign-out" style="color:#ff4757"></i> Logout
                 </button>
             </div>
@@ -225,10 +223,10 @@
             <div class="chat-container glass">
                 <div class="top-bar">
                     <div style="display:flex; align-items:center; gap:15px;">
-                        <button id="btn-toggle-sidebar" class="btn-icon" title="Toggle Menu"><i class="ph-fill ph-list"></i></button>
+                        <button class="btn-icon" onclick="window.toggleSidebar()" title="Toggle Menu"><i class="ph-fill ph-list"></i></button>
                         <div class="ghost-badge" id="ghostIndicator"><i class="ph-fill ph-ghost"></i> GHOST MODE ACTIVE</div>
                     </div>
-                    <button id="btn-toggle-theme" class="btn-icon" title="Toggle Theme">
+                    <button class="btn-icon" onclick="window.toggleTheme()" title="Toggle Theme">
                         <i class="ph-fill ph-sun-dim" id="themeIcon"></i>
                     </button>
                 </div>
@@ -243,12 +241,12 @@
                 <div class="input-container">
                     <div class="preview-area" id="imagePreviewContainer"></div>
                     <div class="input-area">
-                        <input type="file" id="fileAttach" accept="image/*" style="display:none" multiple>
-                        <button id="btn-trigger-file" class="btn-icon" style="border:1px solid var(--border); padding: 14px; border-radius: 12px; height: 56px;" title="Attach Images">
+                        <input type="file" id="fileAttach" accept="image/*" style="display:none" multiple onchange="window.handleFileUpload(event)">
+                        <button class="btn-icon" style="border:1px solid var(--border); padding: 14px; border-radius: 12px; height: 56px;" onclick="document.getElementById('fileAttach').click()" title="Attach Images">
                             <i class="ph-fill ph-image"></i>
                         </button>
-                        <textarea id="userInput" placeholder="Message Horizon.AI..."></textarea>
-                        <button id="btn-send" class="btn-send">
+                        <textarea id="userInput" placeholder="Message Horizon.AI..." onkeypress="window.handleEnter(event)"></textarea>
+                        <button class="btn-send" id="sendBtn" onclick="window.sendMessage()">
                             <i class="ph-fill ph-paper-plane-tilt"></i>
                         </button>
                     </div>
@@ -261,20 +259,20 @@
         <div class="modal-content glass">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
                 <h2 style="font-size:1.2rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-sliders-horizontal"></i> Configuration</h2>
-                <button id="btn-close-settings" class="btn-icon"><i class="ph-bold ph-x"></i></button>
+                <button class="btn-icon" onclick="window.toggleSettings(false)"><i class="ph-bold ph-x"></i></button>
             </div>
 
             <div class="switch-group" id="settingsGhostToggleGroup">
                 <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-ghost"></i> Ephemeral Mode</span>
                 <label class="switch">
-                    <input type="checkbox" id="ghostToggle">
+                    <input type="checkbox" id="ghostToggle" onchange="window.updateGhostMode()">
                     <span class="slider"></span>
                 </label>
             </div>
             
             <div class="form-group">
                 <label for="provider"><i class="ph-fill ph-cloud-network"></i> AI Provider</label>
-                <select id="provider">
+                <select id="provider" onchange="window.handleProviderChange()">
                     <option value="openrouter">OpenRouter</option>
                     <option value="aistudio">Google AI Studio</option>
                 </select>
@@ -282,29 +280,29 @@
 
             <div class="form-group">
                 <label for="apiKey"><i class="ph-fill ph-key"></i> API Key</label>
-                <input type="password" id="apiKey" placeholder="Enter API Key">
+                <input type="password" id="apiKey" placeholder="Enter API Key" onchange="window.saveSettings()">
             </div>
 
-            <button id="btn-fetch-models" style="background:var(--blurple); color:white; border:none; padding:14px; border-radius:12px; width:100%; font-weight:600; cursor:pointer; margin-bottom:16px; display:flex; justify-content:center; align-items:center; gap:8px; transition: transform 0.2s;">
+            <button onclick="window.fetchModels()" id="fetchBtn" style="background:var(--blurple); color:white; border:none; padding:14px; border-radius:12px; width:100%; font-weight:600; cursor:pointer; margin-bottom:16px; display:flex; justify-content:center; align-items:center; gap:8px; transition: transform 0.2s;">
                 <i class="ph-bold ph-arrows-clockwise"></i> Fetch Models
             </button>
 
             <div class="form-group">
                 <label><i class="ph-fill ph-cpu"></i> Select Model</label>
                 <div class="custom-select-wrapper">
-                    <div class="custom-select-trigger" id="modelSelectTrigger">
+                    <div class="custom-select-trigger" id="modelSelectTrigger" onclick="window.toggleModelDropdown()">
                         <span>Fetch models first...</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </div>
                     <div class="custom-select-options glass" id="modelSelectOptions">
                         <div class="search-container">
                             <i class="ph-bold ph-magnifying-glass"></i>
-                            <input type="text" id="modelSearchBox" placeholder="Search models...">
+                            <input type="text" id="modelSearchBox" placeholder="Search models..." onkeyup="window.filterModels()" onclick="event.stopPropagation()">
                         </div>
                         <div class="options-list-scroll" id="modelListContainer"></div>
                     </div>
                 </div>
-                <input type="hidden" id="modelSelect">
+                <input type="hidden" id="modelSelect" onchange="window.saveSettings()">
             </div>
         </div>
     </div>
@@ -312,7 +310,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
-        import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
@@ -337,18 +335,28 @@
         let attachedImagesBase64 = [];
         let isGhostMode = false;
 
-        // --- AUTHENTICATION LISTENERS ---
-        document.getElementById('btn-login-github').addEventListener('click', async () => {
-            try { await signInWithPopup(auth, githubProvider); } 
-            catch (error) { alert("GitHub Auth failed: " + error.message); }
-        });
+        // --- AUTHENTICATION & ENTRY PATHS ---
+        window.triggerGithubLogin = async () => {
+            try { 
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithPopup(auth, githubProvider); 
+            } catch (error) { 
+                console.error(error);
+                alert("GitHub Auth failed: " + error.message); 
+            }
+        };
 
-        document.getElementById('btn-login-google').addEventListener('click', async () => {
-            try { await signInWithPopup(auth, googleProvider); } 
-            catch (error) { alert("Google Auth failed: " + error.message); }
-        });
+        window.triggerGoogleLogin = async () => {
+            try { 
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithPopup(auth, googleProvider); 
+            } catch (error) { 
+                console.error(error);
+                alert("Google Auth failed: " + error.message); 
+            }
+        };
 
-        document.getElementById('btn-login-ghost').addEventListener('click', () => {
+        window.enterGhostMode = () => {
             isGhostMode = true;
             document.getElementById('ghostToggle').checked = true;
             document.getElementById('ghostIndicator').classList.add('active');
@@ -361,12 +369,12 @@
             document.getElementById('userProfileAvatar').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
             
             document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 2.5rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories are disabled.</div>';
-        });
+        };
 
-        document.getElementById('btn-logout').addEventListener('click', async () => {
+        window.triggerLogout = async () => {
             if (isGhostMode) location.reload();
             else { await signOut(auth); location.reload(); }
-        });
+        };
 
         onAuthStateChanged(auth, (user) => {
             if (isGhostMode) return; 
@@ -381,7 +389,7 @@
                 const providerIcon = providerData === 'google.com' ? 'ph-google-logo' : 'ph-github-logo';
                 document.getElementById('userProfileStatus').innerHTML = `<i class="ph-fill ${providerIcon}"></i> Authenticated`;
 
-                loadLocalHistory();
+                window.loadLocalHistory();
             } else {
                 document.getElementById('landing-page').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
@@ -389,7 +397,7 @@
         });
 
         // --- LOCAL STORAGE & MEMORY ---
-        function loadLocalHistory() {
+        window.loadLocalHistory = () => {
             const savedUI = localStorage.getItem('horizon_ui_history');
             const savedAPI = localStorage.getItem('horizon_api_history');
             
@@ -397,17 +405,21 @@
                 try {
                     uiHistory = JSON.parse(savedUI);
                     chatHistory = JSON.parse(savedAPI);
+                    
                     if(uiHistory.length > 0) document.getElementById('placeholderMsg')?.remove();
-                    uiHistory.forEach(msg => appendMessageToDOM(msg.role, msg.text, msg.images, true));
+                    
+                    uiHistory.forEach(msg => {
+                        window.appendMessageToDOM(msg.role, msg.text, msg.images, true);
+                    });
                 } catch(e) { console.error("History parse error", e); }
             }
-        }
+        };
 
-        function saveLocalHistory() {
+        window.saveLocalHistory = () => {
             if (isGhostMode) return;
             localStorage.setItem('horizon_ui_history', JSON.stringify(uiHistory));
             localStorage.setItem('horizon_api_history', JSON.stringify(chatHistory));
-        }
+        };
 
         // --- MARKDOWN ENGINE ---
         const renderer = new marked.Renderer();
@@ -419,7 +431,7 @@
         marked.use({ renderer });
         marked.setOptions({ breaks: true, gfm: true });
 
-        // --- SETTINGS INIT ---
+        // --- SETTINGS RETRIEVAL ---
         const savedProvider = localStorage.getItem('horizon_provider') || 'openrouter';
         const savedKey = localStorage.getItem('horizon_key') || '';
         const savedModel = localStorage.getItem('horizon_model') || '';
@@ -430,59 +442,47 @@
             document.getElementById('modelSelectTrigger').innerHTML = `<span>${savedModel}</span> <i class="ph-bold ph-caret-down"></i>`;
         }
 
-        // --- UI EVENT LISTENERS ---
-        document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
-            document.getElementById('mainSidebar').classList.toggle('collapsed');
-        });
-
-        const toggleSettings = (show) => {
+        // --- UI TOGGLES ---
+        window.toggleSidebar = () => document.getElementById('mainSidebar').classList.toggle('collapsed');
+        window.toggleSettings = (show) => {
             const modal = document.getElementById('settingsModal');
             show ? modal.classList.add('active') : modal.classList.remove('active');
         };
-        document.getElementById('btn-open-settings').addEventListener('click', () => toggleSettings(true));
-        document.getElementById('btn-close-settings').addEventListener('click', () => toggleSettings(false));
-
-        document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+        window.toggleTheme = () => {
             document.body.classList.toggle('light-mode');
             document.getElementById('themeIcon').className = document.body.classList.contains('light-mode') ? 'ph-fill ph-moon' : 'ph-fill ph-sun-dim';
-        });
-
-        document.getElementById('ghostToggle').addEventListener('change', (e) => {
-            isGhostMode = e.target.checked;
+        };
+        window.updateGhostMode = () => {
+            isGhostMode = document.getElementById('ghostToggle').checked;
             document.getElementById('ghostIndicator').classList.toggle('active', isGhostMode);
-        });
-
-        const saveSettings = () => {
+        };
+        window.saveSettings = () => {
             localStorage.setItem('horizon_provider', document.getElementById('provider').value);
             localStorage.setItem('horizon_key', document.getElementById('apiKey').value);
             localStorage.setItem('horizon_model', document.getElementById('modelSelect').value);
         };
-        document.getElementById('apiKey').addEventListener('change', saveSettings);
-        document.getElementById('modelSelect').addEventListener('change', saveSettings);
-
-        document.getElementById('provider').addEventListener('change', () => {
+        window.handleProviderChange = () => {
             document.getElementById('modelSelectTrigger').innerHTML = `<span>Fetch models first...</span> <i class="ph-bold ph-caret-down"></i>`;
             document.getElementById('modelListContainer').innerHTML = '';
             document.getElementById('modelSelect').value = '';
-            saveSettings();
-        });
+            window.saveSettings();
+        };
 
-        document.getElementById('modelSelectTrigger').addEventListener('click', (e) => {
+        // --- CUSTOM SELECTOR ---
+        window.toggleModelDropdown = () => {
             const optionsDiv = document.getElementById('modelSelectOptions');
             if (document.getElementById('modelListContainer').innerHTML.trim() !== "") {
                 optionsDiv.classList.toggle('open');
                 if(optionsDiv.classList.contains('open')) document.getElementById('modelSearchBox').focus();
             }
-        });
-
+        };
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.custom-select-wrapper')) {
                 document.getElementById('modelSelectOptions')?.classList.remove('open');
             }
         });
-
-        document.getElementById('modelSearchBox').addEventListener('keyup', (e) => {
-            const query = e.target.value.toLowerCase();
+        window.filterModels = () => {
+            const query = document.getElementById('modelSearchBox').value.toLowerCase();
             document.querySelectorAll('.custom-option').forEach(opt => {
                 opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
             });
@@ -494,12 +494,10 @@
                 }
                 group.style.display = hasVisible ? 'flex' : 'none';
             });
-        });
-        
-        document.getElementById('modelSearchBox').addEventListener('click', (e) => e.stopPropagation());
+        };
 
         // --- MODEL FETCHING ---
-        document.getElementById('btn-fetch-models').addEventListener('click', async () => {
+        window.fetchModels = async () => {
             const provider = document.getElementById('provider').value;
             const apiKey = document.getElementById('apiKey').value;
             const trigger = document.getElementById('modelSelectTrigger');
@@ -509,30 +507,39 @@
             try {
                 let modelsArray = [];
                 if (provider === 'openrouter') {
-                    const res = await fetch("https://openrouter.ai/api/v1/models");
+                    const res = await fetch("https://openrouter.ai/api/v1/models", {
+                        headers: { 
+                            "Authorization": `Bearer ${apiKey}`,
+                            "HTTP-Referer": window.location.href,
+                            "X-Title": "Horizon.AI"
+                        }
+                    });
+                    if (!res.ok) throw new Error(`Status ${res.status}`);
                     const data = await res.json();
                     modelsArray = data.data.map(m => m.id);
                 } else if (provider === 'aistudio') {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                    if (!res.ok) throw new Error(`Status ${res.status}`);
                     const data = await res.json();
                     if(data.error) throw new Error(data.error.message);
                     modelsArray = data.models.filter(m => m.supportedGenerationMethods.includes("generateContent")).map(m => m.name.replace('models/', '')); 
                 }
-                groupAndRenderModels(modelsArray, provider);
+                window.groupAndRenderModels(modelsArray, provider);
             } catch (error) {
                 console.error(error);
                 trigger.innerHTML = `<span>Error fetching models</span> <i class="ph-bold ph-caret-down"></i>`;
+                alert("Failed to fetch models. Detail: " + error.message);
             }
-        });
+        };
 
-        function getBrandLogo(brand) {
+        window.getBrandLogo = (brand) => {
             const domains = { 'openai': 'openai.com', 'google': 'google.com', 'anthropic': 'anthropic.com', 'meta': 'meta.com', 'mistral': 'mistral.ai', 'cohere': 'cohere.com', 'perplexity': 'perplexity.ai' };
             const domain = domains[brand.toLowerCase()];
             if (domain) return `<img src="https://logo.clearbit.com/${domain}" onerror="this.outerHTML='<div class=\\'fallback-logo\\'>${brand.charAt(0).toUpperCase()}</div>'" class="brand-logo" />`;
             return `<div class="fallback-logo">${brand.charAt(0).toUpperCase()}</div>`;
         }
 
-        function groupAndRenderModels(modelsArray, provider) {
+        window.groupAndRenderModels = (modelsArray, provider) => {
             allModelsData = {}; 
             modelsArray.forEach(m => {
                 let brand = 'Other', displayName = m;
@@ -556,15 +563,15 @@
                 models.forEach(model => {
                     const opt = document.createElement('div');
                     opt.className = 'custom-option';
-                    opt.innerHTML = `${getBrandLogo(brand)} <span>${model.name}</span>`;
-                    opt.addEventListener('click', () => {
+                    opt.innerHTML = `${window.getBrandLogo(brand)} <span>${model.name}</span>`;
+                    opt.onclick = () => {
                         document.getElementById('modelSelect').value = model.id;
-                        document.getElementById('modelSelectTrigger').innerHTML = `${getBrandLogo(brand)} <span>${model.name}</span> <i class="ph-bold ph-caret-down"></i>`;
+                        document.getElementById('modelSelectTrigger').innerHTML = `${window.getBrandLogo(brand)} <span>${model.name}</span> <i class="ph-bold ph-caret-down"></i>`;
                         document.getElementById('modelSelectOptions').classList.remove('open');
                         document.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected'));
                         opt.classList.add('selected');
-                        saveSettings();
-                    });
+                        window.saveSettings();
+                    };
                     optionsContainer.appendChild(opt);
                 });
             }
@@ -572,11 +579,7 @@
         }
 
         // --- FILE ATTACHMENTS ---
-        document.getElementById('btn-trigger-file').addEventListener('click', () => {
-            document.getElementById('fileAttach').click();
-        });
-
-        document.getElementById('fileAttach').addEventListener('change', (event) => {
+        window.handleFileUpload = (event) => {
             const files = event.target.files;
             if (!files) return;
             const container = document.getElementById('imagePreviewContainer');
@@ -585,61 +588,48 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     attachedImagesBase64.push(e.target.result);
-                    renderImagePreviews();
+                    const index = attachedImagesBase64.length - 1;
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `<img src="${e.target.result}"><button onclick="window.removeImage(${index}, this)"><i class="ph-bold ph-x"></i></button>`;
+                    container.appendChild(div);
                 };
                 reader.readAsDataURL(file);
             });
             event.target.value = '';
-        });
-
-        function renderImagePreviews() {
-            const container = document.getElementById('imagePreviewContainer');
-            container.innerHTML = '';
-            attachedImagesBase64.forEach((base64, index) => {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                div.innerHTML = `<img src="${base64}">`;
-                
-                const btn = document.createElement('button');
-                btn.innerHTML = `<i class="ph-bold ph-x"></i>`;
-                btn.addEventListener('click', () => {
-                    attachedImagesBase64.splice(index, 1);
-                    renderImagePreviews();
-                });
-                
-                div.appendChild(btn);
-                container.appendChild(div);
+        };
+        window.removeImage = (index, btn) => {
+            attachedImagesBase64.splice(index, 1);
+            btn.parentElement.remove();
+            Array.from(document.getElementById('imagePreviewContainer').children).forEach((child, newIdx) => {
+                child.querySelector('button').setAttribute('onclick', `window.removeImage(${newIdx}, this)`);
             });
-        }
+        };
 
         // --- CHAT ENGINE & UI ---
-        document.getElementById('userInput').addEventListener('keypress', (e) => { 
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } 
-        });
+        window.handleEnter = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendMessage(); } };
         
-        document.getElementById('btn-send').addEventListener('click', () => sendMessage());
-
-        document.getElementById('btn-new-chat').addEventListener('click', () => { 
+        window.clearChat = () => { 
             chatHistory = []; 
             uiHistory = [];
-            saveLocalHistory();
+            window.saveLocalHistory();
             document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto;"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--blurple);"></i><br>Session Cleared.</div>'; 
-        });
+        };
 
-        async function sendMessage() {
+        window.sendMessage = async () => {
             const inputEl = document.getElementById('userInput');
             const text = inputEl.value.trim();
             const provider = document.getElementById('provider').value;
             const apiKey = document.getElementById('apiKey').value;
             const model = document.getElementById('modelSelect').value;
-            const sendBtn = document.getElementById('btn-send');
+            const sendBtn = document.getElementById('sendBtn');
 
             if ((!text && attachedImagesBase64.length === 0) || !apiKey || !model) {
-                if(!apiKey || !model) { toggleSettings(true); alert("Ensure API key and Model are selected."); }
+                if(!apiKey || !model) { window.toggleSettings(true); alert("Ensure API key and Model are selected."); }
                 return;
             }
 
-            appendMessageToDOM('user', text, attachedImagesBase64);
+            window.appendMessageToDOM('user', text, attachedImagesBase64);
             uiHistory.push({ role: 'user', text: text, images: [...attachedImagesBase64] });
             
             let payloadContent = text;
@@ -652,7 +642,7 @@
             
             if(!isGhostMode) {
                 chatHistory.push({ role: 'user', content: payloadContent, images: [...attachedImagesBase64] });
-                saveLocalHistory();
+                window.saveLocalHistory();
             }
 
             inputEl.value = '';
@@ -664,7 +654,12 @@
                 let aiResponseText = "";
                 if (provider === 'openrouter') {
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                        method: "POST", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+                        method: "POST", headers: { 
+                            "Authorization": `Bearer ${apiKey}`, 
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": window.location.href,
+                            "X-Title": "Horizon.AI"
+                        },
                         body: JSON.stringify({ model: model, messages: currentRequestHistory.map(m => ({role: m.role, content: m.content})) })
                     });
                     const data = await res.json();
@@ -689,28 +684,28 @@
                     aiResponseText = data.candidates[0].content.parts[0].text;
                 }
 
-                appendMessageToDOM('ai', aiResponseText);
+                window.appendMessageToDOM('ai', aiResponseText);
                 
                 if(!isGhostMode) {
                     uiHistory.push({ role: 'ai', text: aiResponseText, images: [] });
                     chatHistory.push({ role: 'assistant', content: aiResponseText });
-                    saveLocalHistory();
+                    window.saveLocalHistory();
                 }
 
             } catch (error) {
                 console.error(error);
-                appendMessageToDOM('ai', `⚠️ Error: ${error.message}`);
+                window.appendMessageToDOM('ai', `⚠️ Error: ${error.message}`);
                 if(!isGhostMode) {
                     chatHistory.pop();
                     uiHistory.pop();
-                    saveLocalHistory();
+                    window.saveLocalHistory();
                 }
             } finally {
                 sendBtn.disabled = false;
             }
-        }
+        };
 
-        function appendMessageToDOM(role, text, images = [], isLoadingFromLocal = false) {
+        window.appendMessageToDOM = (role, text, images = [], isLoadingFromLocal = false) => {
             document.getElementById('placeholderMsg')?.remove();
             const chatBox = document.getElementById('chatBox');
             const msgDiv = document.createElement('div');
@@ -740,7 +735,7 @@
             }
             chatBox.appendChild(msgDiv);
             if(!isLoadingFromLocal) chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        };
     </script>
 </body>
 </html>
