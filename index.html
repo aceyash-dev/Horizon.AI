@@ -38,7 +38,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
 
         body { 
-            height: 100vh; 
+            position: fixed; /* Native app feel, stops scroll bouncing */
+            inset: 0;
+            width: 100vw;
+            height: 100dvh; /* Dynamic viewport height fixes the bottom clipping */
             color: var(--text-light); 
             overflow: hidden; 
             background: var(--bg-gradient);
@@ -77,7 +80,7 @@
         }
 
         /* Landing Page & Modals */
-        #landing-page { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: inherit; transition: opacity 0.5s ease; padding: 20px;}
+        #landing-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: inherit; transition: opacity 0.5s ease; padding: 20px;}
         .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 400px; animation: scaleIn 0.5s ease;}
         
         .btn-auth { color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 12px; font-size: 1rem; transition: transform 0.2s, background 0.2s, box-shadow 0.2s;}
@@ -115,8 +118,8 @@
         .tutorial-step b { color: var(--accent); }
 
         /* Layout */
-        #app-container { display: none; height: 100vh; width: 100vw; padding: 10px; }
-        .app-flex { display: flex; height: 100%; gap: 10px; min-height: 0; position: relative; overflow: hidden;}
+        #app-container { display: none; position: absolute; inset: 0; height: 100%; width: 100%; padding: 10px; box-sizing: border-box;}
+        .app-flex { display: flex; height: 100%; width: 100%; gap: 10px; min-height: 0; position: relative; overflow: hidden;}
         
         .sidebar { width: 280px; padding: 20px; display: flex; flex-direction: column; gap: 12px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
         .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; }
@@ -171,8 +174,6 @@
         .btn-icon { background: transparent; border: none; color: var(--text-light); font-size: 1.4rem; cursor: pointer; padding: 8px; border-radius: 8px; display: flex; align-items: center; transition: background 0.2s, color 0.2s;}
         .btn-icon:hover { background: rgba(0,0,0,0.1); color: var(--accent); }
         .btn-icon.active { color: #ff4757; animation: pulse 1.5s infinite; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .ghost-badge { display: none; background: rgba(255, 255, 255, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #ff4757; border: 1px solid #ff4757; align-items: center; gap: 5px; flex-shrink: 0;}
         .ghost-badge.active { display: flex; animation: slideUp 0.3s; }
@@ -292,18 +293,31 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
+        /* MOBILE FIXES */
         @media (max-width: 768px) {
+            #app-container { padding: 0; }
+            .app-flex { gap: 0; }
+            .chat-container { border-radius: 0; border: none !important; }
+
             .sidebar { position: absolute; left: 0; top: 0; bottom: 0; height: 100%; max-width: 85vw; transform: translateX(0); opacity: 1; border: 1px solid var(--border) !important;}
             .sidebar.collapsed { transform: translateX(-110%); width: 280px; padding: 20px; opacity: 1; pointer-events: none;}
             .mobile-overlay.active { display: block; }
+            
+            /* Top Bar Redesign for Mobile */
+            .top-bar { padding: 10px 15px; align-items: center; justify-content: space-between; gap: 8px;}
+            .chat-search-wrapper { flex: 1 1 100%; max-width: 100%; margin: 5px 0 0 0 !important; order: 5; }
+            .chat-model-selector { margin-right: auto; margin-left: 5px; max-width: 140px; order: 2; padding: 8px 10px;}
+            #btn-toggle-theme { order: 3; }
+            
             .message { max-width: 95%; }
             .messages { padding: 15px; padding-bottom: 25px;}
             .modal-content { padding: 20px; }
-            .input-area { padding: 10px; }
+            
+            /* Input Area Safe Zoning */
+            .input-area { padding: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
             textarea { height: 48px; padding: 12px; border-radius: 12px;}
             .btn-send { width: 48px; height: 48px; font-size: 1.2rem; border-radius: 12px;}
             .hardware-btn { padding: 10px; font-size: 1.2rem; border-radius: 12px;}
-            .chat-search-wrapper { max-width: 150px; }
         }
     </style>
 </head>
@@ -438,25 +452,25 @@
 
             <div class="chat-container glass">
                 <div class="top-bar">
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px; order: 1;">
                         <button id="btn-toggle-sidebar" class="btn-icon" title="Toggle Menu"><i class="ph-fill ph-list"></i></button>
                         <div class="ghost-badge" id="ghostIndicator" title="Ghost Mode"><i class="ph-fill ph-ghost"></i></div>
                     </div>
 
-                    <div class="chat-search-wrapper">
-                        <i class="ph-bold ph-magnifying-glass"></i>
-                        <input type="text" id="chatSearch" placeholder="Search chat...">
-                    </div>
-
-                    <div id="quickModelSelector" class="chat-model-selector" title="Switch Model">
+                    <div id="quickModelSelector" class="chat-model-selector" title="Switch Model" style="order: 2;">
                         <span id="quickModelLabel">Select Model</span>
                         <i class="ph-bold ph-caret-down"></i>
                         <div id="quickModelDropdown" class="quick-model-dropdown"></div>
                     </div>
 
-                    <button id="btn-toggle-theme" class="btn-icon" title="Toggle Theme">
+                    <button id="btn-toggle-theme" class="btn-icon" title="Toggle Theme" style="order: 3;">
                         <i class="ph-fill ph-sun-dim" id="themeIcon"></i>
                     </button>
+
+                    <div class="chat-search-wrapper" style="order: 4;">
+                        <i class="ph-bold ph-magnifying-glass"></i>
+                        <input type="text" id="chatSearch" placeholder="Search chat...">
+                    </div>
                 </div>
 
                 <div class="messages" id="chatBox">
@@ -564,5 +578,8 @@
     </div>
 
     <script type="module" src="script.js"></script>
+    <script>
+        // Note: For full functionality, ensure the script provided in the previous step is saved as "script.js" in the same directory.
+    </script>
 </body>
 </html>
