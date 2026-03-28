@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Horizon.AI</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,6 @@
 
     <style>
         :root {
-            /* Now acting as dynamic accent variables */
             --accent: #5865F2;
             --accent-dark: #4752C4;
             --accent-alpha: rgba(88, 101, 242, 0.4);
@@ -49,7 +48,9 @@
 
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .glass {
             background: var(--glass-bg) !important;
@@ -59,9 +60,9 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
         }
 
-        /* Landing Page */
-        #landing-page { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: inherit; transition: opacity 0.5s ease;}
-        .auth-card { padding: 40px; border-radius: 24px; text-align: center; width: 400px; animation: scaleIn 0.5s ease;}
+        /* Landing Page & Modals */
+        #landing-page { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: inherit; transition: opacity 0.5s ease; padding: 20px;}
+        .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 400px; animation: scaleIn 0.5s ease;}
         
         .btn-auth { color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 12px; font-size: 1rem; transition: transform 0.2s, background 0.2s, box-shadow 0.2s;}
         .btn-auth:hover { transform: translateY(-2px); }
@@ -72,17 +73,42 @@
         .btn-ghost { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); margin-top: 24px; }
         .btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--text-light); border-color: var(--text-light); }
 
+        /* Toasts & Locks */
+        #welcomeToast {
+            display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: white; padding: 12px 20px; border-radius: 30px;
+            z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-weight: 600;
+            align-items: center; gap: 8px; animation: slideDown 0.4s ease forwards;
+            width: max-content; max-width: 90vw; font-size: 0.9rem; text-align: center;
+        }
+
+        #tutorialLock {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;
+        }
+        .tutorial-card {
+            background: var(--glass-bg); border: 1px solid var(--border); padding: 30px; 
+            border-radius: 24px; width: 100%; max-width: 450px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .tutorial-step {
+            background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; 
+            margin: 15px 0; text-align: left; font-size: 0.95rem; color: var(--text-light);
+            border: 1px solid var(--border);
+        }
+        .tutorial-step b { color: var(--accent); }
+
         /* Layout */
         #app-container { display: none; height: 100vh; width: 100vw; padding: 10px; }
-        .app-flex { display: flex; height: 100%; gap: 10px; min-height: 0;}
-        .sidebar { width: 280px; padding: 20px; display: flex; flex-direction: column; gap: 12px; border-radius: 16px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto;}
+        .app-flex { display: flex; height: 100%; gap: 10px; min-height: 0; position: relative; overflow: hidden;}
+        
+        .sidebar { width: 280px; padding: 20px; display: flex; flex-direction: column; gap: 12px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
         .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; }
         
         .brand { font-weight: 700; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; white-space: nowrap;}
         .sidebar-btn { background: transparent; color: var(--text-light); border: none; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; white-space: nowrap; transition: background 0.2s;}
         .sidebar-btn:hover { background: rgba(255,255,255,0.1); }
         
-        /* Personal Links */
         .sidebar-links { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 5px; border-top: 1px solid var(--border); padding-top: 20px;}
         .sidebar-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transition: color 0.2s; white-space: nowrap; font-weight: 500;}
         .sidebar-links a:hover { color: var(--accent); }
@@ -94,9 +120,31 @@
         .user-profile-name { font-weight: 600; font-size: 0.9rem; }
         .user-profile-status { font-size: 0.75rem; color: var(--accent); display: flex; align-items: center; gap: 4px; }
 
+        .mobile-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 15; backdrop-filter: blur(2px); animation: fadeIn 0.2s;}
+
         /* Chat Area */
-        .chat-container { flex: 1; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; min-height: 0; min-width: 0;}
+        .chat-container { flex: 1; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; min-height: 0; min-width: 0; position: relative; z-index: 10;}
         .top-bar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.05); z-index: 5;}
+        
+        /* Quick Switcher */
+        .chat-model-selector {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            background: rgba(0,0,0,0.2); padding: 8px 14px; border-radius: 12px;
+            font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border);
+            position: relative; white-space: nowrap; max-width: 250px; transition: background 0.2s;
+        }
+        .chat-model-selector:hover { background: rgba(255,255,255,0.05); }
+        .chat-model-selector span { overflow: hidden; text-overflow: ellipsis; }
+        .quick-model-dropdown {
+            display: none; position: absolute; top: calc(100% + 10px); left: 50%;
+            transform: translateX(-50%); width: 280px; max-height: 400px;
+            overflow-y: auto; flex-direction: column; background: var(--glass-bg);
+            border: 1px solid var(--border); border-radius: 16px; padding: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 50; backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .quick-model-dropdown.active { display: flex; animation: slideDown 0.2s ease; }
+
         .btn-icon { background: transparent; border: none; color: var(--text-light); font-size: 1.4rem; cursor: pointer; padding: 8px; border-radius: 8px; display: flex; align-items: center; transition: background 0.2s, color 0.2s;}
         .btn-icon:hover { background: rgba(0,0,0,0.1); color: var(--accent); }
         .btn-icon.active { color: #ff4757; animation: pulse 1.5s infinite; }
@@ -116,7 +164,7 @@
         .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); }
         .message.user .message-content { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px var(--accent-alpha); white-space: pre-wrap; }
         .message.ai .message-content { border-bottom-left-radius: 4px; }
-        .message-image { max-width: 300px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
+        .message-image { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
         .message-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; font-size: 0.9rem;}
 
         /* Code Generation */
@@ -131,7 +179,7 @@
         .message-content p code { background-color: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; border: 1px solid var(--border); color: var(--accent); font-family: 'Courier New', monospace;}
         .message-content img { max-width: 100%; border-radius: 8px; }
 
-        /* Input Area */
+        /* Input Area & Pin Actions */
         .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: background 0.3s ease;}
         .preview-area { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; }
         .preview-area:not(:empty) { padding-top: 15px; }
@@ -140,22 +188,37 @@
         .preview-item i { font-size: 1.5rem; margin-bottom: 2px; color: var(--text-light);}
         .preview-item button { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.8); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
         
-        .input-area { padding: 15px 20px; display: flex; gap: 8px; align-items: center; }
-        .hardware-group { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; border: 1px solid var(--border);}
-        .hardware-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s;}
-        .hardware-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-light); }
+        .input-area { padding: 15px 20px; display: flex; gap: 8px; align-items: flex-end; }
         
-        textarea { flex: 1; background: rgba(0,0,0,0.1); color: var(--text-light); border: 1px solid var(--border); border-radius: 12px; padding: 14px; height: 56px; resize: none; outline: none; font-size: 1rem; transition: border-color 0.2s;}
+        .input-actions-wrapper { position: relative; margin-bottom: 4px; }
+        .hardware-btn { background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: var(--text-muted); font-size: 1.3rem; padding: 12px; border-radius: 12px; cursor: pointer; transition: all 0.2s;}
+        .hardware-btn:hover, .hardware-btn.active { background: rgba(255,255,255,0.1); color: var(--accent); }
+        
+        .expanded-actions {
+            display: none; position: absolute; bottom: calc(100% + 15px); left: 0;
+            flex-direction: column; gap: 8px; padding: 8px; border-radius: 16px;
+            background: var(--glass-bg); border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 20; backdrop-filter: blur(16px);
+        }
+        .expanded-actions.active { display: flex; animation: slideUp 0.2s ease forwards; }
+        .expanded-actions button {
+            background: transparent; border: none; color: var(--text-light);
+            padding: 12px; border-radius: 12px; cursor: pointer; transition: background 0.2s, color 0.2s;
+            display: flex; align-items: center; gap: 10px; font-size: 1.1rem;
+        }
+        .expanded-actions button:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
+        
+        textarea { flex: 1; background: rgba(0,0,0,0.1); color: var(--text-light); border: 1px solid var(--border); border-radius: 16px; padding: 16px; height: 56px; resize: none; outline: none; font-size: 1rem; transition: border-color 0.2s;}
         textarea:focus { border-color: var(--accent); }
         
-        .btn-send { background-color: var(--accent); color: white; border: none; width: 56px; height: 56px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.2s; box-shadow: 0 4px 15px var(--accent-alpha); }
+        .btn-send { background-color: var(--accent); color: white; border: none; width: 56px; height: 56px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.2s; box-shadow: 0 4px 15px var(--accent-alpha); flex-shrink: 0; margin-bottom: 4px;}
         .btn-send:hover { background-color: var(--accent-dark); transform: scale(1.05); }
         .btn-send:disabled { background: rgba(255,255,255,0.1); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
 
         /* Settings Modal */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; padding: 15px;}
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease forwards; }
-        .modal-content { padding: 30px; border-radius: 20px; width: 450px; max-width: 90%; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;}
+        .modal-content { padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;}
         .form-group { display: flex; flex-direction: column; gap: 8px; }
         .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 6px;}
         .form-group input:not([type="color"]), .form-group select, .form-group textarea { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: var(--text-light); outline: none; font-size: 1rem; transition: border-color 0.2s;}
@@ -180,19 +243,81 @@
         .custom-select-options.open { display: flex; animation: slideUp 0.2s ease forwards; }
         .search-container { padding: 10px; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 11;}
         .search-container input { width: 100%; background: transparent; border: none; color: var(--text-light); outline: none; }
+        
         .options-list-scroll { overflow-y: auto; max-height: 230px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
         .optgroup-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; padding: 10px 12px 4px; display: flex; align-items: center; gap: 6px;}
-        .custom-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .custom-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; transition: background 0.2s;}
         .custom-option:hover { background: rgba(255,255,255,0.1); }
         .custom-option.selected { background: var(--accent-alpha); border: 1px solid var(--accent); }
-        .brand-logo { width: 24px; height: 24px; border-radius: 6px; object-fit: contain; background: white; padding: 2px;}
+        
+        .badge-lite { background: rgba(88, 101, 242, 0.2); color: var(--accent); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid var(--accent-alpha); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
+        .badge-pro { background: rgba(255, 71, 87, 0.15); color: #ff4757; font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid rgba(255, 71, 87, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
+
+        /* Capabilities List Modal Additions */
+        .capabilities-list { text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 0.95rem; line-height: 1.8; border: 1px solid var(--border); }
+        .capabilities-list div { display: flex; align-items: center; gap: 8px; }
+        .capabilities-list i { color: var(--accent); font-size: 1.2rem; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+        /* Mobile Responsiveness Override */
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; top: 0; bottom: 0; height: 100%; max-width: 85vw; transform: translateX(0); opacity: 1; border: 1px solid var(--border) !important;}
+            .sidebar.collapsed { transform: translateX(-110%); width: 280px; padding: 20px; opacity: 1; pointer-events: none;}
+            .mobile-overlay.active { display: block; }
+            .message { max-width: 95%; }
+            .messages { padding: 15px; }
+            .modal-content { padding: 20px; }
+            .input-area { padding: 10px; }
+            textarea { height: 48px; padding: 12px; border-radius: 12px;}
+            .btn-send { width: 48px; height: 48px; font-size: 1.2rem; border-radius: 12px;}
+            .hardware-btn { padding: 10px; font-size: 1.2rem; border-radius: 12px;}
+        }
     </style>
 </head>
 <body class="dark-mode">
+
+    <div id="welcomeToast">
+        <i class="ph-bold ph-hand-pointing"></i> Tap on the sidebar to configure settings and access chat!
+        <button id="closeToast" style="background:transparent; border:none; color:white; margin-left:10px; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+    </div>
+
+    <div id="tutorialLock">
+        <div class="tutorial-card">
+            <h2 style="color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem;">
+                <i class="ph-fill ph-rocket-launch" style="color: var(--accent)"></i> Welcome!
+            </h2>
+            <div class="tutorial-step">
+                <b>1.</b> Tap the <i class="ph-bold ph-list"></i> button in the top left to open the sidebar.
+            </div>
+            <div class="tutorial-step">
+                <b>2.</b> Click on <b><i class="ph-fill ph-faders"></i> Configuration</b>.
+            </div>
+            <div class="tutorial-step">
+                <b>3.</b> Choose your Provider, paste your API key, and <b>Fetch Models</b>.
+            </div>
+            <button id="btn-close-tutorial" class="btn-auth" style="background: var(--accent); margin-top: 30px; font-size: 1.1rem;">
+                <i class="ph-bold ph-check"></i> I understand
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="capabilitiesModalOverlay" style="z-index: 300;">
+        <div class="modal-content glass" style="max-width: 400px; text-align: center;">
+            <h2 style="font-size:1.3rem; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="ph-fill ph-cpu"></i> Select Model</h2>
+            <p id="capModelName" style="font-weight: 700; color: var(--accent); margin-top: 5px; font-size:1.1rem;"></p>
+            
+            <div class="capabilities-list" id="capList">
+                </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button id="btn-cancel-model" class="btn-auth btn-ghost" style="margin-top:0;">Cancel</button>
+                <button id="btn-confirm-model" class="btn-auth" style="margin-top:0; background: var(--accent);">Ok</button>
+            </div>
+        </div>
+    </div>
 
     <div id="landing-page">
         <div class="auth-card glass">
@@ -215,7 +340,9 @@
 
     <div id="app-container">
         <div class="app-flex">
-            <div class="sidebar glass" id="mainSidebar">
+            <div class="mobile-overlay" id="mobileOverlay"></div>
+
+            <div class="sidebar glass collapsed" id="mainSidebar">
                 <div class="brand">
                     <i class="ph-fill ph-planet" style="color:var(--accent)"></i> Horizon
                 </div>
@@ -249,10 +376,18 @@
 
             <div class="chat-container glass">
                 <div class="top-bar">
-                    <div style="display:flex; align-items:center; gap:15px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
                         <button id="btn-toggle-sidebar" class="btn-icon" title="Toggle Menu"><i class="ph-fill ph-list"></i></button>
-                        <div class="ghost-badge" id="ghostIndicator"><i class="ph-fill ph-ghost"></i> GHOST MODE ACTIVE</div>
+                        <div class="ghost-badge" id="ghostIndicator" title="Ghost Mode"><i class="ph-fill ph-ghost"></i></div>
                     </div>
+
+                    <div id="quickModelSelector" class="chat-model-selector" title="Switch Model">
+                        <span id="quickModelLabel">Select Model</span>
+                        <i class="ph-bold ph-caret-down"></i>
+                        <div id="quickModelDropdown" class="quick-model-dropdown">
+                            </div>
+                    </div>
+
                     <button id="btn-toggle-theme" class="btn-icon" title="Toggle Theme">
                         <i class="ph-fill ph-sun-dim" id="themeIcon"></i>
                     </button>
@@ -271,10 +406,13 @@
                         <input type="file" id="fileAttach" accept="*/*" multiple style="display:none">
                         <input type="file" id="cameraAttach" accept="image/*" capture="environment" style="display:none">
                         
-                        <div class="hardware-group">
-                            <button id="btn-trigger-file" class="hardware-btn" title="Upload File/Image"><i class="ph-fill ph-paperclip"></i></button>
-                            <button id="btn-trigger-camera" class="hardware-btn" title="Take Photo"><i class="ph-fill ph-camera"></i></button>
-                            <button id="btn-trigger-mic" class="hardware-btn" title="Voice Input"><i class="ph-fill ph-microphone"></i></button>
+                        <div class="input-actions-wrapper">
+                            <button id="btn-pin-actions" class="hardware-btn" title="Attachments"><i class="ph-bold ph-paperclip"></i></button>
+                            <div id="expanded-actions" class="expanded-actions">
+                                <button id="btn-trigger-file" title="Upload File"><i class="ph-fill ph-file"></i> Files</button>
+                                <button id="btn-trigger-camera" title="Upload Image"><i class="ph-fill ph-image"></i> Image</button>
+                                <button id="btn-trigger-mic" title="Voice Input"><i class="ph-fill ph-microphone"></i> Audio</button>
+                            </div>
                         </div>
 
                         <textarea id="userInput" placeholder="Message Horizon.AI..."></textarea>
@@ -324,11 +462,15 @@
                 <select id="provider">
                     <option value="openrouter">OpenRouter</option>
                     <option value="aistudio">Google AI Studio</option>
+                    <option value="portkey">Portkey.ai</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="apiKey"><i class="ph-fill ph-key"></i> API Key</label>
+                <label for="apiKey" style="display:flex; justify-content:space-between; width:100%;">
+                    <span><i class="ph-fill ph-key"></i> API Key</span>
+                    <a id="apiKeyLink" href="https://openrouter.ai/keys" target="_blank" style="color: var(--accent); text-decoration: none; font-size: 0.75rem;"><i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key</a>
+                </label>
                 <input type="password" id="apiKey" placeholder="Enter API Key">
             </div>
 
@@ -358,8 +500,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
-        // Switched back to signInWithRedirect per your request
-        import { getAuth, signInWithRedirect, getRedirectResult, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
@@ -381,6 +522,22 @@
         let isGhostMode = false;
         let sfxEnabled = true;
         let hapticsEnabled = true;
+
+        // --- NEW TUTORIAL LOCK ---
+        function checkAndShowTutorialLock() {
+            if (!localStorage.getItem('horizon_tutorial_done')) {
+                document.getElementById('tutorialLock').style.display = 'flex';
+                document.getElementById('btn-close-tutorial').addEventListener('click', () => {
+                    document.getElementById('tutorialLock').style.display = 'none';
+                    localStorage.setItem('horizon_tutorial_done', 'true');
+                    
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('mainSidebar').classList.remove('collapsed');
+                        document.getElementById('mobileOverlay').classList.add('active');
+                    }
+                });
+            }
+        }
 
         // --- SENSORY FEEDBACK ---
         function triggerHaptic() {
@@ -405,19 +562,16 @@
             } catch(e) {}
         }
 
-        // Add haptics to all buttons dynamically
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', triggerHaptic);
         });
 
-        // --- AUTHENTICATION (REDIRECT FLOW) ---
-        document.getElementById('btn-login-github').addEventListener('click', () => { signInWithRedirect(auth, new GithubAuthProvider()); });
-        document.getElementById('btn-login-google').addEventListener('click', () => { signInWithRedirect(auth, new GoogleAuthProvider()); });
-
-        // Handle Redirect Callback
-        getRedirectResult(auth).catch((error) => {
-            console.error(error);
-            alert("Auth Redirect Error: " + error.message);
+        // --- AUTHENTICATION (POPUP FLOW) ---
+        document.getElementById('btn-login-github').addEventListener('click', () => { 
+            signInWithPopup(auth, new GithubAuthProvider()).catch(err => alert("GitHub Login Error: " + err.message)); 
+        });
+        document.getElementById('btn-login-google').addEventListener('click', () => { 
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Google Login Error: " + err.message)); 
         });
 
         document.getElementById('btn-login-ghost').addEventListener('click', () => {
@@ -428,6 +582,7 @@
             setTimeout(() => {
                 document.getElementById('landing-page').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
+                checkAndShowTutorialLock();
             }, 500);
             
             document.getElementById('userProfileName').innerText = 'Ghost User';
@@ -452,6 +607,7 @@
                 const providerIcon = user.providerData[0]?.providerId === 'google.com' ? 'ph-google-logo' : 'ph-github-logo';
                 document.getElementById('userProfileStatus').innerHTML = `<i class="ph-fill ${providerIcon}"></i> Authenticated`;
                 loadLocalHistory();
+                checkAndShowTutorialLock();
             } else {
                 document.getElementById('landing-page').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
@@ -477,10 +633,19 @@
 
         // --- MARKDOWN & CODE EXPORT ---
         const renderer = new marked.Renderer();
-        renderer.code = function(code, language) {
-            const lang = language || 'txt';
-            const escapedCode = code.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-            const encodedForDownload = btoa(unescape(encodeURIComponent(code))); 
+        // BUG FIX: Ensure object signatures from newer marked versions are converted to strings
+        renderer.code = function(token, legacyLang) {
+            let actualCode = "";
+            let lang = legacyLang || "txt";
+            if (typeof token === 'object' && token !== null) {
+                actualCode = token.text || "";
+                lang = token.lang || "txt";
+            } else {
+                actualCode = String(token || "");
+            }
+            
+            const escapedCode = actualCode.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+            const encodedForDownload = btoa(unescape(encodeURIComponent(actualCode))); 
             
             return `
             <div class="code-wrapper">
@@ -516,12 +681,58 @@
         });
 
         // --- SETTINGS UI & DYNAMIC THEME ---
-        document.getElementById('btn-toggle-sidebar').addEventListener('click', () => document.getElementById('mainSidebar').classList.toggle('collapsed'));
-        document.getElementById('btn-open-settings').addEventListener('click', () => document.getElementById('settingsModal').classList.add('active'));
+        const toggleSidebar = () => {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('collapsed');
+            if (!sidebar.classList.contains('collapsed')) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        };
+
+        document.getElementById('btn-toggle-sidebar').addEventListener('click', toggleSidebar);
+        document.getElementById('mobileOverlay').addEventListener('click', toggleSidebar); 
+
+        if (window.innerWidth <= 768) {
+            document.getElementById('mainSidebar').classList.add('collapsed');
+        }
+
+        document.getElementById('btn-open-settings').addEventListener('click', () => {
+            document.getElementById('settingsModal').classList.add('active');
+            if (window.innerWidth <= 768) toggleSidebar(); 
+        });
+        
         document.getElementById('btn-close-settings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
+        
         document.getElementById('btn-toggle-theme').addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
             document.getElementById('themeIcon').className = document.body.classList.contains('light-mode') ? 'ph-fill ph-moon' : 'ph-fill ph-sun-dim';
+        });
+
+        // Quick Switcher Toggle
+        document.getElementById('quickModelSelector').addEventListener('click', (e) => {
+            if(e.target.closest('.custom-option')) return;
+            document.getElementById('quickModelDropdown').classList.toggle('active');
+        });
+
+        // Pin Actions Toggle
+        document.getElementById('btn-pin-actions').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('expanded-actions').classList.toggle('active');
+            document.getElementById('btn-pin-actions').classList.toggle('active');
+        });
+
+        // Close dropdowns if clicking outside
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.input-actions-wrapper')) {
+                document.getElementById('expanded-actions').classList.remove('active');
+                document.getElementById('btn-pin-actions').classList.remove('active');
+            }
+            if(!e.target.closest('#quickModelSelector')) {
+                document.getElementById('quickModelDropdown').classList.remove('active');
+            }
         });
 
         function hexToRgb(hex) {
@@ -531,13 +742,29 @@
 
         const updateAccentColor = (hex) => {
             document.documentElement.style.setProperty('--accent', hex);
-            // Simulate a slightly darker shade for hover/gradients
             document.documentElement.style.setProperty('--accent-dark', hex + 'cc'); 
             document.documentElement.style.setProperty('--accent-alpha', `rgba(${hexToRgb(hex)}, 0.4)`);
         };
 
+        const updateApiLinkUI = (providerName) => {
+            const linkEl = document.getElementById('apiKeyLink');
+            if (providerName === 'openrouter') {
+                linkEl.href = "https://openrouter.ai/keys";
+                linkEl.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key';
+            } else if (providerName === 'aistudio') {
+                linkEl.href = "https://aistudio.google.com/app/apikey";
+                linkEl.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> Get Google AI Key';
+            } else if (providerName === 'portkey') {
+                linkEl.href = "https://app.portkey.ai/api-keys";
+                linkEl.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> Get Portkey Key';
+            }
+        };
+
         const initSettings = () => {
-            document.getElementById('provider').value = localStorage.getItem('horizon_provider') || 'openrouter';
+            const savedProvider = localStorage.getItem('horizon_provider') || 'openrouter';
+            document.getElementById('provider').value = savedProvider;
+            updateApiLinkUI(savedProvider);
+            
             document.getElementById('apiKey').value = localStorage.getItem('horizon_key') || '';
             document.getElementById('systemPrompt').value = localStorage.getItem('horizon_prompt') || '';
             
@@ -553,7 +780,10 @@
             const savedModel = localStorage.getItem('horizon_model');
             if (savedModel) {
                 document.getElementById('modelSelect').value = savedModel;
-                document.getElementById('modelSelectTrigger').innerHTML = `<span>${savedModel}</span> <i class="ph-bold ph-caret-down"></i>`;
+                const nameParts = savedModel.split('/');
+                const shortName = nameParts[nameParts.length - 1];
+                document.getElementById('modelSelectTrigger').innerHTML = `<span>${shortName}</span> <i class="ph-bold ph-caret-down"></i>`;
+                document.getElementById('quickModelLabel').innerText = shortName;
             }
         };
         initSettings();
@@ -581,9 +811,15 @@
         document.getElementById('systemPrompt').addEventListener('change', syncSettings);
         document.getElementById('apiKey').addEventListener('change', syncSettings);
 
-        document.getElementById('provider').addEventListener('change', () => {
+        document.getElementById('provider').addEventListener('change', (e) => {
+            const newProvider = e.target.value;
             document.getElementById('modelSelectTrigger').innerHTML = `<span>Fetch models first...</span> <i class="ph-bold ph-caret-down"></i>`;
             document.getElementById('modelSelect').value = '';
+            updateApiLinkUI(newProvider);
+            
+            if (newProvider === 'portkey' && !document.getElementById('apiKey').value) {
+                document.getElementById('apiKey').value = 'ubeOLvhr1xSsIl3KsVj6XMeEgKmi';
+            }
             syncSettings();
         });
         
@@ -591,6 +827,50 @@
         document.getElementById('modelSearchBox').addEventListener('keyup', (e) => {
             const query = e.target.value.toLowerCase();
             document.querySelectorAll('.custom-option').forEach(opt => opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'flex' : 'none');
+        });
+
+        // --- Capabilities Selection Flow ---
+        let pendingModelSelection = null;
+
+        // Exposed globally for dynamically created elements
+        window.promptModelSelection = (id, name) => {
+            pendingModelSelection = { id, name };
+            document.getElementById('capModelName').innerText = name;
+            
+            // Infer capabilities based on model name/ID
+            const idLower = id.toLowerCase();
+            let capsHTML = `<div><i class="ph-bold ph-text-t"></i> General Text & Code Generation</div>`;
+            
+            if (idLower.includes('vision') || idLower.includes('gemini') || idLower.includes('gpt-4o') || idLower.includes('claude-3') || idLower.includes('pixtral') || idLower.includes('llava')) {
+                capsHTML += `<div><i class="ph-bold ph-image"></i> Vision & Image Analysis</div>`;
+            }
+            if (idLower.includes('pro') || idLower.includes('opus') || idLower.includes('gpt-4') || idLower.includes('sonnet') || idLower.includes('large') || idLower.includes('70b') || idLower.includes('405b')) {
+                capsHTML += `<div><i class="ph-bold ph-brain"></i> Advanced Reasoning & Logic</div>`;
+            }
+            if (idLower.includes('free') || idLower.includes('flash') || idLower.includes('haiku') || idLower.includes('8b') || idLower.includes('mini')) {
+                 capsHTML += `<div><i class="ph-bold ph-lightning"></i> High-Speed Inference</div>`;
+            }
+            
+            document.getElementById('capList').innerHTML = capsHTML;
+            document.getElementById('capabilitiesModalOverlay').classList.add('active');
+        };
+
+        document.getElementById('btn-cancel-model').addEventListener('click', () => {
+            document.getElementById('capabilitiesModalOverlay').classList.remove('active');
+            pendingModelSelection = null;
+        });
+
+        document.getElementById('btn-confirm-model').addEventListener('click', () => {
+            if (pendingModelSelection) {
+                // Apply to hidden select, trigger label, and quick switcher label
+                document.getElementById('modelSelect').value = pendingModelSelection.id;
+                document.getElementById('modelSelectTrigger').innerHTML = `<span>${pendingModelSelection.name}</span> <i class="ph-bold ph-caret-down"></i>`;
+                document.getElementById('quickModelLabel').innerText = pendingModelSelection.name;
+                syncSettings();
+            }
+            document.getElementById('capabilitiesModalOverlay').classList.remove('active');
+            document.getElementById('modelSelectOptions').classList.remove('open');
+            document.getElementById('quickModelDropdown').classList.remove('active');
         });
 
         document.getElementById('btn-fetch-models').addEventListener('click', async () => {
@@ -606,6 +886,10 @@
                     const res = await fetch("https://openrouter.ai/api/v1/models", { headers: { "Authorization": `Bearer ${apiKey}`, "HTTP-Referer": window.location.href, "X-Title": "Horizon.AI" }});
                     const data = await res.json();
                     modelsArray = data.data.map(m => m.id);
+                } else if (provider === 'portkey') {
+                    const res = await fetch("https://api.portkey.ai/v1/models", { headers: { "x-portkey-api-key": apiKey }});
+                    const data = await res.json();
+                    modelsArray = data.data.map(m => m.id);
                 } else {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
                     const data = await res.json();
@@ -616,37 +900,73 @@
         });
 
         function renderModelsList(modelsArray, provider) {
-            const container = document.getElementById('modelListContainer');
-            container.innerHTML = '';
+            const containerSettings = document.getElementById('modelListContainer');
+            const containerQuick = document.getElementById('quickModelDropdown');
+            containerSettings.innerHTML = '';
+            containerQuick.innerHTML = '';
+
             let grouped = {};
             modelsArray.forEach(m => {
-                let brand = provider === 'openrouter' ? (m.split('/')[0] || 'Other') : 'Google';
+                let brand = 'Google';
+                let idName = m;
+                
+                if (provider === 'openrouter' || provider === 'portkey') {
+                    brand = (m.split('/')[0] || 'Other');
+                    idName = m.split('/').slice(1).join('/') || m;
+                }
+                
                 brand = brand.charAt(0).toUpperCase() + brand.slice(1);
                 if (!grouped[brand]) grouped[brand] = [];
-                grouped[brand].push({ id: m, name: provider === 'openrouter' ? m.split('/').slice(1).join('/') : m });
+                
+                // Intelligent Tagging
+                let tagHtml = "";
+                let sortWeight = 1;
+                const lowerId = m.toLowerCase();
+
+                if (lowerId.includes('free') || lowerId.includes('flash') || lowerId.includes('haiku') || lowerId.includes('8b') || lowerId.includes('mini')) {
+                    tagHtml = `<span class="badge-lite"><i class="ph-bold ph-star"></i> FOR YOU</span>`;
+                    sortWeight = 0; 
+                } else if (lowerId.includes('pro') || lowerId.includes('opus') || lowerId.includes('gpt-4') || lowerId.includes('sonnet') || lowerId.includes('70b') || lowerId.includes('large') || lowerId.includes('max')) {
+                    tagHtml = `<span class="badge-pro"><i class="ph-bold ph-brain"></i> PRO</span>`;
+                    sortWeight = 2; 
+                }
+
+                grouped[brand].push({ id: m, name: idName, tag: tagHtml, weight: sortWeight });
             });
 
+            // Render to both dropdowns
             for (const [brand, models] of Object.entries(grouped)) {
-                container.innerHTML += `<div class="optgroup-label"><i class="ph-fill ph-buildings"></i> ${brand}</div>`;
+                // Headers
+                const lbl1 = document.createElement('div'); lbl1.className = 'optgroup-label'; lbl1.innerHTML = `<i class="ph-fill ph-buildings"></i> ${brand}`;
+                const lbl2 = document.createElement('div'); lbl2.className = 'optgroup-label'; lbl2.innerHTML = `<i class="ph-fill ph-buildings"></i> ${brand}`;
+                containerSettings.appendChild(lbl1);
+                containerQuick.appendChild(lbl2);
+                
+                models.sort((a, b) => a.weight - b.weight);
+
                 models.forEach(model => {
-                    const opt = document.createElement('div');
-                    opt.className = 'custom-option';
-                    opt.innerHTML = `<span>${model.name}</span>`;
-                    opt.addEventListener('click', () => {
-                        document.getElementById('modelSelect').value = model.id;
-                        document.getElementById('modelSelectTrigger').innerHTML = `<span>${model.name}</span> <i class="ph-bold ph-caret-down"></i>`;
-                        document.getElementById('modelSelectOptions').classList.remove('open');
-                        syncSettings();
-                    });
-                    container.appendChild(opt);
+                    // Make option builder to prevent ref/id escaping issues
+                    const buildOption = () => {
+                        const opt = document.createElement('div');
+                        opt.className = 'custom-option';
+                        opt.innerHTML = `<span>${model.name}</span> ${model.tag}`;
+                        opt.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            window.promptModelSelection(model.id, model.name);
+                        });
+                        return opt;
+                    };
+                    
+                    containerSettings.appendChild(buildOption());
+                    containerQuick.appendChild(buildOption());
                 });
             }
             document.getElementById('modelSelectTrigger').innerHTML = `<span>Select a model...</span> <i class="ph-bold ph-caret-down"></i>`;
         }
 
         // --- HARDWARE & ATTACHMENTS (MIC, CAMERA, FILE) ---
-        document.getElementById('btn-trigger-file').addEventListener('click', () => document.getElementById('fileAttach').click());
-        document.getElementById('btn-trigger-camera').addEventListener('click', () => document.getElementById('cameraAttach').click());
+        document.getElementById('btn-trigger-file').addEventListener('click', () => { document.getElementById('fileAttach').click(); document.getElementById('expanded-actions').classList.remove('active');});
+        document.getElementById('btn-trigger-camera').addEventListener('click', () => { document.getElementById('cameraAttach').click(); document.getElementById('expanded-actions').classList.remove('active');});
 
         const processFiles = (event) => {
             const files = event.target.files;
@@ -689,12 +1009,13 @@
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             const micBtn = document.getElementById('btn-trigger-mic');
+            const pinBtn = document.getElementById('btn-pin-actions');
             let isRecording = false;
             recognition.continuous = false;
             recognition.interimResults = true;
 
-            recognition.onstart = () => { isRecording = true; micBtn.classList.add('active'); };
-            recognition.onend = () => { isRecording = false; micBtn.classList.remove('active'); };
+            recognition.onstart = () => { isRecording = true; micBtn.classList.add('active'); pinBtn.classList.add('active'); document.getElementById('expanded-actions').classList.remove('active');};
+            recognition.onend = () => { isRecording = false; micBtn.classList.remove('active'); pinBtn.classList.remove('active');};
             recognition.onresult = (event) => {
                 let finalTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -712,7 +1033,10 @@
         // --- CHAT LOGIC WITH SYSTEM PROMPT INJECTION ---
         document.getElementById('userInput').addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); triggerSend(); }});
         document.getElementById('btn-send').addEventListener('click', triggerSend);
-        document.getElementById('btn-new-chat').addEventListener('click', () => { chatHistory = []; uiHistory = []; saveLocalHistory(); document.getElementById('chatBox').innerHTML = ''; });
+        document.getElementById('btn-new-chat').addEventListener('click', () => { 
+            chatHistory = []; uiHistory = []; saveLocalHistory(); document.getElementById('chatBox').innerHTML = ''; 
+            if (window.innerWidth <= 768) toggleSidebar(); 
+        });
 
         async function triggerSend() {
             const inputEl = document.getElementById('userInput');
@@ -732,7 +1056,7 @@
             uiHistory.push({ role: 'user', text: text, files: filesToLog });
             
             let payloadContent = text;
-            if (provider === 'openrouter' && filesToLog.length > 0) {
+            if ((provider === 'openrouter' || provider === 'portkey') && filesToLog.length > 0) {
                 payloadContent = text ? [{ type: "text", text: text }] : [];
                 filesToLog.forEach(file => { if(file.isImage) payloadContent.push({ type: "image_url", image_url: { url: file.base64 } }); });
             }
@@ -748,12 +1072,22 @@
             try {
                 let aiResponse = "";
                 if (provider === 'openrouter') {
-                    // Inject system prompt for OpenRouter at the start of messages
                     let finalMessages = currentReq.map(m => ({role: m.role, content: m.content}));
                     if (systemPrompt) finalMessages.unshift({ role: "system", content: systemPrompt });
 
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.href, "X-Title": "Horizon.AI" },
+                        body: JSON.stringify({ model: model, messages: finalMessages })
+                    });
+                    const data = await res.json();
+                    if(data.error) throw new Error(data.error.message);
+                    aiResponse = data.choices[0].message.content;
+                } else if (provider === 'portkey') {
+                    let finalMessages = currentReq.map(m => ({role: m.role, content: m.content}));
+                    if (systemPrompt) finalMessages.unshift({ role: "system", content: systemPrompt });
+
+                    const res = await fetch("https://api.portkey.ai/v1/chat/completions", {
+                        method: "POST", headers: { "x-portkey-api-key": apiKey, "Content-Type": "application/json" },
                         body: JSON.stringify({ model: model, messages: finalMessages })
                     });
                     const data = await res.json();
@@ -767,7 +1101,6 @@
                         return { role: msg.role === 'user' ? 'user' : 'model', parts: parts };
                     });
 
-                    // Inject system prompt for Gemini
                     let payloadData = { contents: geminiHistory };
                     if (systemPrompt) payloadData.system_instruction = { parts: [{ text: systemPrompt }] };
 
