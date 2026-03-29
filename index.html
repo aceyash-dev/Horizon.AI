@@ -24,26 +24,25 @@
             --glass-bg: rgba(30, 32, 38, 0.35);
             --border: rgba(255, 255, 255, 0.1);
             
-            /* Neumorphism Base Shadows */
-            --shadow-light: rgba(255, 255, 255, 0.08);
-            --shadow-dark: rgba(0, 0, 0, 0.4);
-            --inset-light: rgba(255, 255, 255, 0.1);
+            --shadow-light: rgba(255, 255, 255, 0.04);
+            --shadow-dark: rgba(0, 0, 0, 0.6);
+            --inset-light: rgba(255, 255, 255, 0.15);
             --inset-dark: rgba(0, 0, 0, 0.4);
             --input-bg: rgba(5, 5, 8, 0.6);
         }
 
         body.light-mode {
             --bg-gradient: linear-gradient(135deg, #e0e5ec 0%, #f0f2f5 100%);
-            --text-light: #2E3338;
-            --text-muted: var(--accent);
-            --glass-bg: rgba(255, 255, 255, 0.4);
+            --text-light: #1A1D20;
+            --text-muted: #5C636A;
+            --glass-bg: rgba(255, 255, 255, 0.5);
             --border: rgba(0, 0, 0, 0.1);
             
             --shadow-light: rgba(255, 255, 255, 0.9);
             --shadow-dark: rgba(0, 0, 0, 0.15);
-            --inset-light: rgba(255, 255, 255, 0.7);
-            --inset-dark: rgba(0, 0, 0, 0.1);
-            --input-bg: rgba(230, 230, 235, 0.6);
+            --inset-light: rgba(255, 255, 255, 0.6);
+            --inset-dark: rgba(0, 0, 0, 0.05);
+            --input-bg: rgba(240, 240, 245, 0.8);
         }
 
         body.pitch-black-mode {
@@ -53,8 +52,8 @@
             --glass-bg: rgba(10, 10, 10, 0.6);
             --border: rgba(255, 255, 255, 0.05);
             
-            --shadow-light: rgba(255, 255, 255, 0.02);
-            --shadow-dark: rgba(0, 0, 0, 0.8);
+            --shadow-light: rgba(255, 255, 255, 0.01);
+            --shadow-dark: rgba(0, 0, 0, 0.9);
             --inset-light: rgba(255, 255, 255, 0.05);
             --inset-dark: rgba(0, 0, 0, 0.8);
             --input-bg: rgba(2, 2, 2, 0.8);
@@ -63,11 +62,14 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
 
         body { 
-            position: fixed; inset: 0; width: 100vw; height: 100dvh; 
+            display: flex; flex-direction: column; min-height: 100vh; width: 100vw;
             color: var(--text-light); overflow: hidden; 
-            background: var(--bg-gradient); background-size: 400% 400%;
+            background: var(--bg-gradient); background-size: 200% 200%;
         }
-        body:not(.pitch-black-mode) { animation: gradientBG 15s ease infinite; }
+        
+        @media (min-width: 769px) {
+            body:not(.pitch-black-mode) { animation: gradientBG 20s ease infinite; }
+        }
 
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -84,56 +86,64 @@
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
-        /* GLASSMORPHISM BASE */
         .glass {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, var(--glass-bg) 100%) !important;
             backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
             border: 1px solid var(--border) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+            box-shadow: 
+                -4px -4px 12px var(--shadow-light), 
+                4px 4px 12px var(--shadow-dark), 
+                inset 1px 1px 2px var(--inset-light), 
+                inset -1px -1px 2px var(--inset-dark) !important;
             transform: translateZ(0); 
         }
 
-        /* NEUMORPHISM BUTTONS */
         .btn-extrude, button, .chat-model-selector, .custom-select-trigger, .hardware-btn {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: none !important;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.15)) !important;
+            border: 1px solid rgba(0,0,0,0.5) !important;
             box-shadow: 
-                -4px -4px 10px var(--shadow-light), 
-                4px 4px 10px var(--shadow-dark) !important;
-            transition: all 0.2s ease !important;
+                -2px -2px 6px var(--shadow-light), 
+                2px 2px 6px var(--shadow-dark), 
+                inset 1px 1px 2px var(--inset-light), 
+                inset -1px -1px 2px var(--inset-dark) !important;
+            transition: all 0.15s ease !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            color: var(--text-light);
         }
+        
+        body.light-mode .btn-extrude, body.light-mode button, body.light-mode .chat-model-selector { text-shadow: none; border: 1px solid rgba(0,0,0,0.1) !important;}
 
         .btn-extrude:active, button:active, .hardware-btn.active, .btn-icon.active {
             box-shadow: 
-                inset 4px 4px 10px var(--inset-dark), 
-                inset -4px -4px 10px var(--inset-light) !important;
-            transform: translateY(1px);
-            background: rgba(0, 0, 0, 0.05) !important;
+                inset 2px 2px 5px var(--inset-dark), 
+                inset -1px -1px 2px var(--inset-light),
+                0 1px 1px var(--shadow-light) !important;
+            transform: translateY(2px);
+            background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(255,255,255,0.02)) !important;
         }
 
         .input-recess, textarea, input[type="text"], input[type="password"], input[type="email"], select, .preview-area, .code-wrapper {
             background-color: var(--input-bg) !important;
-            border: 1px solid transparent !important;
+            border: 1px solid rgba(0,0,0,0.8) !important;
+            color: var(--text-light);
             box-shadow: 
-                inset 4px 4px 8px var(--inset-dark), 
-                inset -4px -4px 8px var(--inset-light) !important;
-            transition: border 0.2s ease;
+                inset 3px 3px 6px var(--inset-dark), 
+                inset -2px -2px 4px var(--inset-light),
+                1px 1px 2px var(--shadow-light) !important;
         }
+        body.light-mode .input-recess, body.light-mode textarea, body.light-mode input { border: 1px solid rgba(0,0,0,0.2) !important; }
 
-        /* Background Video */
         #landing-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s ease; padding: 20px; overflow: hidden; background: #000;}
         #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.6; filter: brightness(0.8) contrast(1.1); pointer-events: none;}
         
         .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 400px; animation: scaleIn 0.5s ease; max-height: 95vh; overflow-y: auto;}
-        
-        /* Auth Card Specific Layout */
         .auth-toggle-container { display: flex; background: var(--input-bg); border-radius: 12px; padding: 6px; margin-bottom: 20px; box-shadow: inset 3px 3px 6px var(--inset-dark), inset -3px -3px 6px var(--inset-light); }
         .auth-tab { flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent !important; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important;}
         .auth-tab.active { background: rgba(255, 255, 255, 0.08) !important; color: var(--text-light); box-shadow: -2px -2px 5px var(--shadow-light), 2px 2px 5px var(--shadow-dark) !important; }
         
-        .btn-auth { color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-size: 1rem; margin-bottom: 12px;}
-        .btn-github { background-color: #24292e !important; }
-        .btn-google { background-color: #ffffff !important; color: #333; text-shadow: none; }
+        .btn-auth { padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-size: 1rem; margin-bottom: 12px;}
+        .btn-github { background-color: #24292e !important; color: #fff;}
+        .btn-google { background-color: #ffffff !important; color: #333; text-shadow: none; border-color: #ccc !important;}
         .btn-ghost { background-color: rgba(255,255,255,0.05) !important; color: var(--text-light); margin-top: 10px; margin-bottom: 0; }
 
         .auth-divider { display: flex; align-items: center; text-align: center; margin: 15px 0; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;}
@@ -143,7 +153,7 @@
         .email-form-box { background: rgba(0,0,0,0.15); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: left;}
 
         #auth-loading-overlay { display: none; position: absolute; inset: 0; background: var(--bg-gradient); z-index: 200; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); }
-        #welcomeToast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 12px 20px; border-radius: 30px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: 600; align-items: center; gap: 8px; animation: slideDown 0.4s ease forwards; width: max-content; max-width: 90vw; font-size: 0.9rem; text-align: center; }
+        #welcomeToast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 12px 20px; border-radius: 30px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.3); font-weight: 600; align-items: center; gap: 8px; animation: slideDown 0.4s ease forwards; width: max-content; max-width: 90vw; font-size: 0.9rem; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         
         #tutorialLock { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
         .tutorial-card { padding: 30px; border-radius: 24px; width: 100%; max-width: 450px; text-align: center; animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -152,39 +162,67 @@
         #app-container { display: none; position: absolute; inset: 0; height: 100%; width: 100%; padding: 10px; box-sizing: border-box;}
         .app-flex { display: flex; height: 100%; width: 100%; gap: 10px; min-height: 0; position: relative; overflow: hidden;}
         
-        .sidebar { width: 280px; padding: 20px; display: flex; flex-direction: column; gap: 12px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
-        .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; }
+        /* SIDEBAR REDESIGN */
+        .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
+        .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; display: none; }
         
-        .brand { font-weight: 700; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-        .sidebar-btn { padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; white-space: nowrap; flex-shrink: 0;}
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 10px; }
+        .brand { font-weight: 700; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
         
-        .sidebar-section-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 10px; padding: 0 5px; flex-shrink: 0; }
-        #sidebarChatList { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; flex: 1; padding: 0 5px; margin-bottom: 10px;}
-        .chat-history-item { background: transparent !important; box-shadow: none !important; border: none !important; color: var(--text-muted); padding: 12px 10px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; white-space: nowrap; transition: all 0.2s;}
+        .user-avatar-mini { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); cursor: pointer; flex-shrink: 0; }
+        .user-avatar-mini img { width: 100%; height: 100%; object-fit: cover; }
+        .header-btn { font-size: 1.2rem; padding: 6px; border-radius: 8px; display: flex; align-items: center; cursor: pointer; color: var(--text-muted); background: transparent !important; box-shadow: none !important; transition: color 0.2s; }
+        .header-btn:hover { color: var(--accent); }
+
+        .sidebar-search { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 12px; }
+        .sidebar-search input { flex: 1; background: transparent !important; border: none !important; box-shadow: none !important; color: var(--text-light); outline: none; font-size: 0.95rem; }
+        .sidebar-search i { color: var(--text-muted); font-size: 1.2rem; }
+
+        .sidebar-section-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-top: 5px;}
+        
+        .sidebar-btn { padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0; font-size: 0.9rem;}
+
+        #sidebarChatList { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; padding-right: 4px; }
+        .chat-history-item { background: transparent !important; box-shadow: none !important; border: none !important; color: var(--text-muted); padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; white-space: nowrap; transition: all 0.2s;}
         .chat-history-item:hover { background: rgba(255,255,255,0.05) !important; color: var(--text-light); }
-        .chat-history-item.active { background: var(--accent-alpha) !important; color: var(--text-light); border: 1px solid var(--accent) !important; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3) !important;}
+        .chat-history-item.active { background: var(--input-bg) !important; color: var(--text-light); border: 1px solid var(--accent) !important; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3) !important;}
+        
+        .chat-title-wrapper { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
+        .chat-title-text { overflow: hidden; text-overflow: ellipsis; }
         
         .chat-options-btn { visibility: hidden; padding: 4px; font-size: 1.1rem; border-radius: 6px; }
-        .chat-history-item.active .chat-options-btn { visibility: visible; }
+        .chat-history-item:hover .chat-options-btn, .chat-history-item.active .chat-options-btn { visibility: visible; }
+        
         .context-menu { position: absolute; padding: 5px; display: flex; flex-direction: column; gap: 2px; z-index: 1000; transform-origin: top left; animation: scaleIn 0.15s ease; border-radius: 12px;}
         .context-menu button { background: transparent !important; box-shadow: none !important; border: none !important; padding: 10px 15px; text-align: left; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;}
         .context-menu button:hover { background: rgba(255,255,255,0.1) !important; }
 
-        .sidebar-links { display: flex; flex-direction: column; gap: 10px; padding: 10px 5px; border-top: 1px solid var(--border); padding-top: 15px; flex-shrink: 0;}
-        .sidebar-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transition: color 0.2s; white-space: nowrap; font-weight: 500;}
-        .sidebar-links a:hover { color: var(--accent); }
-        .sidebar-tagline { font-size: 0.7rem; color: var(--text-muted); opacity: 0.6; margin-top: 5px; line-height: 1.4; white-space: normal;}
+        /* Accordion Footer */
+        .footer-toggle-wrapper { display: flex; align-items: center; cursor: pointer; color: var(--text-muted); gap: 10px; margin-top: 10px;}
+        .footer-toggle-wrapper hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+        .footer-toggle-wrapper i { font-size: 0.9rem; transition: transform 0.3s ease; }
+        .footer-toggle-wrapper.open i { transform: rotate(180deg); }
 
-        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-top: 10px; white-space: nowrap; cursor: pointer; flex-shrink: 0; border: 1px solid transparent;}
-        .user-profile img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
-        .user-profile-info { display: flex; flex-direction: column; }
-        .user-profile-name { font-weight: 600; font-size: 0.9rem; }
-        .user-profile-status { font-size: 0.75rem; color: var(--accent); display: flex; align-items: center; gap: 4px; }
+        .sidebar-footer-content { display: none; flex-direction: column; gap: 12px; padding-top: 10px; animation: slideUp 0.3s ease; }
+        .sidebar-footer-content.open { display: flex; }
+        
+        .sidebar-links { display: flex; flex-direction: column; gap: 10px; padding: 0 5px; }
+        .sidebar-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; transition: color 0.2s; white-space: nowrap; font-weight: 500;}
+        .sidebar-links a:hover { color: var(--accent); }
+        .social-row { display: flex; gap: 15px; align-items: center; }
+        .social-row div { width: 1px; height: 16px; background: var(--border); }
+
+        .sys-info-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; }
+        .sys-info-cell { padding: 8px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid var(--border); }
+        .sys-info-cell:nth-child(odd) { border-right: 1px solid var(--border); }
+        .sys-info-cell:nth-last-child(-n+2) { border-bottom: none; }
+        .sys-info-full-row { grid-column: 1 / -1; padding: 8px; display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.15); font-weight: 600; color: var(--text-light); }
 
         .mobile-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 15; backdrop-filter: blur(4px); animation: fadeIn 0.2s;}
 
         .chat-container { flex: 1; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; min-height: 0; min-width: 0; position: relative; z-index: 10;}
-        .top-bar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); z-index: 5; gap: 10px; flex-wrap: wrap; }
+        .top-bar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); z-index: 5; gap: 10px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
         
         .chat-model-selector { padding: 8px 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; position: relative; white-space: nowrap; max-width: 200px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .chat-model-selector span { overflow: hidden; text-overflow: ellipsis; }
@@ -194,44 +232,50 @@
         .btn-icon { font-size: 1.4rem; padding: 8px; border-radius: 8px; display: flex; align-items: center;}
         .btn-icon:hover { color: var(--accent); }
 
-        .ghost-badge { display: none; background: rgba(255, 255, 255, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #ff4757; border: 1px solid #ff4757; align-items: center; gap: 5px; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);}
+        .ghost-badge { display: none; background: rgba(255, 255, 255, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #ff4757; border: 1px solid #ff4757; align-items: center; gap: 5px; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
         .ghost-badge.active { display: flex; animation: slideUp 0.3s; }
 
         .messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 20px; scroll-behavior: smooth; min-height: 0; padding-bottom: 30px;}
         .message { display: flex; flex-direction: column; max-width: 85%; animation: slideUp 0.3s ease forwards; transform: translateZ(0);}
         .message.user { align-self: flex-end; }
         .message.ai { align-self: flex-start; }
-        .message-sender { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .message-sender { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
         .message.user .message-sender { flex-direction: row-reverse; }
-        .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); }
-        .message.user .message-content { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px var(--accent-alpha); white-space: pre-wrap; border: 1px solid rgba(0,0,0,0.2);}
+        .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); text-shadow: 0 1px 2px rgba(0,0,0,0.2);}
+        .message.user .message-content { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 15px var(--accent-alpha); white-space: pre-wrap; border: 1px solid rgba(0,0,0,0.2);}
         .message.ai .message-content { border-bottom-left-radius: 4px; }
         .message-image { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
-        .message-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; font-size: 0.9rem; }
+        .message-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; font-size: 0.9rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
 
         /* Smart Skeleton Loaders */
-        .skeleton-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 250px; }
+        .skeleton-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 200px; }
         .skeleton-line { height: 14px; background: linear-gradient(90deg, rgba(150,150,150,0.1) 25%, rgba(150,150,150,0.2) 50%, rgba(150,150,150,0.1) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 4px; }
-        .skeleton-header { height: 20px; width: 40%; background: linear-gradient(90deg, rgba(150,150,150,0.2) 25%, rgba(150,150,150,0.3) 50%, rgba(150,150,150,0.2) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 4px; margin-bottom: 10px;}
-        .skeleton-box { height: 180px; width: 100%; background: linear-gradient(90deg, rgba(150,150,150,0.1) 25%, rgba(150,150,150,0.2) 50%, rgba(150,150,150,0.1) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 8px; margin-top: 5px; border: 1px dashed var(--border);}
+        .skeleton-header { height: 20px; width: 30%; background: linear-gradient(90deg, rgba(150,150,150,0.2) 25%, rgba(150,150,150,0.3) 50%, rgba(150,150,150,0.2) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 4px; margin-bottom: 10px;}
+        .skeleton-box { height: 150px; width: 100%; background: linear-gradient(90deg, rgba(150,150,150,0.1) 25%, rgba(150,150,150,0.2) 50%, rgba(150,150,150,0.1) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 8px; margin-top: 5px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); border: 1px dashed var(--border);}
         @keyframes skeleton-shimmer { to { background-position: -200% 0; } }
 
         .code-wrapper { border-radius: 12px; margin: 16px 0; overflow: hidden; }
-        .code-header { background: rgba(0,0,0,0.2); padding: 8px 16px; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.2); text-transform: uppercase; align-items: center; }
+        .code-header { background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(0,0,0,0.2)); padding: 8px 16px; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid #000; text-transform: uppercase; align-items: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
         .code-header-actions { display: flex; gap: 8px; }
         .code-action-btn { background: transparent !important; box-shadow: none !important; border: none !important; padding: 4px; font-size: 0.8rem;}
         .code-wrapper pre { padding: 16px; margin: 0; overflow-x: auto; }
         .code-wrapper code { font-family: 'Courier New', monospace; font-size: 0.95em; color: var(--text-light); }
-        .message-content p code { background-color: rgba(0,0,0,0.6); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; color: var(--accent); font-family: 'Courier New', monospace; }
+        .message-content p code { background-color: rgba(0,0,0,0.6); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; border: 1px solid #000; color: var(--accent); font-family: 'Courier New', monospace; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);}
 
-        .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: background 0.3s ease; box-shadow: 0 -4px 10px rgba(0,0,0,0.1);}
-        .preview-area { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; border-radius: 0 !important; box-shadow: none !important; border-bottom: 1px solid rgba(0,0,0,0.2) !important;}
+        .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: background 0.3s ease; box-shadow: 0 -4px 10px rgba(0,0,0,0.3);}
+        .preview-area { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; }
         .preview-area:not(:empty) { padding-top: 15px; }
         .preview-item { position: relative; width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--accent); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.6rem; color: var(--text-muted);}
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
         .preview-item i { font-size: 1.5rem; margin-bottom: 2px; color: var(--text-light);}
         .preview-item button { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.8) !important; color: white; border: none !important; box-shadow: none !important; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center;}
         
+        /* Icebreakers */
+        .icebreaker-container { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; width: 100%; max-width: 600px; scroll-behavior: smooth; }
+        .icebreaker-container::-webkit-scrollbar { display: none; }
+        .icebreaker-btn { padding: 10px 16px; border-radius: 20px; white-space: nowrap; font-size: 0.85rem; color: var(--text-light); border: 1px solid var(--border); background: var(--input-bg); cursor: pointer; transition: all 0.2s; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .icebreaker-btn:hover { background: var(--accent-alpha); border-color: var(--accent); }
+
         .input-area { padding: 15px 20px; display: flex; gap: 8px; align-items: flex-end; }
         .input-actions-wrapper { position: relative; margin-bottom: 4px; }
         .hardware-btn { font-size: 1.3rem; padding: 12px; border-radius: 12px;}
@@ -251,30 +295,31 @@
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease forwards; }
         .modal-content { padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;}
         .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
-        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
         .form-group input, .form-group select, .form-group textarea { padding: 14px; border-radius: 12px; color: var(--text-light); outline: none; font-size: 1rem; width: 100%;}
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent) !important; }
 
         .color-picker-wrapper { display: flex; align-items: center; gap: 15px; }
-        input[type="color"] { -webkit-appearance: none; border: none !important; box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; padding: 0; background: transparent !important; }
+        input[type="color"] { -webkit-appearance: none; border: none !important; box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; padding: 0; background: transparent !important; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 50%; }
 
+        /* Skeuomorphic Toggles */
         .switch-group { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { 
-            position: absolute; cursor: pointer; inset: 0; background: rgba(0,0,0,0.3); transition: .4s; border-radius: 34px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);
+            position: absolute; cursor: pointer; inset: 0; background: linear-gradient(180deg, #111, #333); transition: .4s; border-radius: 34px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.05); border: 1px solid rgba(0,0,0,0.8);
         }
         .slider:before { 
             position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-            background: #fff; transition: .4s; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+            background: linear-gradient(180deg, #eee, #aaa); transition: .4s; border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 1px 1px white; border: 1px solid #888;
         }
         input:checked + .slider { 
-            background: var(--accent);
-            border-color: var(--accent-dark);
+            background: linear-gradient(180deg, var(--accent-dark), var(--accent));
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.7), 0 1px 1px rgba(255,255,255,0.1); border-color: var(--accent-dark);
         }
         input:checked + .slider:before { transform: translateX(22px); }
 
@@ -283,18 +328,18 @@
         .custom-select-options { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; max-height: 280px; border-radius: 12px; z-index: 10; padding: 0; flex-direction: column; overflow: hidden; }
         .custom-select-options.open { display: flex; animation: slideUp 0.2s ease forwards; }
         
-        .search-container { padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 11;}
+        .search-container { padding: 10px; border-bottom: 1px solid #000; display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 11;}
         .search-container input { width: 100%; background: transparent !important; box-shadow: none !important; border: none !important; color: var(--text-light); outline: none; padding: 0;}
         
         .options-list-scroll { overflow-y: auto; max-height: 230px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .optgroup-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; padding: 10px 12px 4px; display: flex; align-items: center; gap: 6px; }
+        .optgroup-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; padding: 10px 12px 4px; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
         .custom-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; transition: background 0.2s;}
         .custom-option:hover { background: rgba(255,255,255,0.1); }
         .custom-option.selected { background: var(--accent-alpha); border: 1px solid var(--accent); }
         
         .badge-lite { background: rgba(88, 101, 242, 0.2); color: var(--accent); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid var(--accent-alpha); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
         .badge-pro { background: rgba(255, 71, 87, 0.15); color: #ff4757; font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid rgba(255, 71, 87, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
-        .capability-badge { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: rgba(0,0,0,0.4); font-size: 0.85rem; margin-left: -5px; }
+        .capability-badge { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: rgba(0,0,0,0.4); font-size: 0.85rem; margin-left: -5px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05);}
 
         /* Stratified Voice Modal */
         #voiceModalOverlay { z-index: 9999 !important; backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
@@ -304,13 +349,21 @@
 
         .capabilities-list { text-align: left; padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 0.95rem; line-height: 1.8; }
         .capabilities-list div { display: flex; align-items: center; gap: 8px; }
-        .capabilities-list i { color: var(--accent); font-size: 1.2rem; width: 24px; text-align: center; }
+        .capabilities-list i { color: var(--accent); font-size: 1.2rem; width: 24px; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.8);}
 
+        /* User Info specific modal overrrides */
         .user-stats-container { display: flex; justify-content: space-around; padding: 15px; border-radius: 12px; margin: 10px 0; }
         .stat-box { text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
         .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
         .api-credits-info { font-size: 0.85rem; color: #2ecc71; margin-top: 5px; text-align: center; display: none; padding: 8px; border-radius: 8px; }
+
+        /* Comparison Modal overrides */
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;}
+        .compare-col { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;}
+        .compare-detail { font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+        .compare-detail b { color: var(--text-light); }
+        .winner-text { color: #2ecc71; font-weight: 700; margin-top: 10px; font-size: 0.9rem; padding: 10px; background: rgba(46, 204, 113, 0.1); border-radius: 8px; border: 1px solid rgba(46, 204, 113, 0.3);}
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -323,7 +376,7 @@
             .chat-container { border-radius: 0; border: none !important; }
 
             .sidebar { position: absolute; left: 0; top: 0; bottom: 0; height: 100%; max-width: 85vw; transform: translateX(0); opacity: 1; border: 1px solid var(--border) !important;}
-            .sidebar.collapsed { transform: translateX(-110%); width: 280px; padding: 20px; opacity: 1; pointer-events: none;}
+            .sidebar.collapsed { transform: translateX(-110%); width: 300px; padding: 20px; opacity: 1; pointer-events: none;}
             .mobile-overlay.active { display: block; }
             
             .top-bar { padding: 10px 15px; align-items: center; justify-content: space-between; gap: 8px;}
@@ -346,8 +399,8 @@
 <body class="dark-mode">
 
     <div id="auth-loading-overlay">
-        <i class="ph-bold ph-spinner ph-spin" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
-        <h2 style="margin:0;">Logging In</h2>
+        <i class="ph-bold ph-spinner ph-spin" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--accent));"></i>
+        <h2 style="margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Logging In</h2>
         <p style="color: var(--text-muted); margin-top: 5px;">Coding Data Blocks...</p>
     </div>
 
@@ -358,8 +411,8 @@
 
     <div id="tutorialLock">
         <div class="tutorial-card glass">
-            <h2 style="color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem;">
-                <i class="ph-fill ph-rocket-launch" style="color: var(--accent);"></i> Welcome to Horizon.AI!
+            <h2 style="color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                <i class="ph-fill ph-rocket-launch" style="color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i> Welcome to Horizon.AI!
             </h2>
             <div class="tutorial-step">
                 <b>1.</b> Tap the <i class="ph-bold ph-list"></i> button in the top left to open the sidebar.
@@ -381,17 +434,17 @@
             <div class="voice-pulse-ring">
                 <button id="btn-stop-voice" class="btn-send btn-extrude" style="width: 80px; height: 80px; font-size: 2.5rem; border-radius: 50%;"><i class="ph-fill ph-microphone"></i></button>
             </div>
-            <h3 style="margin: 0; color: var(--accent); font-size: 1.5rem;">Listening...</h3>
+            <h3 style="margin: 0; color: var(--accent); font-size: 1.5rem; text-shadow: 0 2px 5px rgba(0,0,0,0.8);">Listening...</h3>
             <div class="input-recess" style="width: 100%; border-radius: 12px; padding: 15px;">
-                <div id="voiceInterimText" style="min-height: 50px; font-size: 1.1rem; color: var(--text-light); font-style: italic; display: flex; align-items: center; justify-content: center;">Speak into it</div>
+                <div id="voiceInterimText" style="min-height: 50px; font-size: 1.1rem; color: var(--text-light); font-style: italic; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Speak into it</div>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="capabilitiesModalOverlay" style="z-index: 300;">
         <div class="modal-content glass" style="max-width: 400px; text-align: center;">
-            <h2 style="font-size:1.3rem; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="ph-fill ph-cpu"></i> Select Model</h2>
-            <p id="capModelName" style="font-weight: 700; color: var(--accent); margin-top: 5px; font-size:1.1rem; "></p>
+            <h2 style="font-size:1.3rem; display:flex; align-items:center; justify-content:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-cpu"></i> Select Model</h2>
+            <p id="capModelName" style="font-weight: 700; color: var(--accent); margin-top: 5px; font-size:1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></p>
             
             <div class="capabilities-list input-recess" id="capList"></div>
             
@@ -402,30 +455,53 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="compareModalOverlay" style="z-index: 300;">
+        <div class="modal-content glass" style="max-width: 600px;">
+            <h2 style="font-size:1.3rem; display:flex; align-items:center; justify-content:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-scales"></i> Compare Models</h2>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <select id="compareSelectA" class="input-recess" style="flex: 1; font-size: 0.85rem;"><option value="">Select Model A</option></select>
+                <select id="compareSelectB" class="input-recess" style="flex: 1; font-size: 0.85rem;"><option value="">Select Model B</option></select>
+            </div>
+            
+            <button id="btn-run-compare" class="btn-auth btn-extrude" style="background-color: var(--accent) !important; margin-top: 10px;">Analyze & Compare</button>
+
+            <div id="compareResultsArea" style="display:none;">
+                <div class="compare-grid">
+                    <div class="compare-col" id="compareColA"></div>
+                    <div class="compare-col" id="compareColB"></div>
+                </div>
+                <div id="compareVerdict" class="winner-text"></div>
+            </div>
+
+            <button id="btn-close-compare" class="btn-auth btn-ghost btn-extrude" style="margin-top:15px;">Close</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="profileModalOverlay" style="z-index: 300;">
         <div class="modal-content glass" style="max-width: 400px;">
-            <h2 style="font-size:1.3rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-user-circle"></i> You</h2>
+            <h2 style="font-size:1.3rem; display:flex; align-items:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-user-circle"></i> Profile Settings</h2>
             
             <div class="user-stats-container input-recess">
                 <div class="stat-box">
                     <div class="stat-value" id="statMsgs">0</div>
-                    <div class="stat-label">All Time Messages</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="statTokens">0</div>
-                    <div class="stat-label">Total Cash Saved</div>
+                    <div class="stat-label">Messages</div>
                 </div>
             </div>
 
             <div id="apiCreditsInfo" class="api-credits-info input-recess" style="background: rgba(46, 204, 113, 0.15) !important;"></div>
 
             <div class="form-group" style="margin-top: 5px;">
-                <label>Username</label>
+                <label>Display Name</label>
                 <input type="text" class="input-recess" id="editProfileName" placeholder="Your Name">
             </div>
             <div class="form-group">
-                <label>PFP URL</label>
-                <input type="text" class="input-recess" id="editProfilePfp" placeholder="https://...">
+                <label>Avatar / PFP URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" class="input-recess" id="editProfilePfp" placeholder="https://..." style="flex: 1;">
+                    <button id="btn-upload-pfp" class="btn-extrude" style="padding: 0 15px; border-radius: 12px; font-weight: 600;"><i class="ph-bold ph-upload-simple"></i></button>
+                    <input type="file" id="pfpFileInput" accept="image/*" style="display:none;">
+                </div>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
@@ -487,38 +563,58 @@
             <div class="mobile-overlay" id="mobileOverlay"></div>
 
             <div class="sidebar glass collapsed" id="mainSidebar">
-                <div class="brand">
-                    <i class="ph-fill ph-planet" style="color:var(--accent);"></i> Horizon.AI
-                </div>
-                <button id="btn-new-chat" class="sidebar-btn btn-extrude">
-                    <i class="ph-fill ph-plus-circle" style="color:var(--accent)"></i> New Chat
-                </button>
-                <button id="btn-open-settings" class="sidebar-btn btn-extrude">
-                    <i class="ph-fill ph-faders" style="color:var(--accent)"></i> Configuration
-                </button>
                 
-                <div class="sidebar-section-title">Recent Chats</div>
-                <div id="sidebarChatList"></div>
-                
-                <div class="sidebar-links">
-                    <a href="https://aceyash.vercel.app" target="_blank"><i class="ph-fill ph-globe"></i>Official Support Site</a>
-                    <a href="https://github.com/aceyash-dev" target="_blank"><i class="ph-fill ph-github-logo"></i> GitHub</a>
-                    <a href="https://instagram.com/archives.of.yash" target="_blank"><i class="ph-fill ph-instagram-logo"></i> Instagram</a>
-                    <a href="https://chai4.me/aceyash-dev" target="_blank"><i class="ph-fill ph-coffee"></i> Buy me a Chai</a>
-                    <div class="sidebar-tagline">©Ace Horizon 2024</div>
-                </div>
-
-                <div class="user-profile input-recess" id="btn-user-profile" title="Edit Profile & Stats">
-                    <img id="userProfileAvatar" src="https://via.placeholder.com/36" alt="Avatar">
-                    <div class="user-profile-info">
-                        <span class="user-profile-name" id="userProfileName">Yash</span>
-                        <span class="user-profile-status" id="userProfileStatus"><i class="ph-fill ph-shield-check"></i> ☑Secure-Switching available</span>
+                <div class="sidebar-header">
+                    <div class="brand"><i class="ph-fill ph-planet" style="color:var(--accent);"></i> Horizon.AI</div>
+                    <div class="header-actions">
+                        <div class="user-avatar-mini" id="btn-user-profile" title="Profile">
+                            <img id="userProfileAvatar" src="https://via.placeholder.com/32" alt="User">
+                        </div>
+                        <button id="btn-open-settings" class="header-btn" title="Settings"><i class="ph-fill ph-gear"></i></button>
+                        <button id="btn-logout" class="header-btn" title="Logout"><i class="ph-bold ph-power"></i></button>
                     </div>
                 </div>
-                
-                <button id="btn-logout" class="sidebar-btn btn-extrude" style="margin-top: 5px;">
-                    <i class="ph-fill ph-sign-out" style="color:#ff4757"></i> Get Out
+
+                <div class="sidebar-search input-recess">
+                    <input type="text" id="chatSearchInput" placeholder="Search Chats">
+                    <i class="ph-bold ph-magnifying-glass"></i>
+                </div>
+
+                <button id="btn-compare-models" class="sidebar-btn btn-extrude" style="margin-top: 5px;">
+                    <i class="ph-fill ph-scales" style="color:var(--accent)"></i> Compare Models
                 </button>
+
+                <div class="sidebar-section-title" style="display:flex; justify-content:space-between; margin-top: 15px;">
+                    <span><i class="ph-fill ph-chat-teardrop-text"></i> CHATS</span>
+                    <button id="btn-new-chat" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size: 1rem;" title="New Chat"><i class="ph-bold ph-plus"></i></button>
+                </div>
+                <div id="sidebarChatList"></div>
+                
+                <div style="margin-top: auto;">
+                    <div class="footer-toggle-wrapper" id="btn-toggle-footer">
+                        <hr><i class="ph-bold ph-caret-down"></i><hr>
+                    </div>
+                    
+                    <div class="sidebar-footer-content" id="sidebarFooterContent">
+                        <div class="sidebar-links">
+                            <a href="https://aceyash.vercel.app" target="_blank"><i class="ph-fill ph-globe"></i> Official Support Site</a>
+                            <div class="social-row">
+                                <a href="https://github.com/aceyash-dev" target="_blank"><i class="ph-fill ph-github-logo"></i> GitHub</a>
+                                <div></div>
+                                <a href="https://instagram.com/archives.of.yash" target="_blank"><i class="ph-fill ph-instagram-logo"></i> Instagram</a>
+                            </div>
+                            <a href="https://chai4.me/aceyash-dev" target="_blank"><i class="ph-fill ph-coffee"></i> Support / Fuel the Project</a>
+                        </div>
+
+                        <div class="sys-info-grid">
+                            <div class="sys-info-cell" id="sysBrowserInfo"><i class="ph-bold ph-browser"></i> Browser</div>
+                            <div class="sys-info-cell" id="sysDeviceInfo"><i class="ph-bold ph-device-mobile"></i> Device</div>
+                            <div class="sys-info-cell" style="color:var(--accent);"><i class="ph-fill ph-coin"></i> <span id="sysStatTokens">0</span> All Time</div>
+                            <div class="sys-info-full-row" id="sysAuthStatus"><i class="ph-bold ph-check-circle" style="color:#2ecc71;"></i> Secured: Unknown</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="chat-container glass">
@@ -534,7 +630,13 @@
                         <div id="quickModelSelector" class="chat-model-selector btn-extrude" title="Switch Model">
                             <span id="quickModelLabel">Select Model</span>
                             <i class="ph-bold ph-caret-down"></i>
-                            <div id="quickModelDropdown" class="quick-model-dropdown glass"></div>
+                            <div id="quickModelDropdown" class="quick-model-dropdown glass">
+                                <div class="search-container input-recess" style="border-radius: 8px; margin-bottom: 8px; padding: 6px 10px;">
+                                    <i class="ph-bold ph-magnifying-glass" style="font-size: 0.9rem;"></i>
+                                    <input type="text" id="quickModelSearchBox" placeholder="Search..." style="font-size: 0.85rem; box-shadow: none !important; border: none !important; padding: 0 !important; background: transparent !important;">
+                                </div>
+                                <div id="quickModelListContainer" style="display: flex; flex-direction: column; overflow-y: auto; max-height: 300px;"></div>
+                            </div>
                         </div>
 
                         <button id="btn-refresh-models-chat" class="btn-icon btn-extrude" title="Refresh Models">
@@ -548,14 +650,10 @@
                 </div>
 
                 <div class="messages" id="chatBox">
-                    <div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg">
-                        <i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent);"></i>
-                        <span>Welcome to Horizon.AI..! What's in your mind today? </span>
                     </div>
-                </div>
                 
                 <div class="input-container">
-                    <div class="preview-area input-recess" id="imagePreviewContainer"></div>
+                    <div class="preview-area input-recess" id="imagePreviewContainer" style="box-shadow: none !important; border: none !important; border-bottom: 1px solid rgba(0,0,0,0.5) !important;"></div>
                     <div class="input-area">
                         <input type="file" id="fileAttach" accept="*/*" multiple style="display:none">
                         <input type="file" id="cameraAttach" accept="image/*" capture="environment" style="display:none">
@@ -581,34 +679,34 @@
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content glass">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h2 style="font-size:1.2rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-sliders-horizontal"></i> Configuration</h2>
+                <h2 style="font-size:1.2rem; display:flex; align-items:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-sliders-horizontal"></i> Configuration</h2>
                 <button id="btn-close-settings" class="btn-icon btn-extrude"><i class="ph-bold ph-x"></i></button>
             </div>
 
             <div class="switch-group" style="padding-top: 0;">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-palette"></i> Accent Color</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-palette"></i> Accent Color</span>
                 <div class="color-picker-wrapper">
                     <input type="color" id="accentColorPicker" value="#5865F2">
                 </div>
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-speaker-high"></i>Allow Voice Responses (TTS)?</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-speaker-high"></i>Allow Voice Responses (TTS)?</span>
                 <label class="switch"><input type="checkbox" id="voiceToggle"><span class="slider"></span></label>
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-music-notes"></i> Sound Effects(SFX) </span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-music-notes"></i> Sound Effects(SFX) </span>
                 <label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label>
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-vibrate"></i> Haptic Feedback</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-vibrate"></i> Haptic Feedback</span>
                 <label class="switch"><input type="checkbox" id="hapticsToggle" checked><span class="slider"></span></label>
             </div>
 
             <div class="switch-group" id="settingsGhostToggleGroup">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; color: #ff4757;"><i class="ph-fill ph-ghost"></i> Ghost Mode? 😏</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; color: #ff4757; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-ghost"></i> Ghost Mode? 😏</span>
                 <label class="switch"><input type="checkbox" id="ghostToggle"><span class="slider"></span></label>
             </div>
 
@@ -640,7 +738,7 @@
             <div class="form-group">
                 <label for="apiKey" style="display:flex; justify-content:space-between; width:100%;">
                     <span><i class="ph-fill ph-key"></i> API Key</span>
-                    <a id="apiKeyLink" href="https://openrouter.ai/keys" target="_blank" style="color: var(--accent); text-decoration: none; font-size: 0.75rem;"><i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key</a>
+                    <a id="apiKeyLink" href="https://openrouter.ai/keys" target="_blank" style="color: var(--accent); text-decoration: none; font-size: 0.75rem; text-shadow: none;"><i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key</a>
                 </label>
                 <input type="password" id="apiKey" class="input-recess" placeholder="Enter API Key">
             </div>
