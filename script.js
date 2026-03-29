@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/fireba
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
+// NOTE: Using raw keys client-side is vulnerable to abuse. 
+// Must configure Firebase App Check & restrict domain usage in the Google Cloud Console.
 const firebaseConfig = {
     apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
     authDomain: "ace-horizon.firebaseapp.com",
@@ -26,6 +28,9 @@ let chatHistory = [];
 let uiHistory = [];         
 let attachedFilesData = []; 
 
+// Global singleton for AudioContext to prevent severe memory leakage
+let audioCtx = null;
+
 // Settings States
 let isGhostMode = false;
 let sfxEnabled = true;
@@ -34,6 +39,7 @@ let voiceResponseEnabled = false;
 let currentTone = 'standard';
 let statMessages = parseInt(localStorage.getItem('horizon_stat_msgs')) || 0;
 let statTokens = parseInt(localStorage.getItem('horizon_stat_tokens')) || 0;
+window.allParsedModels = []; 
 
 const TONE_DIRECTIVES = {
     'standard': '',
@@ -43,88 +49,154 @@ const TONE_DIRECTIVES = {
     'academic': 'Respond in a highly detailed, academic, and analytical tone with deep explanations.'
 };
 
-// --- THEME TOGGLE (INCLUDING PITCH BLACK) ---
+// --- SYSTEM INFO PARSING FOR FOOTER GRID ---
+function parseSystemInfo() {
+    const sysBrowserEl = document.getElementById('sysBrowserInfo');
+    const sysDeviceEl = document.getElementById('sysDeviceInfo');
+    const sysTokensEl = document.getElementById('sysStatTokens');
+    
+    if(!sysBrowserEl || !sysDeviceEl || !sysTokensEl) return;
+
+    const ua = navigator.userAgent;
+    let browser = "Unknown Browser";
+    if (ua.includes("Firefox")) browser = "Firefox";
+    else if (ua.includes("SamsungBrowser")) browser = "Samsung Int";
+    else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+    else if (ua.includes("Trident")) browser = "IE";
+    else if (ua.includes("Edge")) browser = "Edge";
+    else if (ua.includes("Chrome")) browser = "Chrome";
+    else if (ua.includes("Safari")) browser = "Safari";
+    
+    let os = "Unknown Device";
+    if (ua.includes("Win")) os = "Windows";
+    else if (ua.includes("Mac")) os = "macOS/iOS";
+    else if (ua.includes("Linux")) os = "Linux";
+    else if (ua.includes("Android")) os = "Android";
+
+    sysBrowserEl.innerHTML = `<i class="ph-bold ph-browser"></i> ${browser}`;
+    sysDeviceEl.innerHTML = `<i class="ph-bold ph-device-mobile"></i> ${os}`;
+    sysTokensEl.innerText = statTokens.toLocaleString() || '0';
+}
+document.addEventListener("DOMContentLoaded", parseSystemInfo);
+
+// --- THEME TOGGLE ---
 const themes = ['dark-mode', 'pitch-black-mode', 'light-mode'];
 const themeIcons = ['ph-moon', 'ph-star', 'ph-sun-dim'];
 let currentThemeIndex = parseInt(localStorage.getItem('horizon_theme_index')) || 0;
 
 function applyTheme() {
-    document.body.className = themes[currentThemeIndex];
-    document.getElementById('themeIcon').className = `ph-fill ${themeIcons[currentThemeIndex]}`;
-    localStorage.setItem('horizon_theme_index', currentThemeIndex);
+    document.body.classList.remove(...themes);
+    document.body.classList.add(themes[currentThemeIndex]);
+    
+    const themeIcon = document.getElementById('themeIcon');
+    if(themeIcon) themeIcon.className = `ph-fill ${themeIcons[currentThemeIndex]}`;
+    
+    localStorage.setItem('horizon_theme_index', currentThemeIndex.toString());
 }
 applyTheme();
 
-document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+document.getElementById('btn-toggle-theme')?.addEventListener('click', () => {
     currentThemeIndex = (currentThemeIndex + 1) % themes.length;
     applyTheme();
 });
 
 
-// --- AUTHENTICATION FLOW (ROBUST FIX & MEMORY) ---
+// --- AUTHENTICATION FLOW (28-DAY GHOST PURGE) ---
 const authLoader = document.getElementById('auth-loading-overlay');
-let authMode = 'login'; // Track current tab mode (login vs signup)
+let authMode = 'login'; 
 
-// Handle Tab Switching
-document.getElementById('tab-login').addEventListener('click', () => {
+document.getElementById('tab-login')?.addEventListener('click', () => {
     authMode = 'login';
     document.getElementById('tab-login').classList.add('active');
-    document.getElementById('tab-signup').classList.remove('active');
-    document.getElementById('tc-container').style.display = 'none';
+    document.getElementById('tab-signup')?.classList.remove('active');
+    const tcCont = document.getElementById('tc-container');
+    if(tcCont) tcCont.style.display = 'none';
 });
 
-document.getElementById('tab-signup').addEventListener('click', () => {
+document.getElementById('tab-signup')?.addEventListener('click', () => {
     authMode = 'signup';
     document.getElementById('tab-signup').classList.add('active');
-    document.getElementById('tab-login').classList.remove('active');
-    document.getElementById('tc-container').style.display = 'block';
+    document.getElementById('tab-login')?.classList.remove('active');
+    const tcCont = document.getElementById('tc-container');
+    if(tcCont) tcCont.style.display = 'block';
 });
 
-// Function to securely activate Ghost Mode UI
 function activateGhostMode() {
     isGhostMode = true;
-    document.getElementById('ghostToggle').checked = true;
-    document.getElementById('ghostIndicator').classList.add('active');
-    document.getElementById('landing-page').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
+    chatHistory = []; 
+    uiHistory = [];
+
+    const ghostToggle = document.getElementById('ghostToggle');
+    if(ghostToggle) ghostToggle.checked = true;
+    
+    document.getElementById('ghostIndicator')?.classList.add('active');
+    
+    const lp = document.getElementById('landing-page');
+    if(lp) lp.style.display = 'none';
+    
+    const appCont = document.getElementById('app-container');
+    if(appCont) appCont.style.display = 'block';
+    
     checkAndShowTutorialLock();
     
-    document.getElementById('userProfileName').innerText = 'Ghost User';
-    document.getElementById('userProfileStatus').innerHTML = '<i class="ph-fill ph-eye-closed"></i> Incognito';
-    document.getElementById('userProfileAvatar').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
-    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 3rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
-    document.getElementById('sidebarChatList').innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem; text-align:center;">History is turned off.</div>';
+    const authStatus = document.getElementById('sysAuthStatus');
+    if(authStatus) authStatus.innerHTML = `<i class="ph-bold ph-ghost" style="color:#ff4757;"></i> Secured: Ghost`;
+    
+    const avatar = document.getElementById('userProfileAvatar');
+    if(avatar) avatar.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
+    
+    const cb = document.getElementById('chatBox');
+    if(cb) cb.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 3rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
+    
+    const sbc = document.getElementById('sidebarChatList');
+    if(sbc) sbc.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem; text-align:center;">History is turned off.</div>';
 }
 
-// Auto-Login Check on Load
 const savedAuthMethod = localStorage.getItem('horizon_auth_method');
+
 if (savedAuthMethod === 'ghost') {
-    activateGhostMode();
+    const ghostTimestamp = localStorage.getItem('horizon_ghost_timestamp');
+    const twentyEightDaysInMs = 28 * 24 * 60 * 60 * 1000;
+    
+    if (ghostTimestamp && (Date.now() - parseInt(ghostTimestamp, 10)) > twentyEightDaysInMs) {
+        localStorage.removeItem('horizon_auth_method');
+        localStorage.removeItem('horizon_ghost_timestamp');
+        localStorage.removeItem('horizon_sessions');
+        localStorage.removeItem('horizon_long_term_memory');
+        alert("Your 28-Day ephemeral Ghost Session has expired and data has been purged.");
+        window.location.reload();
+    } else {
+        activateGhostMode();
+    }
 } else {
-    authLoader.style.display = 'flex';
+    if(authLoader) authLoader.style.display = 'flex';
 }
 
 onAuthStateChanged(auth, (user) => {
-    authLoader.style.display = 'none';
+    if(authLoader) authLoader.style.display = 'none';
     if (isGhostMode) return; 
+    
     if (user) {
         localStorage.setItem('horizon_auth_method', 'firebase');
-        document.getElementById('landing-page').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
+        const lp = document.getElementById('landing-page');
+        if(lp) lp.style.display = 'none';
+        const ac = document.getElementById('app-container');
+        if(ac) ac.style.display = 'block';
         applyProfileOverrides(user);
         initSessions();
         checkAndShowTutorialLock();
     } else {
-        document.getElementById('landing-page').style.display = 'flex';
-        document.getElementById('app-container').style.display = 'none';
+        const lp = document.getElementById('landing-page');
+        if(lp) lp.style.display = 'flex';
+        const ac = document.getElementById('app-container');
+        if(ac) ac.style.display = 'none';
     }
 });
 
-// Unified Email GO Button Flow
-document.getElementById('btn-auth-go').addEventListener('click', async () => {
-    const email = document.getElementById('auth-email').value;
-    const pwd = document.getElementById('auth-password').value;
-    const tcChecked = document.getElementById('auth-tc').checked;
+document.getElementById('btn-auth-go')?.addEventListener('click', async () => {
+    const email = document.getElementById('auth-email')?.value;
+    const pwd = document.getElementById('auth-password')?.value;
+    const tcChecked = document.getElementById('auth-tc')?.checked;
     
     if (!email || !pwd) return alert("Please enter both email and password.");
     
@@ -132,7 +204,7 @@ document.getElementById('btn-auth-go').addEventListener('click', async () => {
         return alert("You must agree to the Terms & Conditions to sign up.");
     }
 
-    authLoader.style.display = 'flex';
+    if(authLoader) authLoader.style.display = 'flex';
     try {
         if (authMode === 'login') {
             await signInWithEmailAndPassword(auth, email, pwd);
@@ -141,13 +213,12 @@ document.getElementById('btn-auth-go').addEventListener('click', async () => {
         }
         localStorage.setItem('horizon_auth_method', 'firebase');
     } catch (err) {
-        authLoader.style.display = 'none';
+        if(authLoader) authLoader.style.display = 'none';
         alert("Authentication Error: " + err.message);
     }
 });
 
-// Social Login
-document.getElementById('btn-login-github').addEventListener('click', async () => {
+document.getElementById('btn-login-github')?.addEventListener('click', async () => {
     const provider = new GithubAuthProvider();
     try {
         await signInWithPopup(auth, provider);
@@ -157,7 +228,7 @@ document.getElementById('btn-login-github').addEventListener('click', async () =
     }
 });
 
-document.getElementById('btn-login-google').addEventListener('click', async () => {
+document.getElementById('btn-login-google')?.addEventListener('click', async () => {
     const provider = new GoogleAuthProvider();
     try {
         await signInWithPopup(auth, provider);
@@ -167,19 +238,89 @@ document.getElementById('btn-login-google').addEventListener('click', async () =
     }
 });
 
-document.getElementById('btn-login-ghost').addEventListener('click', () => {
+document.getElementById('btn-login-ghost')?.addEventListener('click', () => {
     localStorage.setItem('horizon_auth_method', 'ghost');
-    document.getElementById('landing-page').style.opacity = '0';
+    localStorage.setItem('horizon_ghost_timestamp', Date.now().toString());
+    const lp = document.getElementById('landing-page');
+    if(lp) lp.style.opacity = '0';
     setTimeout(activateGhostMode, 500);
 });
 
-document.getElementById('btn-logout').addEventListener('click', async () => {
+document.getElementById('btn-logout')?.addEventListener('click', async () => {
     localStorage.removeItem('horizon_auth_method');
+    localStorage.removeItem('horizon_ghost_timestamp');
     if (!isGhostMode) await signOut(auth); 
     location.reload();
 });
 
-// --- SESSION & CONTEXTUAL NAMING MANAGEMENT ---
+
+// --- SESSION MANAGEMENT & WELCOME MSG ---
+function updateGreeting() {
+    const hr = new Date().getHours();
+    let greeting = hr < 12 ? "Good Morning" : hr < 18 ? "Good Afternoon" : "Good Evening";
+    const savedName = localStorage.getItem('horizon_custom_name');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'User');
+    if (isGhostMode) name = 'Ghost';
+    return `${greeting}, ${name}!`;
+}
+
+function updateIcebreakers(modelId) {
+    if(!modelId) return '';
+    const idLower = modelId.toLowerCase();
+    let options = [];
+    
+    if (idLower.includes('vision') || idLower.includes('gpt-4o') || idLower.includes('gemini') || idLower.includes('claude-3') || idLower.includes('pixtral')) {
+        options.push('<i class="ph-bold ph-image"></i> Analyze the details in an image');
+    }
+    if (idLower.includes('pro') || idLower.includes('opus') || idLower.includes('large') || idLower.includes('gpt-4')) {
+        options.push('<i class="ph-bold ph-code"></i> Write a Python script for a web scraper');
+        options.push('<i class="ph-bold ph-math-operations"></i> Solve a complex logic puzzle');
+    }
+    if (idLower.includes('free') || idLower.includes('flash') || idLower.includes('mini') || idLower.includes('haiku')) {
+        options.push('<i class="ph-bold ph-text-align-left"></i> Summarize a long article');
+        options.push('<i class="ph-bold ph-envelope-simple"></i> Draft a professional email');
+    }
+    
+    if(options.length < 2) {
+        options.push('<i class="ph-bold ph-lightbulb"></i> Give me 5 creative ideas for a blog');
+        options.push('<i class="ph-bold ph-translate"></i> Translate a sentence to Spanish');
+    }
+
+    let html = `<div class="icebreaker-container">`;
+    options.forEach(opt => {
+        html += `<button class="icebreaker-btn">${DOMPurify.sanitize(opt)}</button>`;
+    });
+    html += `</div>`;
+    return html;
+}
+
+function renderPlaceholder() {
+    const modelEl = document.getElementById('modelSelect');
+    const model = modelEl ? modelEl.value : '';
+    const greeting = DOMPurify.sanitize(updateGreeting());
+    const icebreakers = updateIcebreakers(model); // Sanitized inside fn
+    
+    return `<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;" id="placeholderMsg">
+        <i class="ph-fill ph-sparkle" style="font-size: 3.5rem; color: var(--accent); filter: drop-shadow(0 0 15px var(--accent-glow));"></i>
+        <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.6); line-height: 1.5; font-size: 1.2rem; font-weight: 600; color: var(--text-light);">${greeting}</span>
+        <span style="font-size: 0.9rem;">What's on your mind today?</span>
+        ${icebreakers}
+    </div>`;
+}
+
+// Bind Icebreakers safely
+document.getElementById('chatBox')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.icebreaker-btn');
+    if(btn) {
+        const text = btn.innerText.trim();
+        const userInput = document.getElementById('userInput');
+        if(userInput) {
+            userInput.value = text;
+            userInput.focus();
+        }
+    }
+});
+
 function initSessions() {
     if (isGhostMode) return;
     if (sessions.length === 0 || !currentSessionId) {
@@ -196,7 +337,8 @@ function createNewSession() {
     currentSessionId = Date.now().toString();
     sessions.unshift({ id: currentSessionId, title: 'New Chat', pinned: false, uiHistory: [], apiHistory: [], timestamp: Date.now() });
     
-    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 400px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 3rem; color: var(--accent);"></i><span style="line-height: 1.5;">Welcome. Configure your API key to begin.</span></div>';
+    const cb = document.getElementById('chatBox');
+    if(cb) cb.innerHTML = renderPlaceholder();
     
     const titleDisplay = document.getElementById('chatTitleDisplay');
     if (titleDisplay) titleDisplay.innerText = 'New Chat';
@@ -214,26 +356,31 @@ function loadSession(id) {
         const titleDisplay = document.getElementById('chatTitleDisplay');
         if (titleDisplay) titleDisplay.innerText = session.title || 'New Chat';
 
-        document.getElementById('chatBox').innerHTML = '';
-        if (uiHistory.length === 0) {
-            document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 400px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 3rem; color: var(--accent);"></i><span style="line-height: 1.5;">Welcome. Configure your API key to begin.</span></div>';
-        } else {
-            uiHistory.forEach(msg => renderMessageToDOM(msg.role, msg.text, msg.files, true));
-            scrollToBottom();
+        const cb = document.getElementById('chatBox');
+        if(cb) {
+            cb.innerHTML = '';
+            if (uiHistory.length === 0) {
+                cb.innerHTML = renderPlaceholder();
+            } else {
+                uiHistory.forEach(msg => renderMessageToDOM(msg.role, msg.text, msg.files, true));
+                scrollToBottom();
+            }
         }
         saveSessionData();
     }
 }
 
 async function generateChatTitle(userMessage, sessionIndex) {
-    const provider = document.getElementById('provider').value;
-    const apiKey = document.getElementById('apiKey').value;
-    const model = document.getElementById('modelSelect').value;
+    const provider = document.getElementById('provider')?.value;
+    const apiKey = document.getElementById('apiKey')?.value;
+    const model = document.getElementById('modelSelect')?.value;
 
     const fallbackTitle = userMessage.substring(0, 20) + (userMessage.length > 20 ? '...' : '');
 
     if (!apiKey || !model) {
-        updateSessionTitle(sessionIndex, fallbackTitle);
+        if (sessions[sessionIndex] && sessions[sessionIndex].id === currentSessionId) {
+            updateSessionTitle(sessionIndex, fallbackTitle);
+        }
         return;
     }
 
@@ -257,15 +404,21 @@ async function generateChatTitle(userMessage, sessionIndex) {
         }
 
         if (title.toLowerCase().startsWith('title:')) title = title.substring(6).trim();
-        updateSessionTitle(sessionIndex, title || fallbackTitle);
+        
+        // Race condition prevention: check if session is still the same ID
+        if (sessions[sessionIndex] && sessions[sessionIndex].id === currentSessionId) {
+            updateSessionTitle(sessionIndex, title || fallbackTitle);
+        }
     } catch (e) {
-        updateSessionTitle(sessionIndex, fallbackTitle);
+        if (sessions[sessionIndex] && sessions[sessionIndex].id === currentSessionId) {
+            updateSessionTitle(sessionIndex, fallbackTitle);
+        }
     }
 }
 
 function updateSessionTitle(index, title) {
     if(sessions[index]) {
-        sessions[index].title = title;
+        sessions[index].title = DOMPurify.sanitize(title);
         localStorage.setItem('horizon_sessions', JSON.stringify(sessions));
         renderSidebarSessions();
         if (sessions[index].id === currentSessionId) {
@@ -277,6 +430,12 @@ function updateSessionTitle(index, title) {
 
 function saveSessionData() {
     if (isGhostMode) return;
+    
+    // Bounds check to avoid memory bloat
+    if (sessions.length > 50) {
+        sessions.length = 50; 
+    }
+
     const sessionIndex = sessions.findIndex(s => s.id === currentSessionId);
     if (sessionIndex > -1) {
         sessions[sessionIndex].uiHistory = uiHistory;
@@ -300,41 +459,64 @@ function saveSessionData() {
     }
 }
 
-// Sidebar Context Menu
+// --- UI INTERACTIONS (SIDEBAR & SEARCH) ---
 let activeContextMenu = null;
 document.addEventListener('click', (e) => { 
-    // Safely close context menus
     if(activeContextMenu && !e.target.closest('.context-menu')) { 
         activeContextMenu.remove(); 
         activeContextMenu = null; 
     }
-    
-    // Safely handle dropdown clicks via Delegation to prevent unattached listener crashes
     const modelSelector = e.target.closest('#quickModelSelector');
     const modelDropdown = document.getElementById('quickModelDropdown');
-    if (modelSelector && !e.target.closest('.custom-option')) {
-        modelDropdown.classList.toggle('active');
+    if (modelSelector && !e.target.closest('.custom-option') && !e.target.closest('#quickModelSearchBox')) {
+        if(modelDropdown) modelDropdown.classList.toggle('active');
     } else if (!modelSelector && modelDropdown) {
         modelDropdown.classList.remove('active');
     }
 
-    // Safely handle Attachment Pin Clicks
     const pinBtn = e.target.closest('#btn-pin-actions');
     const pinWrapper = e.target.closest('.input-actions-wrapper');
     const expandedActions = document.getElementById('expanded-actions');
     const actualPinBtn = document.getElementById('btn-pin-actions');
     
     if (pinBtn) {
-        expandedActions.classList.toggle('active');
-        actualPinBtn.classList.toggle('active');
+        expandedActions?.classList.toggle('active');
+        actualPinBtn?.classList.toggle('active');
     } else if (!pinWrapper && expandedActions) {
-        expandedActions.classList.remove('active');
-        actualPinBtn.classList.remove('active');
+        expandedActions?.classList.remove('active');
+        actualPinBtn?.classList.remove('active');
     }
+});
+
+// Sidebar Chat Filter
+document.getElementById('chatSearchInput')?.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('.chat-history-item').forEach(item => {
+        const titleText = item.querySelector('.chat-title-text')?.innerText.toLowerCase() || '';
+        if(titleText.includes(term)) item.style.display = 'flex';
+        else item.style.display = 'none';
+    });
+});
+
+// Quick Model Box Filter
+document.getElementById('quickModelSearchBox')?.addEventListener('keyup', (e) => {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('#quickModelListContainer .custom-option').forEach(item => {
+        if(item.innerText.toLowerCase().includes(term)) item.style.display = 'flex';
+        else item.style.display = 'none';
+    });
+});
+
+
+// Footer Accordion Toggle
+document.getElementById('btn-toggle-footer')?.addEventListener('click', function() {
+    this.classList.toggle('open');
+    document.getElementById('sidebarFooterContent')?.classList.toggle('open');
 });
 
 function renderSidebarSessions() {
     const list = document.getElementById('sidebarChatList');
+    if(!list) return;
     list.innerHTML = '';
 
     sessions.sort((a, b) => {
@@ -346,70 +528,87 @@ function renderSidebarSessions() {
         const btn = document.createElement('div');
         btn.className = `chat-history-item ${session.id === currentSessionId ? 'active' : ''}`;
         
-        const titleSpan = document.createElement('span');
-        titleSpan.innerHTML = `${session.pinned ? '<i class="ph-fill ph-push-pin" style="color:var(--accent)"></i>' : '<i class="ph-fill ph-chat-circle-dots"></i>'} <span style="overflow:hidden; text-overflow:ellipsis;">${session.title}</span>`;
-        titleSpan.style.flex = "1"; titleSpan.style.display = "flex"; titleSpan.style.alignItems = "center"; titleSpan.style.gap = "8px"; titleSpan.style.cursor = "pointer";
-        titleSpan.addEventListener('click', () => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chat-title-wrapper';
+        const cleanTitle = DOMPurify.sanitize(session.title);
+        wrapper.innerHTML = `${session.pinned ? '<i class="ph-fill ph-push-pin" style="color:var(--accent)"></i>' : '<i class="ph-fill ph-chat-circle-dots"></i>'} <span class="chat-title-text">${cleanTitle}</span>`;
+        
+        wrapper.addEventListener('click', () => {
             if(session.id !== currentSessionId) {
                 loadSession(session.id);
                 if (window.innerWidth <= 768) toggleSidebar();
             }
         });
-        btn.appendChild(titleSpan);
+        btn.appendChild(wrapper);
 
-        if (session.id === currentSessionId) {
-            const optionsBtn = document.createElement('button');
-            optionsBtn.className = 'btn-icon chat-options-btn';
-            optionsBtn.innerHTML = '<i class="ph-bold ph-dots-three"></i>';
-            optionsBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if(activeContextMenu) activeContextMenu.remove();
-                
-                const menu = document.createElement('div');
-                menu.className = 'context-menu glass';
-                menu.style.top = `${e.clientY + 10}px`;
-                menu.style.left = `${e.clientX}px`;
+        const optionsBtn = document.createElement('button');
+        optionsBtn.className = 'btn-icon chat-options-btn';
+        optionsBtn.innerHTML = '<i class="ph-bold ph-dots-three"></i>';
+        optionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if(activeContextMenu) activeContextMenu.remove();
+            
+            const menu = document.createElement('div');
+            menu.className = 'context-menu glass';
+            menu.style.top = `${e.clientY + 10}px`;
+            menu.style.left = `${e.clientX}px`;
 
-                const renameBtn = document.createElement('button');
-                renameBtn.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Rename';
-                renameBtn.onclick = () => {
-                    const newTitle = prompt("Enter new chat name:", session.title);
-                    if (newTitle) updateSessionTitle(index, newTitle);
-                };
+            const renameBtn = document.createElement('button');
+            renameBtn.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Rename';
+            renameBtn.onclick = () => {
+                const newTitle = prompt("Enter new chat name:", session.title);
+                if (newTitle) updateSessionTitle(index, newTitle);
+            };
 
-                const pinBtn = document.createElement('button');
-                pinBtn.innerHTML = `<i class="ph-bold ph-push-pin"></i> ${session.pinned ? 'Unpin Chat' : 'Pin Chat'}`;
-                pinBtn.onclick = () => {
-                    session.pinned = !session.pinned;
+            const pinBtn = document.createElement('button');
+            pinBtn.innerHTML = `<i class="ph-bold ph-push-pin"></i> ${session.pinned ? 'Unpin' : 'Pin'}`;
+            pinBtn.onclick = () => {
+                session.pinned = !session.pinned;
+                localStorage.setItem('horizon_sessions', JSON.stringify(sessions));
+                renderSidebarSessions();
+            };
+
+            const delBtn = document.createElement('button');
+            delBtn.innerHTML = `<i class="ph-bold ph-trash" style="color:#ff4757;"></i> Delete`;
+            delBtn.onclick = () => {
+                if(confirm("Are you sure you want to delete this chat?")) {
+                    sessions.splice(index, 1);
                     localStorage.setItem('horizon_sessions', JSON.stringify(sessions));
-                    renderSidebarSessions();
-                };
+                    if (session.id === currentSessionId) {
+                        createNewSession(); 
+                    } else {
+                        renderSidebarSessions();
+                    }
+                }
+            };
 
-                menu.appendChild(renameBtn); menu.appendChild(pinBtn);
-                document.body.appendChild(menu);
-                activeContextMenu = menu;
-            });
-            btn.appendChild(optionsBtn);
-        }
+            menu.appendChild(renameBtn); menu.appendChild(pinBtn); menu.appendChild(delBtn);
+            document.body.appendChild(menu);
+            activeContextMenu = menu;
+        });
+        btn.appendChild(optionsBtn);
+        
         list.appendChild(btn);
     });
 }
 
-document.getElementById('btn-new-chat').addEventListener('click', () => {
+document.getElementById('btn-new-chat')?.addEventListener('click', () => {
     createNewSession();
     if (window.innerWidth <= 768) toggleSidebar();
 });
 
-// --- TUTORIAL & SENSORY FEEDBACK ---
+
+// --- SENSORY FEEDBACK & STATS ---
 function checkAndShowTutorialLock() {
     if (!localStorage.getItem('horizon_tutorial_done')) {
-        document.getElementById('tutorialLock').style.display = 'flex';
-        document.getElementById('btn-close-tutorial').addEventListener('click', () => {
-            document.getElementById('tutorialLock').style.display = 'none';
+        const tl = document.getElementById('tutorialLock');
+        if(tl) tl.style.display = 'flex';
+        document.getElementById('btn-close-tutorial')?.addEventListener('click', () => {
+            if(tl) tl.style.display = 'none';
             localStorage.setItem('horizon_tutorial_done', 'true');
             if (window.innerWidth <= 768) {
-                document.getElementById('mainSidebar').classList.remove('collapsed');
-                document.getElementById('mobileOverlay').classList.add('active');
+                document.getElementById('mainSidebar')?.classList.remove('collapsed');
+                document.getElementById('mobileOverlay')?.classList.add('active');
             }
         });
     }
@@ -419,14 +618,15 @@ function triggerHaptic() { if (hapticsEnabled && navigator.vibrate) navigator.vi
 function playPopSound() {
     if (!sfxEnabled) return;
     try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.1);
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.1);
     } catch(e) {}
 }
 
@@ -436,21 +636,30 @@ function applyProfileOverrides(user) {
     if (isGhostMode) return;
     const savedName = localStorage.getItem('horizon_custom_name');
     const savedPfp = localStorage.getItem('horizon_custom_pfp');
-    document.getElementById('userProfileName').innerText = savedName || (user ? user.displayName || user.email.split('@')[0] : 'Yash') || 'Yash';
-    document.getElementById('userProfileAvatar').src = savedPfp || (user ? user.photoURL : 'https://via.placeholder.com/40') || 'https://via.placeholder.com/40';
+    const displayStr = savedName || (user ? user.displayName || user.email.split('@')[0] : 'User');
+    
+    const nameEl = document.getElementById('editProfileName');
+    if(nameEl) nameEl.value = displayStr;
+    
+    const avatarEl = document.getElementById('userProfileAvatar');
+    if(avatarEl) avatarEl.src = savedPfp || (user && user.photoURL ? user.photoURL : 'https://via.placeholder.com/40');
+    
     if (user) {
-        let providerIcon = 'ph-envelope-simple'; // default to email
-        if(user.providerData[0]?.providerId === 'google.com') providerIcon = 'ph-google-logo';
-        if(user.providerData[0]?.providerId === 'github.com') providerIcon = 'ph-github-logo';
-        document.getElementById('userProfileStatus').innerHTML = `<i class="ph-fill ${providerIcon}"></i> Authenticated`;
+        let providerName = 'Email';
+        if(user.providerData[0]?.providerId === 'google.com') providerName = 'Google';
+        if(user.providerData[0]?.providerId === 'github.com') providerName = 'GitHub';
+        const statEl = document.getElementById('sysAuthStatus');
+        if(statEl) statEl.innerHTML = `<i class="ph-bold ph-check-circle" style="color:#2ecc71;"></i> Secured: ${providerName}`;
     }
 }
 
 function updateStatsUI(addedTokens = 0) {
     if (isGhostMode) return;
     statMessages += 1; statTokens += addedTokens;
-    localStorage.setItem('horizon_stat_msgs', statMessages);
-    localStorage.setItem('horizon_stat_tokens', statTokens);
+    localStorage.setItem('horizon_stat_msgs', statMessages.toString());
+    localStorage.setItem('horizon_stat_tokens', statTokens.toString());
+    const statEl = document.getElementById('sysStatTokens');
+    if(statEl) statEl.innerText = statTokens.toLocaleString();
 }
 
 // --- MARKDOWN RENDERING ---
@@ -465,27 +674,38 @@ renderer.code = function(token, legacyLang) {
         actualCode = String(token || "");
     }
     const escapedCode = actualCode.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    const encodedForDownload = btoa(unescape(encodeURIComponent(actualCode))); 
+    // Clean btoa using text encoder avoiding deprecated escape
+    const bytes = new TextEncoder().encode(actualCode);
+    const binStr = Array.from(bytes, b => String.fromCharCode(b)).join("");
+    const encodedForDownload = btoa(binStr); 
+    
     return `
     <div class="code-wrapper">
         <div class="code-header">
-            <span style="display:flex; align-items:center; gap:8px;"><i class="ph-bold ph-file-code"></i> ${lang.toUpperCase()}</span>
+            <span style="display:flex; align-items:center; gap:8px;"><i class="ph-bold ph-file-code"></i> ${DOMPurify.sanitize(lang).toUpperCase()}</span>
             <div class="code-header-actions">
-                <button class="code-action-btn btn-code-download" data-code="${encodedForDownload}" data-ext="${lang}"><i class="ph-bold ph-download-simple"></i> Save</button>
+                <button class="code-action-btn btn-code-download" data-code="${encodedForDownload}" data-ext="${DOMPurify.sanitize(lang)}"><i class="ph-bold ph-download-simple"></i> Save</button>
             </div>
         </div>
-        <pre><code class="language-${lang}">${escapedCode}</code></pre>
+        <pre><code class="language-${DOMPurify.sanitize(lang)}">${escapedCode}</code></pre>
     </div>`;
 };
 marked.use({ renderer });
 marked.setOptions({ breaks: true, gfm: true });
 
-document.getElementById('chatBox').addEventListener('click', (e) => {
+document.getElementById('chatBox')?.addEventListener('click', (e) => {
     const downloadBtn = e.target.closest('.btn-code-download');
     if (downloadBtn) {
         const base64Code = downloadBtn.getAttribute('data-code');
         const ext = downloadBtn.getAttribute('data-ext') || 'txt';
-        const decodedCode = decodeURIComponent(escape(atob(base64Code)));
+        
+        const binaryStr = atob(base64Code);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+        }
+        const decodedCode = new TextDecoder().decode(bytes);
+        
         const blob = new Blob([decodedCode], { type: "text/plain" });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -495,39 +715,37 @@ document.getElementById('chatBox').addEventListener('click', (e) => {
     }
 });
 
-// --- SETTINGS UI & MODALS ---
+
+// --- MODALS & CONFIGURATIONS ---
 const toggleSidebar = () => {
     const sidebar = document.getElementById('mainSidebar');
     const overlay = document.getElementById('mobileOverlay');
-    sidebar.classList.toggle('collapsed');
-    overlay.classList.toggle('active', !sidebar.classList.contains('collapsed'));
+    if(sidebar) sidebar.classList.toggle('collapsed');
+    if(overlay && sidebar) overlay.classList.toggle('active', !sidebar.classList.contains('collapsed'));
 };
 
-document.getElementById('btn-toggle-sidebar').addEventListener('click', toggleSidebar);
-document.getElementById('mobileOverlay').addEventListener('click', toggleSidebar); 
-if (window.innerWidth <= 768) document.getElementById('mainSidebar').classList.add('collapsed');
+document.getElementById('btn-toggle-sidebar')?.addEventListener('click', toggleSidebar);
+document.getElementById('mobileOverlay')?.addEventListener('click', toggleSidebar); 
+if (window.innerWidth <= 768) document.getElementById('mainSidebar')?.classList.add('collapsed');
 
-document.getElementById('btn-open-settings').addEventListener('click', () => {
-    document.getElementById('settingsModal').classList.add('active');
-    if (window.innerWidth <= 768) toggleSidebar(); 
+document.getElementById('btn-open-settings')?.addEventListener('click', () => {
+    document.getElementById('settingsModal')?.classList.add('active');
 });
-document.getElementById('btn-close-settings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
+document.getElementById('btn-close-settings')?.addEventListener('click', () => document.getElementById('settingsModal')?.classList.remove('active'));
 
 
 // Profile Modal
-document.getElementById('btn-user-profile').addEventListener('click', async () => {
+document.getElementById('btn-user-profile')?.addEventListener('click', async () => {
     if (isGhostMode) return alert("Profile stats are disabled in Ephemeral/Ghost Mode.");
-    document.getElementById('statMsgs').innerText = statMessages;
-    document.getElementById('statTokens').innerText = statTokens.toLocaleString();
-    document.getElementById('editProfileName').value = document.getElementById('userProfileName').innerText;
-    document.getElementById('editProfilePfp').value = document.getElementById('userProfileAvatar').src;
+    const msgsEl = document.getElementById('statMsgs');
+    if(msgsEl) msgsEl.innerText = statMessages;
     
-    const provider = document.getElementById('provider').value;
-    const apiKey = document.getElementById('apiKey').value;
+    const provider = document.getElementById('provider')?.value;
+    const apiKey = document.getElementById('apiKey')?.value;
     const creditInfoDiv = document.getElementById('apiCreditsInfo');
-    creditInfoDiv.style.display = 'none';
+    if(creditInfoDiv) creditInfoDiv.style.display = 'none';
     
-    if (provider === 'openrouter' && apiKey) {
+    if (provider === 'openrouter' && apiKey && creditInfoDiv) {
         creditInfoDiv.style.display = 'block';
         creditInfoDiv.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Fetching limits...';
         try {
@@ -544,18 +762,42 @@ document.getElementById('btn-user-profile').addEventListener('click', async () =
         } catch(e) { creditInfoDiv.innerHTML = 'Could not retrieve credits'; }
     }
 
-    document.getElementById('profileModalOverlay').classList.add('active');
-    if (window.innerWidth <= 768) toggleSidebar();
+    document.getElementById('profileModalOverlay')?.classList.add('active');
 });
 
-document.getElementById('btn-close-profile').addEventListener('click', () => document.getElementById('profileModalOverlay').classList.remove('active'));
-document.getElementById('btn-save-profile').addEventListener('click', () => {
-    const newName = document.getElementById('editProfileName').value.trim();
-    const newPfp = document.getElementById('editProfilePfp').value.trim();
+// PFP Upload Logic
+document.getElementById('btn-upload-pfp')?.addEventListener('click', () => {
+    document.getElementById('pfpFileInput')?.click();
+});
+document.getElementById('pfpFileInput')?.addEventListener('change', function() {
+    const file = this.files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const pfpInput = document.getElementById('editProfilePfp');
+            if(pfpInput) pfpInput.value = e.target.result;
+            const avatar = document.getElementById('userProfileAvatar');
+            if(avatar) avatar.src = e.target.result; // Instant preview
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
+document.getElementById('btn-close-profile')?.addEventListener('click', () => document.getElementById('profileModalOverlay')?.classList.remove('active'));
+document.getElementById('btn-save-profile')?.addEventListener('click', () => {
+    const nameEl = document.getElementById('editProfileName');
+    const pfpEl = document.getElementById('editProfilePfp');
+    const newName = nameEl ? nameEl.value.trim() : '';
+    const newPfp = pfpEl ? pfpEl.value.trim() : '';
+    
     if (newName) localStorage.setItem('horizon_custom_name', newName);
     if (newPfp) localStorage.setItem('horizon_custom_pfp', newPfp);
     applyProfileOverrides(auth.currentUser);
-    document.getElementById('profileModalOverlay').classList.remove('active');
+    document.getElementById('profileModalOverlay')?.classList.remove('active');
+    
+    const cb = document.getElementById('chatBox');
+    if(uiHistory.length === 0 && cb) cb.innerHTML = renderPlaceholder();
 });
 
 function hexToRgb(hex) {
@@ -566,10 +808,12 @@ const updateAccentColor = (hex) => {
     document.documentElement.style.setProperty('--accent', hex);
     document.documentElement.style.setProperty('--accent-dark', hex + 'cc'); 
     document.documentElement.style.setProperty('--accent-alpha', `rgba(${hexToRgb(hex)}, 0.4)`);
+    document.documentElement.style.setProperty('--accent-glow', `rgba(${hexToRgb(hex)}, 0.6)`);
 };
 
 const updateApiLinkUI = (providerName) => {
     const linkEl = document.getElementById('apiKeyLink');
+    if(!linkEl) return;
     if (providerName === 'openrouter') { linkEl.href = "https://openrouter.ai/keys"; linkEl.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key'; }
     else if (providerName === 'aistudio') { linkEl.href = "https://aistudio.google.com/app/apikey"; linkEl.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> Get Google AI Key'; }
     else if (providerName === 'portkey') { linkEl.href = "https://app.portkey.ai/api-keys"; linkEl.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> Get Portkey Key'; }
@@ -577,14 +821,18 @@ const updateApiLinkUI = (providerName) => {
 
 const initSettings = () => {
     const savedProvider = localStorage.getItem('horizon_provider') || 'openrouter';
-    document.getElementById('provider').value = savedProvider;
+    const providerEl = document.getElementById('provider');
+    if(providerEl) providerEl.value = savedProvider;
     updateApiLinkUI(savedProvider);
     
-    document.getElementById('apiKey').value = localStorage.getItem('horizon_key') || '';
-    document.getElementById('systemPrompt').value = localStorage.getItem('horizon_prompt') || '';
+    const apiEl = document.getElementById('apiKey');
+    const promptEl = document.getElementById('systemPrompt');
+    if(apiEl) apiEl.value = localStorage.getItem('horizon_key') || '';
+    if(promptEl) promptEl.value = localStorage.getItem('horizon_prompt') || '';
     
     const savedColor = localStorage.getItem('horizon_color') || '#5865F2';
-    document.getElementById('accentColorPicker').value = savedColor;
+    const colorEl = document.getElementById('accentColorPicker');
+    if(colorEl) colorEl.value = savedColor;
     updateAccentColor(savedColor);
 
     sfxEnabled = localStorage.getItem('horizon_sfx') !== 'false';
@@ -592,70 +840,181 @@ const initSettings = () => {
     voiceResponseEnabled = localStorage.getItem('horizon_voice') === 'true';
     currentTone = localStorage.getItem('horizon_tone') || 'standard';
 
-    document.getElementById('sfxToggle').checked = sfxEnabled;
-    document.getElementById('hapticsToggle').checked = hapticsEnabled;
-    document.getElementById('voiceToggle').checked = voiceResponseEnabled;
-    document.getElementById('chatTone').value = currentTone;
+    const sfxT = document.getElementById('sfxToggle');
+    const hapticsT = document.getElementById('hapticsToggle');
+    const voiceT = document.getElementById('voiceToggle');
+    const toneT = document.getElementById('chatTone');
+    
+    if(sfxT) sfxT.checked = sfxEnabled;
+    if(hapticsT) hapticsT.checked = hapticsEnabled;
+    if(voiceT) voiceT.checked = voiceResponseEnabled;
+    if(toneT) toneT.value = currentTone;
 
     const savedModel = localStorage.getItem('horizon_model');
     if (savedModel) {
-        document.getElementById('modelSelect').value = savedModel;
+        const sel = document.getElementById('modelSelect');
+        if(sel) sel.value = savedModel;
         const shortName = savedModel.split('/').pop();
-        document.getElementById('modelSelectTrigger').innerHTML = `<span>${shortName}</span> <i class="ph-bold ph-caret-down"></i>`;
-        document.getElementById('quickModelLabel').innerText = shortName;
+        const trig = document.getElementById('modelSelectTrigger');
+        if(trig) trig.innerHTML = `<span>${DOMPurify.sanitize(shortName)}</span> <i class="ph-bold ph-caret-down"></i>`;
+        const qlbl = document.getElementById('quickModelLabel');
+        if(qlbl) qlbl.innerText = shortName;
     }
 
-    // SILENT AUTO-FETCH BACKGROUND MODELS LIST ON LOAD
-    if (document.getElementById('apiKey').value) {
+    if (apiEl && apiEl.value) {
         fetchAvailableModels(true);
     }
 };
 initSettings();
 
 const syncSettings = () => {
-    localStorage.setItem('horizon_provider', document.getElementById('provider').value);
-    localStorage.setItem('horizon_key', document.getElementById('apiKey').value);
-    localStorage.setItem('horizon_model', document.getElementById('modelSelect').value);
-    localStorage.setItem('horizon_prompt', document.getElementById('systemPrompt').value);
-    localStorage.setItem('horizon_color', document.getElementById('accentColorPicker').value);
-    localStorage.setItem('horizon_sfx', document.getElementById('sfxToggle').checked);
-    localStorage.setItem('horizon_haptics', document.getElementById('hapticsToggle').checked);
-    localStorage.setItem('horizon_voice', document.getElementById('voiceToggle').checked);
-    localStorage.setItem('horizon_tone', document.getElementById('chatTone').value);
+    const providerVal = document.getElementById('provider')?.value || 'openrouter';
+    const apiVal = document.getElementById('apiKey')?.value || '';
+    const modelVal = document.getElementById('modelSelect')?.value || '';
+    const promptVal = document.getElementById('systemPrompt')?.value || '';
+    const colorVal = document.getElementById('accentColorPicker')?.value || '#5865F2';
+    
+    sfxEnabled = document.getElementById('sfxToggle')?.checked ?? true;
+    hapticsEnabled = document.getElementById('hapticsToggle')?.checked ?? true;
+    voiceResponseEnabled = document.getElementById('voiceToggle')?.checked ?? false;
+    currentTone = document.getElementById('chatTone')?.value || 'standard';
 
-    sfxEnabled = document.getElementById('sfxToggle').checked;
-    hapticsEnabled = document.getElementById('hapticsToggle').checked;
-    voiceResponseEnabled = document.getElementById('voiceToggle').checked;
-    currentTone = document.getElementById('chatTone').value;
+    localStorage.setItem('horizon_provider', providerVal);
+    localStorage.setItem('horizon_key', apiVal);
+    localStorage.setItem('horizon_model', modelVal);
+    localStorage.setItem('horizon_prompt', promptVal);
+    localStorage.setItem('horizon_color', colorVal);
+    localStorage.setItem('horizon_sfx', sfxEnabled);
+    localStorage.setItem('horizon_haptics', hapticsEnabled);
+    localStorage.setItem('horizon_voice', voiceResponseEnabled);
+    localStorage.setItem('horizon_tone', currentTone);
+    
+    const cb = document.getElementById('chatBox');
+    if(uiHistory.length === 0 && cb) cb.innerHTML = renderPlaceholder();
 };
 
-document.getElementById('accentColorPicker').addEventListener('input', (e) => { updateAccentColor(e.target.value); syncSettings(); });
-document.getElementById('sfxToggle').addEventListener('change', syncSettings);
-document.getElementById('hapticsToggle').addEventListener('change', syncSettings);
-document.getElementById('voiceToggle').addEventListener('change', syncSettings);
-document.getElementById('chatTone').addEventListener('change', syncSettings);
-document.getElementById('systemPrompt').addEventListener('change', syncSettings);
-document.getElementById('apiKey').addEventListener('change', syncSettings);
-document.getElementById('provider').addEventListener('change', (e) => {
-    document.getElementById('modelSelectTrigger').innerHTML = `<span>Fetch models first...</span> <i class="ph-bold ph-caret-down"></i>`;
-    document.getElementById('modelSelect').value = '';
+document.getElementById('accentColorPicker')?.addEventListener('input', (e) => { updateAccentColor(e.target.value); syncSettings(); });
+document.getElementById('sfxToggle')?.addEventListener('change', syncSettings);
+document.getElementById('hapticsToggle')?.addEventListener('change', syncSettings);
+document.getElementById('voiceToggle')?.addEventListener('change', syncSettings);
+document.getElementById('chatTone')?.addEventListener('change', syncSettings);
+document.getElementById('systemPrompt')?.addEventListener('change', syncSettings);
+document.getElementById('apiKey')?.addEventListener('change', syncSettings);
+document.getElementById('provider')?.addEventListener('change', (e) => {
+    const trig = document.getElementById('modelSelectTrigger');
+    if(trig) trig.innerHTML = `<span>Fetch models first...</span> <i class="ph-bold ph-caret-down"></i>`;
+    const sel = document.getElementById('modelSelect');
+    if(sel) sel.value = '';
     updateApiLinkUI(e.target.value);
-    if (e.target.value === 'portkey' && !document.getElementById('apiKey').value) {
-        document.getElementById('apiKey').value = 'ubeOLvhr1xSsIl3KsVj6XMeEgKmi';
+    
+    const apiK = document.getElementById('apiKey');
+    if (e.target.value === 'portkey' && apiK && !apiK.value) {
+        apiK.value = 'ubeOLvhr1xSsIl3KsVj6XMeEgKmi';
     }
     syncSettings();
 });
 
-document.getElementById('modelSelectTrigger').addEventListener('click', () => document.getElementById('modelSelectOptions').classList.toggle('open'));
-document.getElementById('modelSearchBox').addEventListener('keyup', (e) => {
+document.getElementById('modelSelectTrigger')?.addEventListener('click', () => document.getElementById('modelSelectOptions')?.classList.toggle('open'));
+document.getElementById('modelSearchBox')?.addEventListener('keyup', (e) => {
     const query = e.target.value.toLowerCase();
-    document.querySelectorAll('.custom-option').forEach(opt => opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'flex' : 'none');
+    document.querySelectorAll('#modelListContainer .custom-option').forEach(opt => {
+        opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+    });
 });
 
-// --- MODEL FETCHING & RENDER ---
+// --- MODEL COMPARE LOGIC ---
+document.getElementById('btn-compare-models')?.addEventListener('click', () => {
+    if(window.allParsedModels.length === 0) return alert('Please fetch models first in Configurations.');
+    const selA = document.getElementById('compareSelectA');
+    const selB = document.getElementById('compareSelectB');
+    if(!selA || !selB) return;
+    
+    selA.innerHTML = '<option value="">Select Model A</option>';
+    selB.innerHTML = '<option value="">Select Model B</option>';
+    
+    window.allParsedModels.forEach(m => {
+        const safeId = DOMPurify.sanitize(m.id);
+        const safeName = DOMPurify.sanitize(m.name);
+        selA.innerHTML += `<option value="${safeId}">${safeName}</option>`;
+        selB.innerHTML += `<option value="${safeId}">${safeName}</option>`;
+    });
+
+    const resArea = document.getElementById('compareResultsArea');
+    if(resArea) resArea.style.display = 'none';
+    
+    document.getElementById('compareModalOverlay')?.classList.add('active');
+    if (window.innerWidth <= 768) toggleSidebar(); 
+});
+
+document.getElementById('btn-close-compare')?.addEventListener('click', () => {
+    document.getElementById('compareModalOverlay')?.classList.remove('active');
+});
+
+document.getElementById('btn-run-compare')?.addEventListener('click', () => {
+    const valA = document.getElementById('compareSelectA')?.value;
+    const valB = document.getElementById('compareSelectB')?.value;
+    
+    if(!valA || !valB) return alert("Select two models to compare.");
+    
+    const modelA = window.allParsedModels.find(m => m.id === valA);
+    const modelB = window.allParsedModels.find(m => m.id === valB);
+    
+    if(!modelA || !modelB) return;
+    
+    const checkVision = m => /(vision|gemini|gpt-4o|claude-3|pixtral|llava)/i.test(m.id);
+    const checkAudio = m => /(audio|gemini-1\.5|gpt-4o)/i.test(m.id);
+    const checkPro = m => /(pro|opus|gpt-4|sonnet|70b|large|max)/i.test(m.id);
+    const checkFree = m => /(free|flash|haiku|8b|mini)/i.test(m.id);
+    
+    const getCutoff = id => {
+        if(/(gpt-4o|claude-3-5)/i.test(id)) return "April 2024+";
+        if(/(llama-3)/i.test(id)) return "March 2024";
+        if(/(gemini-1\.5)/i.test(id)) return "Early 2024";
+        if(/(gpt-4|claude-3)/i.test(id)) return "Late 2023";
+        return "Standard / Unknown";
+    };
+
+    const renderCol = (m) => `
+        <div style="font-weight:700; color:var(--accent); font-size: 1rem; border-bottom:1px solid var(--border); padding-bottom:8px;">${DOMPurify.sanitize(m.name)}</div>
+        <div class="compare-detail"><b>Cost Tier:</b> ${checkFree(m) ? '<span style="color:#2ecc71;">Free/Low</span>' : (checkPro(m) ? '<span style="color:#e74c3c;">Premium</span>' : 'Standard')}</div>
+        <div class="compare-detail"><b>Knowledge:</b> ${getCutoff(m.id)}</div>
+        <div class="compare-detail"><b>Reasoning:</b> ${checkPro(m) ? 'Advanced (Slow)' : 'Standard (Fast)'}</div>
+        <div class="compare-detail"><b>Vision support:</b> ${checkVision(m) ? '✅ Yes' : '❌ No'}</div>
+        <div class="compare-detail"><b>Audio support:</b> ${checkAudio(m) ? '✅ Yes' : '❌ No'}</div>
+    `;
+
+    const colA = document.getElementById('compareColA');
+    const colB = document.getElementById('compareColB');
+    if(colA) colA.innerHTML = renderCol(modelA);
+    if(colB) colB.innerHTML = renderCol(modelB);
+    
+    let verdict = "";
+    if (valA === valB) {
+        verdict = "These are the exact same models! 🤦‍♂️";
+    } else {
+        const scoreA = (checkPro(modelA)?2:0) + (checkVision(modelA)?1:0) + (checkAudio(modelA)?1:0);
+        const scoreB = (checkPro(modelB)?2:0) + (checkVision(modelB)?1:0) + (checkAudio(modelB)?1:0);
+        
+        if(scoreA > scoreB) verdict = `🏆 <b>${DOMPurify.sanitize(modelA.name)}</b> is more capable generally. Use it for complex tasks.`;
+        else if(scoreB > scoreA) verdict = `🏆 <b>${DOMPurify.sanitize(modelB.name)}</b> is more capable generally. Use it for complex tasks.`;
+        else verdict = "⚖️ It's a tie! Both have similar capability levels. Choose based on cost or context window.";
+
+        if(checkFree(modelA) && !checkFree(modelB)) verdict += `<br>💡 <b>Tip:</b> ${DOMPurify.sanitize(modelA.name)} is cheaper/faster for simple tasks.`;
+        else if(!checkFree(modelA) && checkFree(modelB)) verdict += `<br>💡 <b>Tip:</b> ${DOMPurify.sanitize(modelB.name)} is cheaper/faster for simple tasks.`;
+    }
+
+    const cVerdict = document.getElementById('compareVerdict');
+    if(cVerdict) cVerdict.innerHTML = DOMPurify.sanitize(verdict);
+    const resArea = document.getElementById('compareResultsArea');
+    if(resArea) resArea.style.display = 'block';
+});
+
+
+// --- MODEL FETCHING ---
 window.promptModelSelection = (id, name) => {
     window.pendingModelSelection = { id, name };
-    document.getElementById('capModelName').innerText = name;
+    const capEl = document.getElementById('capModelName');
+    if(capEl) capEl.innerText = name;
     
     const idLower = id.toLowerCase();
     let capsHTML = `<div><i class="ph-bold ph-text-t"></i> General Text & Code Generation</div>`;
@@ -676,26 +1035,30 @@ window.promptModelSelection = (id, name) => {
     else if(idLower.includes('pro') || idLower.includes('opus') || idLower.includes('large') || idLower.includes('gpt-4')) cost = "Premium";
     capsHTML += `<div><i class="ph-bold ph-coins"></i> Cost Tier: <b>${cost}</b></div>`;
     
-    document.getElementById('capList').innerHTML = capsHTML;
-    document.getElementById('capabilitiesModalOverlay').classList.add('active');
+    const capList = document.getElementById('capList');
+    if(capList) capList.innerHTML = capsHTML;
+    document.getElementById('capabilitiesModalOverlay')?.classList.add('active');
 };
 
-document.getElementById('btn-cancel-model').addEventListener('click', () => { document.getElementById('capabilitiesModalOverlay').classList.remove('active'); window.pendingModelSelection = null; });
-document.getElementById('btn-confirm-model').addEventListener('click', () => {
+document.getElementById('btn-cancel-model')?.addEventListener('click', () => { document.getElementById('capabilitiesModalOverlay')?.classList.remove('active'); window.pendingModelSelection = null; });
+document.getElementById('btn-confirm-model')?.addEventListener('click', () => {
     if (window.pendingModelSelection) {
-        document.getElementById('modelSelect').value = window.pendingModelSelection.id;
-        document.getElementById('modelSelectTrigger').innerHTML = `<span>${window.pendingModelSelection.name}</span> <i class="ph-bold ph-caret-down"></i>`;
-        document.getElementById('quickModelLabel').innerText = window.pendingModelSelection.name;
+        const ms = document.getElementById('modelSelect');
+        if(ms) ms.value = window.pendingModelSelection.id;
+        const trig = document.getElementById('modelSelectTrigger');
+        if(trig) trig.innerHTML = `<span>${DOMPurify.sanitize(window.pendingModelSelection.name)}</span> <i class="ph-bold ph-caret-down"></i>`;
+        const ql = document.getElementById('quickModelLabel');
+        if(ql) ql.innerText = window.pendingModelSelection.name;
         syncSettings();
     }
-    document.getElementById('capabilitiesModalOverlay').classList.remove('active');
-    document.getElementById('modelSelectOptions').classList.remove('open');
-    document.getElementById('quickModelDropdown').classList.remove('active');
+    document.getElementById('capabilitiesModalOverlay')?.classList.remove('active');
+    document.getElementById('modelSelectOptions')?.classList.remove('open');
+    document.getElementById('quickModelDropdown')?.classList.remove('active');
 });
 
 async function fetchAvailableModels(isSilent = false) {
-    const provider = document.getElementById('provider').value;
-    const apiKey = document.getElementById('apiKey').value;
+    const provider = document.getElementById('provider')?.value;
+    const apiKey = document.getElementById('apiKey')?.value;
     const trigger = document.getElementById('modelSelectTrigger');
     const chatRefreshBtn = document.getElementById('btn-refresh-models-chat');
 
@@ -704,7 +1067,7 @@ async function fetchAvailableModels(isSilent = false) {
         return;
     }
     
-    if (!isSilent) trigger.innerHTML = `<span><i class="ph-bold ph-spinner ph-spin"></i> Loading...</span>`;
+    if (!isSilent && trigger) trigger.innerHTML = `<span><i class="ph-bold ph-spinner ph-spin"></i> Loading...</span>`;
     if (chatRefreshBtn) chatRefreshBtn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i>`;
 
     try {
@@ -721,19 +1084,21 @@ async function fetchAvailableModels(isSilent = false) {
         }
         renderModelsList(modelsArray, provider);
     } catch (error) { 
-        if (!isSilent) { trigger.innerHTML = `<span>Error</span>`; alert(error.message); }
+        if (!isSilent && trigger) { trigger.innerHTML = `<span>Error</span>`; alert(error.message); }
     } finally {
         if (chatRefreshBtn) chatRefreshBtn.innerHTML = `<i class="ph-bold ph-arrows-clockwise"></i>`;
     }
 }
 
-document.getElementById('btn-fetch-models').addEventListener('click', () => fetchAvailableModels(false));
-document.getElementById('btn-refresh-models-chat').addEventListener('click', () => fetchAvailableModels(false));
+document.getElementById('btn-fetch-models')?.addEventListener('click', () => fetchAvailableModels(false));
+document.getElementById('btn-refresh-models-chat')?.addEventListener('click', () => fetchAvailableModels(false));
 
 function renderModelsList(modelsArray, provider) {
     const containerSettings = document.getElementById('modelListContainer');
-    const containerQuick = document.getElementById('quickModelDropdown');
-    containerSettings.innerHTML = ''; containerQuick.innerHTML = '';
+    const containerQuick = document.getElementById('quickModelListContainer');
+    if(containerSettings) containerSettings.innerHTML = ''; 
+    if(containerQuick) containerQuick.innerHTML = '';
+    window.allParsedModels = [];
 
     let grouped = {};
     modelsArray.forEach(m => {
@@ -753,7 +1118,6 @@ function renderModelsList(modelsArray, provider) {
             tagHtml = `<span class="badge-pro"><i class="ph-bold ph-brain"></i> PRO</span>`; sortWeight = 2; 
         }
 
-        // Add Capability Badges
         let capabilityBadges = `<div style="display:flex; gap: 4px; margin-left: auto;">`;
         if (lowerId.includes('vision') || lowerId.includes('gemini') || lowerId.includes('gpt-4o') || lowerId.includes('claude-3') || lowerId.includes('pixtral') || lowerId.includes('llava')) {
             capabilityBadges += `<span class="capability-badge" title="Image Processing" style="color: #4cd137;"><i class="ph-bold ph-image"></i></span>`;
@@ -764,37 +1128,41 @@ function renderModelsList(modelsArray, provider) {
         capabilityBadges += `</div>`;
 
         grouped[brand].push({ id: m, name: idName, tag: tagHtml, capabilities: capabilityBadges, weight: sortWeight });
+        window.allParsedModels.push({ id: m, name: idName }); 
     });
 
     for (const [brand, models] of Object.entries(grouped)) {
-        const lbl1 = document.createElement('div'); lbl1.className = 'optgroup-label'; lbl1.innerHTML = `<i class="ph-fill ph-buildings"></i> ${brand}`;
-        const lbl2 = document.createElement('div'); lbl2.className = 'optgroup-label'; lbl2.innerHTML = `<i class="ph-fill ph-buildings"></i> ${brand}`;
-        containerSettings.appendChild(lbl1); containerQuick.appendChild(lbl2);
+        const lbl1 = document.createElement('div'); lbl1.className = 'optgroup-label'; lbl1.innerHTML = `<i class="ph-fill ph-buildings"></i> ${DOMPurify.sanitize(brand)}`;
+        const lbl2 = document.createElement('div'); lbl2.className = 'optgroup-label'; lbl2.innerHTML = `<i class="ph-fill ph-buildings"></i> ${DOMPurify.sanitize(brand)}`;
+        if(containerSettings) containerSettings.appendChild(lbl1); 
+        if(containerQuick) containerQuick.appendChild(lbl2);
         models.sort((a, b) => a.weight - b.weight);
 
         models.forEach(model => {
             const buildOption = () => {
                 const opt = document.createElement('div'); opt.className = 'custom-option';
-                opt.innerHTML = `<span>${model.name}</span> ${model.capabilities} ${model.tag}`;
+                opt.innerHTML = `<span>${DOMPurify.sanitize(model.name)}</span> ${model.capabilities} ${model.tag}`;
                 opt.addEventListener('click', (e) => { e.stopPropagation(); window.promptModelSelection(model.id, model.name); });
                 return opt;
             };
-            containerSettings.appendChild(buildOption()); containerQuick.appendChild(buildOption());
+            if(containerSettings) containerSettings.appendChild(buildOption()); 
+            if(containerQuick) containerQuick.appendChild(buildOption());
         });
     }
     
-    const savedModel = document.getElementById('modelSelect').value;
-    if (savedModel) {
+    const savedModel = document.getElementById('modelSelect')?.value;
+    const trig = document.getElementById('modelSelectTrigger');
+    if (savedModel && trig) {
         const shortName = savedModel.split('/').pop();
-        document.getElementById('modelSelectTrigger').innerHTML = `<span>${shortName}</span> <i class="ph-bold ph-caret-down"></i>`;
-    } else {
-        document.getElementById('modelSelectTrigger').innerHTML = `<span>Select a model...</span> <i class="ph-bold ph-caret-down"></i>`;
+        trig.innerHTML = `<span>${DOMPurify.sanitize(shortName)}</span> <i class="ph-bold ph-caret-down"></i>`;
+    } else if (trig) {
+        trig.innerHTML = `<span>Select a model...</span> <i class="ph-bold ph-caret-down"></i>`;
     }
 }
 
-// --- ATTACHMENTS ---
-document.getElementById('btn-trigger-file').addEventListener('click', () => { document.getElementById('fileAttach').click(); document.getElementById('expanded-actions').classList.remove('active');});
-document.getElementById('btn-trigger-camera').addEventListener('click', () => { document.getElementById('cameraAttach').click(); document.getElementById('expanded-actions').classList.remove('active');});
+// --- ATTACHMENTS & VOICE ---
+document.getElementById('btn-trigger-file')?.addEventListener('click', () => { document.getElementById('fileAttach')?.click(); document.getElementById('expanded-actions')?.classList.remove('active');});
+document.getElementById('btn-trigger-camera')?.addEventListener('click', () => { document.getElementById('cameraAttach')?.click(); document.getElementById('expanded-actions')?.classList.remove('active');});
 const processFiles = (event) => {
     const files = event.target.files; if (!files) return;
     Array.from(files).forEach(file => {
@@ -805,22 +1173,26 @@ const processFiles = (event) => {
         }; reader.readAsDataURL(file);
     }); event.target.value = '';
 };
-document.getElementById('fileAttach').addEventListener('change', processFiles);
-document.getElementById('cameraAttach').addEventListener('change', processFiles);
+document.getElementById('fileAttach')?.addEventListener('change', processFiles);
+document.getElementById('cameraAttach')?.addEventListener('change', processFiles);
 
 function updateStagingArea() {
-    const container = document.getElementById('imagePreviewContainer'); container.innerHTML = '';
+    const container = document.getElementById('imagePreviewContainer'); 
+    if(!container) return;
+    container.innerHTML = '';
     attachedFilesData.forEach((fileObj, index) => {
         const div = document.createElement('div'); div.className = 'preview-item';
-        if (fileObj.isImage) div.innerHTML = `<img src="${fileObj.base64}">`;
-        else div.innerHTML = `<i class="ph-fill ph-file-text"></i><span>${fileObj.name.substring(0,5)}..</span>`;
+        if (fileObj.isImage) {
+            const img = document.createElement('img'); img.src = fileObj.base64; div.appendChild(img);
+        } else {
+            div.innerHTML = `<i class="ph-fill ph-file-text"></i><span>${DOMPurify.sanitize(fileObj.name.substring(0,5))}..</span>`;
+        }
         const btn = document.createElement('button'); btn.innerHTML = `<i class="ph-bold ph-x"></i>`;
         btn.addEventListener('click', () => { attachedFilesData.splice(index, 1); updateStagingArea(); });
         div.appendChild(btn); container.appendChild(div);
     });
 }
 
-// --- VOICE MODAL STT ---
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
     const recognition = new SpeechRecognition();
@@ -835,14 +1207,14 @@ if (SpeechRecognition) {
 
     recognition.onstart = () => { 
         isRecording = true; 
-        micBtn.classList.add('active'); 
-        voiceModal.classList.add('active');
-        voiceInterim.innerText = "Speak now...";
+        if(micBtn) micBtn.classList.add('active'); 
+        if(voiceModal) voiceModal.classList.add('active');
+        if(voiceInterim) voiceInterim.innerText = "Speak now...";
     };
     recognition.onend = () => { 
         isRecording = false; 
-        micBtn.classList.remove('active'); 
-        voiceModal.classList.remove('active');
+        if(micBtn) micBtn.classList.remove('active'); 
+        if(voiceModal) voiceModal.classList.remove('active');
     };
     
     recognition.onresult = (event) => {
@@ -854,24 +1226,25 @@ if (SpeechRecognition) {
             else interimTranscript += event.results[i][0].transcript;
         }
         
-        if(interimTranscript) {
+        if(interimTranscript && voiceInterim) {
             voiceInterim.innerText = interimTranscript;
         }
         if (finalTranscript) {
             const input = document.getElementById('userInput');
-            input.value += (input.value ? ' ' : '') + finalTranscript;
+            if(input) input.value += (input.value ? ' ' : '') + finalTranscript;
         }
     };
 
-    micBtn.addEventListener('click', () => { isRecording ? recognition.stop() : recognition.start(); });
-    btnStopVoice.addEventListener('click', () => { recognition.stop(); });
+    micBtn?.addEventListener('click', () => { isRecording ? recognition.stop() : recognition.start(); });
+    btnStopVoice?.addEventListener('click', () => { recognition.stop(); });
 } else {
-    document.getElementById('btn-trigger-mic').style.display = 'none';
+    const micBtn = document.getElementById('btn-trigger-mic');
+    if(micBtn) micBtn.style.display = 'none';
 }
 
-// --- CHAT LOGIC WITH LONG-TERM MEMORY & TTS ---
-document.getElementById('userInput').addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); triggerSend(); }});
-document.getElementById('btn-send').addEventListener('click', () => {
+// --- CHAT LOGIC ---
+document.getElementById('userInput')?.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); triggerSend(); }});
+document.getElementById('btn-send')?.addEventListener('click', () => {
     try {
         triggerSend();
     } catch(e) {
@@ -880,11 +1253,15 @@ document.getElementById('btn-send').addEventListener('click', () => {
     }
 });
 
-const scrollToBottom = () => requestAnimationFrame(() => document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight);
+const scrollToBottom = () => requestAnimationFrame(() => {
+    const box = document.getElementById('chatBox');
+    if(box) box.scrollTop = box.scrollHeight;
+});
 
 function showTypingIndicator(showSkeleton = false) {
     document.getElementById('placeholderMsg')?.remove();
     const box = document.getElementById('chatBox');
+    if(!box) return;
     const msgDiv = document.createElement('div'); msgDiv.className = `message ai`; msgDiv.id = `typingIndicatorActive`;
     
     if (showSkeleton) {
@@ -907,24 +1284,27 @@ function removeTypingIndicator() { const ind = document.getElementById('typingIn
 
 function createMessageShell(role) {
     const box = document.getElementById('chatBox');
+    if(!box) return null;
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${role}`;
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'Yash');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'User');
     if (isGhostMode) name = 'Ghost';
     
-    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${name} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
+    const safeName = DOMPurify.sanitize(name);
+    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${safeName} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
     box.appendChild(msgDiv);
     return msgDiv;
 }
 
 async function triggerSend() {
     const inputEl = document.getElementById('userInput');
+    if(!inputEl) return;
     const text = inputEl.value.trim();
-    const provider = document.getElementById('provider').value;
-    const apiKey = document.getElementById('apiKey').value;
-    const model = document.getElementById('modelSelect').value;
-    let systemPrompt = document.getElementById('systemPrompt').value.trim();
+    const provider = document.getElementById('provider')?.value;
+    const apiKey = document.getElementById('apiKey')?.value;
+    const model = document.getElementById('modelSelect')?.value;
+    let systemPrompt = document.getElementById('systemPrompt')?.value.trim() || '';
     const sendBtn = document.getElementById('btn-send');
 
     if ((!text && attachedFilesData.length === 0) || !apiKey || !model) return alert("Missing input or config.");
@@ -932,15 +1312,16 @@ async function triggerSend() {
 
     const filesToLog = [...attachedFilesData];
     
-    // Render User message immediately
     const userMsgDiv = createMessageShell('user');
-    const userContent = userMsgDiv.querySelector('.message-content');
-    userContent.innerText = text;
-    filesToLog.forEach(f => {
-        if(f.isImage) { const img = document.createElement('img'); img.src = f.base64; img.className = 'message-image'; userContent.appendChild(img); } 
-        else { const fileDiv = document.createElement('div'); fileDiv.className = 'message-file'; fileDiv.innerHTML = `<i class="ph-fill ph-file-text" style="font-size:1.5rem"></i> <span>${f.name}</span>`; userContent.appendChild(fileDiv); }
-    });
-    scrollToBottom();
+    if(userMsgDiv) {
+        const userContent = userMsgDiv.querySelector('.message-content');
+        userContent.innerText = text; // innerText avoids XSS automatically
+        filesToLog.forEach(f => {
+            if(f.isImage) { const img = document.createElement('img'); img.src = f.base64; img.className = 'message-image'; userContent.appendChild(img); } 
+            else { const fileDiv = document.createElement('div'); fileDiv.className = 'message-file'; fileDiv.innerHTML = `<i class="ph-fill ph-file-text" style="font-size:1.5rem"></i> <span>${DOMPurify.sanitize(f.name)}</span>`; userContent.appendChild(fileDiv); }
+        });
+        scrollToBottom();
+    }
     uiHistory.push({ role: 'user', text: text, files: filesToLog });
     
     let payloadContent = text;
@@ -952,11 +1333,11 @@ async function triggerSend() {
     const currentReq = [...chatHistory, { role: 'user', content: payloadContent, files: filesToLog }];
     if(!isGhostMode) { chatHistory.push({ role: 'user', content: payloadContent, files: filesToLog }); saveSessionData(); }
 
-    inputEl.value = ''; attachedFilesData = []; updateStagingArea(); sendBtn.disabled = true;
+    inputEl.value = ''; attachedFilesData = []; updateStagingArea(); 
+    if(sendBtn) sendBtn.disabled = true;
     
     if(window.speechSynthesis) window.speechSynthesis.cancel();
     
-    // Check if prompt requires a skeleton loader based on intent
     const isResourceGenIntent = /(generate|create|make|draw|paint).*image|(generate|create|make).*video|(write|build|code|script).*code/i.test(text);
     showTypingIndicator(isResourceGenIntent);
 
@@ -1014,12 +1395,11 @@ async function triggerSend() {
 
         removeTypingIndicator(); playPopSound();
         
-        // --- Stream-like execution improvement to avoid markdown stuttering ---
         const aiMsgShell = createMessageShell('ai');
+        if(!aiMsgShell) return;
         const contentNode = aiMsgShell.querySelector('.message-content');
         
-        // Update chunking logic to stream plain text strings then render markdown at intervals to prevent layout thrashing
-        const chunkSize = Math.ceil(aiResponse.length / 40); // 40 steps 
+        const chunkSize = Math.ceil(aiResponse.length / 40); 
         let currentStreamedText = "";
         let step = 0;
         
@@ -1032,7 +1412,7 @@ async function triggerSend() {
                 scrollToBottom();
                 setTimeout(streamNextChunk, 15); 
             } else {
-                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(aiResponse)); // Final pass
+                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(aiResponse)); 
                 if (voiceResponseEnabled && window.speechSynthesis) {
                     const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
                     const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
@@ -1047,36 +1427,39 @@ async function triggerSend() {
                     chatHistory.push({ role: 'assistant', content: aiResponse }); 
                     saveSessionData(); 
                 }
-                sendBtn.disabled = false;
+                if(sendBtn) sendBtn.disabled = false;
             }
         }
         
-        // Start streaming
         streamNextChunk();
 
     } catch (err) {
         console.error(err); removeTypingIndicator();
         
         const errorShell = createMessageShell('ai');
-        errorShell.querySelector('.message-content').innerText = `⚠️ Error: ${err.message}`;
+        if(errorShell) {
+            const errContent = errorShell.querySelector('.message-content');
+            errContent.innerText = `⚠️ Error: ${err.message}`; // safe assignment
+        }
         
         if(!isGhostMode) { chatHistory.pop(); uiHistory.pop(); saveSessionData(); }
-        sendBtn.disabled = false;
+        if(sendBtn) sendBtn.disabled = false;
     }
 }
 
-// Initial full-render function for historical messages
 function renderMessageToDOM(role, text, files = [], skipScroll = false) {
     document.getElementById('placeholderMsg')?.remove();
     const box = document.getElementById('chatBox');
+    if(!box) return;
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${role}`;
     
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'Yash');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'User');
     if (isGhostMode) name = 'Ghost';
+    const safeName = DOMPurify.sanitize(name);
     
-    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${name} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
+    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${safeName} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
     const content = msgDiv.querySelector('.message-content');
     
     if (role === 'ai') content.innerHTML = DOMPurify.sanitize(marked.parse(text));
@@ -1084,7 +1467,7 @@ function renderMessageToDOM(role, text, files = [], skipScroll = false) {
         content.innerText = text; 
         files.forEach(f => {
             if(f.isImage) { const img = document.createElement('img'); img.src = f.base64; img.className = 'message-image'; content.appendChild(img); } 
-            else { const fileDiv = document.createElement('div'); fileDiv.className = 'message-file'; fileDiv.innerHTML = `<i class="ph-fill ph-file-text" style="font-size:1.5rem"></i> <span>${f.name}</span>`; content.appendChild(fileDiv); }
+            else { const fileDiv = document.createElement('div'); fileDiv.className = 'message-file'; fileDiv.innerHTML = `<i class="ph-fill ph-file-text" style="font-size:1.5rem"></i> <span>${DOMPurify.sanitize(f.name)}</span>`; content.appendChild(fileDiv); }
         });
     }
     box.appendChild(msgDiv);
