@@ -101,9 +101,42 @@ document.getElementById('btn-toggle-theme')?.addEventListener('click', () => {
 });
 
 
-// --- AUTHENTICATION FLOW (28-DAY GHOST PURGE) ---
+// --- AUTHENTICATION FLOW (Landing View Transitions) ---
 const authLoader = document.getElementById('auth-loading-overlay');
 let authMode = 'login'; 
+
+// View Transition Logic
+document.getElementById('btn-get-started')?.addEventListener('click', () => {
+    const intro = document.getElementById('landing-intro');
+    const authCard = document.getElementById('landing-auth');
+    if(intro && authCard) {
+        intro.style.opacity = '0';
+        intro.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            intro.style.display = 'none';
+            authCard.style.display = 'block';
+            void authCard.offsetWidth; // Trigger reflow
+            authCard.style.opacity = '1';
+            authCard.style.transform = 'scale(1)';
+        }, 400);
+    }
+});
+
+document.getElementById('btn-back-intro')?.addEventListener('click', () => {
+    const intro = document.getElementById('landing-intro');
+    const authCard = document.getElementById('landing-auth');
+    if(intro && authCard) {
+        authCard.style.opacity = '0';
+        authCard.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            authCard.style.display = 'none';
+            intro.style.display = 'flex';
+            void intro.offsetWidth; 
+            intro.style.opacity = '1';
+            intro.style.transform = 'scale(1)';
+        }, 400);
+    }
+});
 
 document.getElementById('tab-login')?.addEventListener('click', () => {
     authMode = 'login';
@@ -298,7 +331,7 @@ function renderPlaceholder() {
     const modelEl = document.getElementById('modelSelect');
     const model = modelEl ? modelEl.value : '';
     const greeting = DOMPurify.sanitize(updateGreeting());
-    const icebreakers = updateIcebreakers(model); // Sanitized inside fn
+    const icebreakers = updateIcebreakers(model); 
     
     return `<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;" id="placeholderMsg">
         <i class="ph-fill ph-sparkle" style="font-size: 3.5rem; color: var(--accent); filter: drop-shadow(0 0 15px var(--accent-glow));"></i>
@@ -405,7 +438,6 @@ async function generateChatTitle(userMessage, sessionIndex) {
 
         if (title.toLowerCase().startsWith('title:')) title = title.substring(6).trim();
         
-        // Race condition prevention: check if session is still the same ID
         if (sessions[sessionIndex] && sessions[sessionIndex].id === currentSessionId) {
             updateSessionTitle(sessionIndex, title || fallbackTitle);
         }
@@ -431,7 +463,6 @@ function updateSessionTitle(index, title) {
 function saveSessionData() {
     if (isGhostMode) return;
     
-    // Bounds check to avoid memory bloat
     if (sessions.length > 50) {
         sessions.length = 50; 
     }
@@ -459,7 +490,7 @@ function saveSessionData() {
     }
 }
 
-// --- UI INTERACTIONS (SIDEBAR & SEARCH) ---
+// --- UI INTERACTIONS (SIDEBAR, SEARCH, EXPORT & ACTIONS) ---
 let activeContextMenu = null;
 document.addEventListener('click', (e) => { 
     if(activeContextMenu && !e.target.closest('.context-menu')) { 
@@ -488,7 +519,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Sidebar Chat Filter
 document.getElementById('chatSearchInput')?.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.chat-history-item').forEach(item => {
@@ -498,7 +528,6 @@ document.getElementById('chatSearchInput')?.addEventListener('input', (e) => {
     });
 });
 
-// Quick Model Box Filter
 document.getElementById('quickModelSearchBox')?.addEventListener('keyup', (e) => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('#quickModelListContainer .custom-option').forEach(item => {
@@ -508,7 +537,6 @@ document.getElementById('quickModelSearchBox')?.addEventListener('keyup', (e) =>
 });
 
 
-// Footer Accordion Toggle
 document.getElementById('btn-toggle-footer')?.addEventListener('click', function() {
     this.classList.toggle('open');
     document.getElementById('sidebarFooterContent')?.classList.toggle('open');
@@ -568,6 +596,19 @@ function renderSidebarSessions() {
                 renderSidebarSessions();
             };
 
+            const exportBtn = document.createElement('button');
+            exportBtn.innerHTML = `<i class="ph-bold ph-download-simple"></i> Export`;
+            exportBtn.onclick = () => {
+                const chatData = sessions[index].uiHistory.map(m => `${m.role.toUpperCase()}:\n${m.text}`).join('\n\n---\n\n');
+                const blob = new Blob([chatData], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); 
+                a.href = url; 
+                a.download = `${sessions[index].title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+                a.click(); 
+                URL.revokeObjectURL(url);
+            };
+
             const delBtn = document.createElement('button');
             delBtn.innerHTML = `<i class="ph-bold ph-trash" style="color:#ff4757;"></i> Delete`;
             delBtn.onclick = () => {
@@ -582,7 +623,7 @@ function renderSidebarSessions() {
                 }
             };
 
-            menu.appendChild(renameBtn); menu.appendChild(pinBtn); menu.appendChild(delBtn);
+            menu.appendChild(renameBtn); menu.appendChild(pinBtn); menu.appendChild(exportBtn); menu.appendChild(delBtn);
             document.body.appendChild(menu);
             activeContextMenu = menu;
         });
@@ -662,7 +703,7 @@ function updateStatsUI(addedTokens = 0) {
     if(statEl) statEl.innerText = statTokens.toLocaleString();
 }
 
-// --- MARKDOWN RENDERING ---
+// --- MARKDOWN RENDERING & EVENT DELEGATION ---
 const renderer = new marked.Renderer();
 renderer.code = function(token, legacyLang) {
     let actualCode = "";
@@ -674,7 +715,6 @@ renderer.code = function(token, legacyLang) {
         actualCode = String(token || "");
     }
     const escapedCode = actualCode.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    // Clean btoa using text encoder avoiding deprecated escape
     const bytes = new TextEncoder().encode(actualCode);
     const binStr = Array.from(bytes, b => String.fromCharCode(b)).join("");
     const encodedForDownload = btoa(binStr); 
@@ -684,7 +724,7 @@ renderer.code = function(token, legacyLang) {
         <div class="code-header">
             <span style="display:flex; align-items:center; gap:8px;"><i class="ph-bold ph-file-code"></i> ${DOMPurify.sanitize(lang).toUpperCase()}</span>
             <div class="code-header-actions">
-                <button class="code-action-btn btn-code-download" data-code="${encodedForDownload}" data-ext="${DOMPurify.sanitize(lang)}"><i class="ph-bold ph-download-simple"></i> Save</button>
+                <button class="code-action-btn btn-code-copy" data-code="${encodedForDownload}"><i class="ph-bold ph-copy"></i> Copy Code</button>
             </div>
         </div>
         <pre><code class="language-${DOMPurify.sanitize(lang)}">${escapedCode}</code></pre>
@@ -694,11 +734,10 @@ marked.use({ renderer });
 marked.setOptions({ breaks: true, gfm: true });
 
 document.getElementById('chatBox')?.addEventListener('click', (e) => {
-    const downloadBtn = e.target.closest('.btn-code-download');
-    if (downloadBtn) {
-        const base64Code = downloadBtn.getAttribute('data-code');
-        const ext = downloadBtn.getAttribute('data-ext') || 'txt';
-        
+    // Code Block Copy
+    const copyBtn = e.target.closest('.btn-code-copy');
+    if (copyBtn) {
+        const base64Code = copyBtn.getAttribute('data-code');
         const binaryStr = atob(base64Code);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) {
@@ -706,12 +745,59 @@ document.getElementById('chatBox')?.addEventListener('click', (e) => {
         }
         const decodedCode = new TextDecoder().decode(bytes);
         
-        const blob = new Blob([decodedCode], { type: "text/plain" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = `horizon_snippet.${ext}`;
-        document.body.appendChild(a); a.click();
-        window.URL.revokeObjectURL(url); document.body.removeChild(a);
+        navigator.clipboard.writeText(decodedCode).then(() => {
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="ph-bold ph-check" style="color:#2ecc71;"></i> Copied';
+            setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
+        });
+    }
+    
+    // Message Actions (Copy)
+    const copyMsgBtn = e.target.closest('.btn-copy-msg');
+    if (copyMsgBtn) {
+        const msgBlock = copyMsgBtn.closest('.message');
+        const textToCopy = msgBlock?.querySelector('.message-content')?.innerText || '';
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const icon = copyMsgBtn.querySelector('i');
+            icon.className = 'ph-bold ph-check';
+            icon.style.color = '#2ecc71';
+            setTimeout(() => {
+                icon.className = 'ph-bold ph-copy';
+                icon.style.color = '';
+            }, 1500);
+        });
+    }
+
+    // Message Actions (Edit User Message)
+    const editBtn = e.target.closest('.btn-edit-msg');
+    if (editBtn) {
+        const msgBlock = editBtn.closest('.message');
+        const textToEdit = msgBlock?.querySelector('.message-content')?.innerText || '';
+        const inputArea = document.getElementById('userInput');
+        if(inputArea) {
+            inputArea.value = textToEdit;
+            inputArea.focus();
+        }
+    }
+
+    // Message Actions (Delete Message)
+    const deleteBtn = e.target.closest('.btn-delete-msg');
+    if (deleteBtn) {
+        if(confirm("Are you sure you want to delete this message?")) {
+            const msgBlock = deleteBtn.closest('.message');
+            const allMessages = Array.from(document.getElementById('chatBox').querySelectorAll('.message:not(#typingIndicatorActive)'));
+            const index = allMessages.indexOf(msgBlock);
+            if(index > -1) {
+                uiHistory.splice(index, 1);
+                chatHistory.splice(index, 1);
+                msgBlock.remove();
+                saveSessionData();
+                if(uiHistory.length === 0) {
+                    const cb = document.getElementById('chatBox');
+                    if(cb) cb.innerHTML = renderPlaceholder();
+                }
+            }
+        }
     }
 });
 
@@ -777,7 +863,7 @@ document.getElementById('pfpFileInput')?.addEventListener('change', function() {
             const pfpInput = document.getElementById('editProfilePfp');
             if(pfpInput) pfpInput.value = e.target.result;
             const avatar = document.getElementById('userProfileAvatar');
-            if(avatar) avatar.src = e.target.result; // Instant preview
+            if(avatar) avatar.src = e.target.result; 
         };
         reader.readAsDataURL(file);
     }
@@ -1242,7 +1328,7 @@ if (SpeechRecognition) {
     if(micBtn) micBtn.style.display = 'none';
 }
 
-// --- CHAT LOGIC ---
+// --- CHAT LOGIC WITH STREAMING API ---
 document.getElementById('userInput')?.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); triggerSend(); }});
 document.getElementById('btn-send')?.addEventListener('click', () => {
     try {
@@ -1292,7 +1378,25 @@ function createMessageShell(role) {
     if (isGhostMode) name = 'Ghost';
     
     const safeName = DOMPurify.sanitize(name);
-    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${safeName} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
+    
+    let actionsHTML = `
+        <div class="message-actions">
+            <button class="msg-action-btn btn-copy-msg" title="Copy"><i class="ph-bold ph-copy"></i></button>
+            ${role === 'user' ? `<button class="msg-action-btn btn-edit-msg" title="Edit"><i class="ph-bold ph-pencil-simple"></i></button>` : ''}
+            <button class="msg-action-btn btn-delete-msg" title="Delete"><i class="ph-bold ph-trash"></i></button>
+        </div>
+    `;
+
+    let sourcesHTML = '';
+    if (role === 'ai') {
+        sourcesHTML = `
+        <div class="message-sources">
+            <div class="source-pill" title="Verified AI Model Knowledge"><i class="ph-fill ph-brain" style="color:var(--accent);"></i> <span>Knowledge Base</span></div>
+            <div class="source-pill" title="Web/Search Data"><i class="ph-fill ph-globe" style="color:#2ecc71;"></i> <span>Web Sources</span></div>
+        </div>`;
+    }
+    
+    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${safeName} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div>${sourcesHTML}<div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>${actionsHTML}`;
     box.appendChild(msgDiv);
     return msgDiv;
 }
@@ -1315,7 +1419,7 @@ async function triggerSend() {
     const userMsgDiv = createMessageShell('user');
     if(userMsgDiv) {
         const userContent = userMsgDiv.querySelector('.message-content');
-        userContent.innerText = text; // innerText avoids XSS automatically
+        userContent.innerText = text; 
         filesToLog.forEach(f => {
             if(f.isImage) { const img = document.createElement('img'); img.src = f.base64; img.className = 'message-image'; userContent.appendChild(img); } 
             else { const fileDiv = document.createElement('div'); fileDiv.className = 'message-file'; fileDiv.innerHTML = `<i class="ph-fill ph-file-text" style="font-size:1.5rem"></i> <span>${DOMPurify.sanitize(f.name)}</span>`; userContent.appendChild(fileDiv); }
@@ -1353,6 +1457,7 @@ async function triggerSend() {
 
     try {
         let aiResponse = "";
+        
         if (provider === 'openrouter' || provider === 'portkey') {
             const url = provider === 'openrouter' ? "https://openrouter.ai/api/v1/chat/completions" : "https://api.portkey.ai/v1/chat/completions";
             const headers = provider === 'openrouter' ? { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.href, "X-Title": "Horizon.AI" } : { "x-portkey-api-key": apiKey, "Content-Type": "application/json" };
@@ -1360,9 +1465,39 @@ async function triggerSend() {
             let finalMessages = currentReq.map(m => ({role: m.role, content: m.content}));
             if (systemPrompt) finalMessages.unshift({ role: "system", content: systemPrompt });
 
-            const res = await fetch(url, { method: "POST", headers: headers, body: JSON.stringify({ model: model, messages: finalMessages }) });
-            const data = await res.json(); if(data.error) throw new Error(data.error.message);
-            aiResponse = data.choices[0].message.content;
+            const res = await fetch(url, { 
+                method: "POST", 
+                headers: headers, 
+                body: JSON.stringify({ model: model, messages: finalMessages, stream: true }) 
+            });
+            if(!res.ok) throw new Error(`API Error: ${res.status}`);
+            
+            removeTypingIndicator(); playPopSound();
+            const aiMsgShell = createMessageShell('ai');
+            if(!aiMsgShell) return;
+            const contentNode = aiMsgShell.querySelector('.message-content');
+            
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
+                                aiResponse += data.choices[0].delta.content;
+                                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(aiResponse));
+                                scrollToBottom();
+                            }
+                        } catch(e) {}
+                    }
+                }
+            }
             
         } else if (provider === 'aistudio') {
             const geminiHistory = currentReq.map(msg => {
@@ -1374,13 +1509,40 @@ async function triggerSend() {
             let payloadData = { contents: geminiHistory };
             if (systemPrompt) payloadData.system_instruction = { parts: [{ text: systemPrompt }] };
 
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadData)
             });
-            const data = await res.json(); if(data.error) throw new Error(data.error.message);
-            aiResponse = data.candidates[0].content.parts[0].text;
+            if(!res.ok) throw new Error(`API Error: ${res.status}`);
+
+            removeTypingIndicator(); playPopSound();
+            const aiMsgShell = createMessageShell('ai');
+            if(!aiMsgShell) return;
+            const contentNode = aiMsgShell.querySelector('.message-content');
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                                aiResponse += data.candidates[0].content.parts[0].text;
+                                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(aiResponse));
+                                scrollToBottom();
+                            }
+                        } catch(e) {}
+                    }
+                }
+            }
         }
 
+        // Post-Stream Processing
         if (!isGhostMode) {
             const memoryRegex = /<remember>([\s\S]*?)<\/remember>/gi;
             let match;
@@ -1393,45 +1555,24 @@ async function triggerSend() {
             aiResponse = aiResponse.replace(memoryRegex, '').trim(); 
         }
 
-        removeTypingIndicator(); playPopSound();
-        
-        const aiMsgShell = createMessageShell('ai');
-        if(!aiMsgShell) return;
-        const contentNode = aiMsgShell.querySelector('.message-content');
-        
-        const chunkSize = Math.ceil(aiResponse.length / 40); 
-        let currentStreamedText = "";
-        let step = 0;
-        
-        function streamNextChunk() {
-            if (step < 40) {
-                const end = Math.min((step + 1) * chunkSize, aiResponse.length);
-                currentStreamedText = aiResponse.substring(0, end);
-                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(currentStreamedText));
-                step++;
-                scrollToBottom();
-                setTimeout(streamNextChunk, 15); 
-            } else {
-                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(aiResponse)); 
-                if (voiceResponseEnabled && window.speechSynthesis) {
-                    const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
-                    const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
-                    window.speechSynthesis.speak(utterance);
-                }
-                
-                const estimatedTokens = Math.ceil((text.length + aiResponse.length) / 4);
-                updateStatsUI(estimatedTokens);
+        const activeMsg = document.getElementById('chatBox').lastElementChild;
+        if (activeMsg) activeMsg.querySelector('.message-content').innerHTML = DOMPurify.sanitize(marked.parse(aiResponse));
 
-                if(!isGhostMode) { 
-                    uiHistory.push({ role: 'ai', text: aiResponse, files: [] }); 
-                    chatHistory.push({ role: 'assistant', content: aiResponse }); 
-                    saveSessionData(); 
-                }
-                if(sendBtn) sendBtn.disabled = false;
-            }
+        if (voiceResponseEnabled && window.speechSynthesis) {
+            const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
+            window.speechSynthesis.speak(utterance);
         }
         
-        streamNextChunk();
+        const estimatedTokens = Math.ceil((text.length + aiResponse.length) / 4);
+        updateStatsUI(estimatedTokens);
+
+        if(!isGhostMode) { 
+            uiHistory.push({ role: 'ai', text: aiResponse, files: [] }); 
+            chatHistory.push({ role: 'assistant', content: aiResponse }); 
+            saveSessionData(); 
+        }
+        if(sendBtn) sendBtn.disabled = false;
 
     } catch (err) {
         console.error(err); removeTypingIndicator();
@@ -1439,7 +1580,7 @@ async function triggerSend() {
         const errorShell = createMessageShell('ai');
         if(errorShell) {
             const errContent = errorShell.querySelector('.message-content');
-            errContent.innerText = `⚠️ Error: ${err.message}`; // safe assignment
+            errContent.innerText = `⚠️ Error: ${err.message}`; 
         }
         
         if(!isGhostMode) { chatHistory.pop(); uiHistory.pop(); saveSessionData(); }
@@ -1459,7 +1600,24 @@ function renderMessageToDOM(role, text, files = [], skipScroll = false) {
     if (isGhostMode) name = 'Ghost';
     const safeName = DOMPurify.sanitize(name);
     
-    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${safeName} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
+    let actionsHTML = `
+        <div class="message-actions">
+            <button class="msg-action-btn btn-copy-msg" title="Copy"><i class="ph-bold ph-copy"></i></button>
+            ${role === 'user' ? `<button class="msg-action-btn btn-edit-msg" title="Edit"><i class="ph-bold ph-pencil-simple"></i></button>` : ''}
+            <button class="msg-action-btn btn-delete-msg" title="Delete"><i class="ph-bold ph-trash"></i></button>
+        </div>
+    `;
+
+    let sourcesHTML = '';
+    if (role === 'ai') {
+        sourcesHTML = `
+        <div class="message-sources">
+            <div class="source-pill" title="Verified AI Model Knowledge"><i class="ph-fill ph-brain" style="color:var(--accent);"></i> <span>Knowledge Base</span></div>
+            <div class="source-pill" title="Web/Search Data"><i class="ph-fill ph-globe" style="color:#2ecc71;"></i> <span>Web Sources</span></div>
+        </div>`;
+    }
+
+    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${safeName} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div>${sourcesHTML}<div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>${actionsHTML}`;
     const content = msgDiv.querySelector('.message-content');
     
     if (role === 'ai') content.innerHTML = DOMPurify.sanitize(marked.parse(text));
