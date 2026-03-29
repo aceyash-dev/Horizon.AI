@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
-import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
@@ -63,6 +63,22 @@ document.getElementById('btn-toggle-theme').addEventListener('click', () => {
 
 // --- AUTHENTICATION FLOW (ROBUST FIX & MEMORY) ---
 const authLoader = document.getElementById('auth-loading-overlay');
+let authMode = 'login'; // Track current tab mode (login vs signup)
+
+// Handle Tab Switching
+document.getElementById('tab-login').addEventListener('click', () => {
+    authMode = 'login';
+    document.getElementById('tab-login').classList.add('active');
+    document.getElementById('tab-signup').classList.remove('active');
+    document.getElementById('tc-container').style.display = 'none';
+});
+
+document.getElementById('tab-signup').addEventListener('click', () => {
+    authMode = 'signup';
+    document.getElementById('tab-signup').classList.add('active');
+    document.getElementById('tab-login').classList.remove('active');
+    document.getElementById('tc-container').style.display = 'block';
+});
 
 // Function to securely activate Ghost Mode UI
 function activateGhostMode() {
@@ -76,8 +92,8 @@ function activateGhostMode() {
     document.getElementById('userProfileName').innerText = 'Ghost User';
     document.getElementById('userProfileStatus').innerHTML = '<i class="ph-fill ph-eye-closed"></i> Incognito';
     document.getElementById('userProfileAvatar').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
-    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 2.5rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
-    document.getElementById('sidebarChatList').innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; text-align:center;">History is turned off.</div>';
+    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 3rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
+    document.getElementById('sidebarChatList').innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem; text-align:center;">History is turned off.</div>';
 }
 
 // Auto-Login Check on Load
@@ -104,7 +120,33 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Force signInWithPopup to avoid mobile browser storage partitioning completely.
+// Unified Email GO Button Flow
+document.getElementById('btn-auth-go').addEventListener('click', async () => {
+    const email = document.getElementById('auth-email').value;
+    const pwd = document.getElementById('auth-password').value;
+    const tcChecked = document.getElementById('auth-tc').checked;
+    
+    if (!email || !pwd) return alert("Please enter both email and password.");
+    
+    if (authMode === 'signup' && !tcChecked) {
+        return alert("You must agree to the Terms & Conditions to sign up.");
+    }
+
+    authLoader.style.display = 'flex';
+    try {
+        if (authMode === 'login') {
+            await signInWithEmailAndPassword(auth, email, pwd);
+        } else {
+            await createUserWithEmailAndPassword(auth, email, pwd);
+        }
+        localStorage.setItem('horizon_auth_method', 'firebase');
+    } catch (err) {
+        authLoader.style.display = 'none';
+        alert("Authentication Error: " + err.message);
+    }
+});
+
+// Social Login
 document.getElementById('btn-login-github').addEventListener('click', async () => {
     const provider = new GithubAuthProvider();
     try {
@@ -154,7 +196,7 @@ function createNewSession() {
     currentSessionId = Date.now().toString();
     sessions.unshift({ id: currentSessionId, title: 'New Chat', pinned: false, uiHistory: [], apiHistory: [], timestamp: Date.now() });
     
-    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Welcome. Configure your API key to begin.</span></div>';
+    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 400px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 3rem; color: var(--accent);"></i><span style="line-height: 1.5;">Welcome. Configure your API key to begin.</span></div>';
     
     const titleDisplay = document.getElementById('chatTitleDisplay');
     if (titleDisplay) titleDisplay.innerText = 'New Chat';
@@ -174,7 +216,7 @@ function loadSession(id) {
 
         document.getElementById('chatBox').innerHTML = '';
         if (uiHistory.length === 0) {
-            document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Welcome. Configure your API key to begin.</span></div>';
+            document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 400px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 3rem; color: var(--accent);"></i><span style="line-height: 1.5;">Welcome. Configure your API key to begin.</span></div>';
         } else {
             uiHistory.forEach(msg => renderMessageToDOM(msg.role, msg.text, msg.files, true));
             scrollToBottom();
@@ -394,10 +436,12 @@ function applyProfileOverrides(user) {
     if (isGhostMode) return;
     const savedName = localStorage.getItem('horizon_custom_name');
     const savedPfp = localStorage.getItem('horizon_custom_pfp');
-    document.getElementById('userProfileName').innerText = savedName || (user ? user.displayName : 'Yash') || 'Yash';
-    document.getElementById('userProfileAvatar').src = savedPfp || (user ? user.photoURL : 'https://via.placeholder.com/36') || 'https://via.placeholder.com/36';
+    document.getElementById('userProfileName').innerText = savedName || (user ? user.displayName || user.email.split('@')[0] : 'Yash') || 'Yash';
+    document.getElementById('userProfileAvatar').src = savedPfp || (user ? user.photoURL : 'https://via.placeholder.com/40') || 'https://via.placeholder.com/40';
     if (user) {
-        const providerIcon = user.providerData[0]?.providerId === 'google.com' ? 'ph-google-logo' : 'ph-github-logo';
+        let providerIcon = 'ph-envelope-simple'; // default to email
+        if(user.providerData[0]?.providerId === 'google.com') providerIcon = 'ph-google-logo';
+        if(user.providerData[0]?.providerId === 'github.com') providerIcon = 'ph-github-logo';
         document.getElementById('userProfileStatus').innerHTML = `<i class="ph-fill ${providerIcon}"></i> Authenticated`;
     }
 }
@@ -425,7 +469,7 @@ renderer.code = function(token, legacyLang) {
     return `
     <div class="code-wrapper">
         <div class="code-header">
-            <span style="display:flex; align-items:center; gap:6px;"><i class="ph-bold ph-file-code"></i> ${lang.toUpperCase()}</span>
+            <span style="display:flex; align-items:center; gap:8px;"><i class="ph-bold ph-file-code"></i> ${lang.toUpperCase()}</span>
             <div class="code-header-actions">
                 <button class="code-action-btn btn-code-download" data-code="${encodedForDownload}" data-ext="${lang}"><i class="ph-bold ph-download-simple"></i> Save</button>
             </div>
@@ -838,11 +882,25 @@ document.getElementById('btn-send').addEventListener('click', () => {
 
 const scrollToBottom = () => requestAnimationFrame(() => document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight);
 
-function showTypingIndicator() {
+function showTypingIndicator(showSkeleton = false) {
     document.getElementById('placeholderMsg')?.remove();
     const box = document.getElementById('chatBox');
     const msgDiv = document.createElement('div'); msgDiv.className = `message ai`; msgDiv.id = `typingIndicatorActive`;
-    msgDiv.innerHTML = `<div class="message-sender"><i class="ph-fill ph-planet neon-planet"></i> Horizon is responding...</div><div class="message-content glass"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+    
+    if (showSkeleton) {
+        msgDiv.innerHTML = `<div class="message-sender"><i class="ph-fill ph-planet neon-planet"></i> Horizon is working on it...</div>
+        <div class="message-content glass" style="width: 100%;">
+            <div class="skeleton-wrapper">
+                <div class="skeleton-header"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-box"></div>
+            </div>
+        </div>`;
+    } else {
+        msgDiv.innerHTML = `<div class="message-sender"><i class="ph-fill ph-planet neon-planet"></i> Horizon is responding...</div><div class="message-content glass"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+    }
+    
     box.appendChild(msgDiv); scrollToBottom();
 }
 function removeTypingIndicator() { const ind = document.getElementById('typingIndicatorActive'); if (ind) ind.remove(); }
@@ -852,7 +910,7 @@ function createMessageShell(role) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${role}`;
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || 'Yash') : 'Yash');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'Yash');
     if (isGhostMode) name = 'Ghost';
     
     msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${name} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
@@ -898,7 +956,9 @@ async function triggerSend() {
     
     if(window.speechSynthesis) window.speechSynthesis.cancel();
     
-    showTypingIndicator();
+    // Check if prompt requires a skeleton loader based on intent
+    const isResourceGenIntent = /(generate|create|make|draw|paint).*image|(generate|create|make).*video|(write|build|code|script).*code/i.test(text);
+    showTypingIndicator(isResourceGenIntent);
 
     if (TONE_DIRECTIVES[currentTone]) {
         systemPrompt += `\n\n[ASSISTANT TONE DIRECTIVE]: ${TONE_DIRECTIVES[currentTone]}`;
@@ -954,24 +1014,25 @@ async function triggerSend() {
 
         removeTypingIndicator(); playPopSound();
         
-        // --- Word-by-Word Typewriter Execution ---
+        // --- Stream-like execution improvement to avoid markdown stuttering ---
         const aiMsgShell = createMessageShell('ai');
         const contentNode = aiMsgShell.querySelector('.message-content');
         
-        // Match words along with surrounding spaces to preserve layout
-        const words = aiResponse.match(/(\S+|\s+)/g) || [];
-        let wordIndex = 0;
+        // Update chunking logic to stream plain text strings then render markdown at intervals to prevent layout thrashing
+        const chunkSize = Math.ceil(aiResponse.length / 40); // 40 steps 
         let currentStreamedText = "";
+        let step = 0;
         
-        function streamNextWord() {
-            if (wordIndex < words.length) {
-                currentStreamedText += words[wordIndex];
+        function streamNextChunk() {
+            if (step < 40) {
+                const end = Math.min((step + 1) * chunkSize, aiResponse.length);
+                currentStreamedText = aiResponse.substring(0, end);
                 contentNode.innerHTML = DOMPurify.sanitize(marked.parse(currentStreamedText));
-                wordIndex++;
+                step++;
                 scrollToBottom();
-                setTimeout(streamNextWord, 10); 
+                setTimeout(streamNextChunk, 15); 
             } else {
-                // Done Streaming
+                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(aiResponse)); // Final pass
                 if (voiceResponseEnabled && window.speechSynthesis) {
                     const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
                     const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
@@ -991,7 +1052,7 @@ async function triggerSend() {
         }
         
         // Start streaming
-        streamNextWord();
+        streamNextChunk();
 
     } catch (err) {
         console.error(err); removeTypingIndicator();
@@ -1012,7 +1073,7 @@ function renderMessageToDOM(role, text, files = [], skipScroll = false) {
     msgDiv.className = `message ${role}`;
     
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || 'Yash') : 'Yash');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'Yash');
     if (isGhostMode) name = 'Ghost';
     
     msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${name} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
