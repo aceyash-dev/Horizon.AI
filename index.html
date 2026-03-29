@@ -24,6 +24,7 @@
             --glass-bg: rgba(30, 32, 38, 0.35);
             --border: rgba(255, 255, 255, 0.1);
             
+            /* Trio-morphism Light Sources */
             --shadow-light: rgba(255, 255, 255, 0.04);
             --shadow-dark: rgba(0, 0, 0, 0.6);
             --inset-light: rgba(255, 255, 255, 0.15);
@@ -67,9 +68,7 @@
             background: var(--bg-gradient); background-size: 200% 200%;
         }
         
-        @media (min-width: 769px) {
-            body:not(.pitch-black-mode) { animation: gradientBG 20s ease infinite; }
-        }
+        body:not(.pitch-black-mode) { animation: gradientBG 20s ease infinite; }
 
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -133,10 +132,29 @@
         }
         body.light-mode .input-recess, body.light-mode textarea, body.light-mode input { border: 1px solid rgba(0,0,0,0.2) !important; }
 
-        #landing-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s ease; padding: 20px; overflow: hidden; background: #000;}
-        #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.6; filter: brightness(0.8) contrast(1.1); pointer-events: none;}
+        /* Landing Page Layout */
+        #landing-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s ease; padding: 20px; overflow: auto; background: #000;}
+        #bg-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.6; filter: brightness(0.8) contrast(1.1); pointer-events: none;}
         
-        .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 400px; animation: scaleIn 0.5s ease; max-height: 95vh; overflow-y: auto;}
+        /* Intro State */
+        #landing-intro { max-width: 900px; width: 100%; text-align: center; padding: 40px; border-radius: 24px; transition: opacity 0.4s ease, transform 0.4s ease; animation: scaleIn 0.5s ease; display: flex; flex-direction: column; gap: 20px; z-index: 1;}
+        .intro-title { font-size: 3.5rem; font-weight: 700; line-height: 1.1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 10px;}
+        .intro-tagline { font-size: 1.2rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+        
+        /* Feature Cards Grid */
+        .feature-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; text-align: center;}
+        .feature-card { padding: 25px 20px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.2s;}
+        .feature-card:hover { transform: translateY(-5px); background: rgba(0,0,0,0.4); }
+        .feature-card i { font-size: 3rem; color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
+        .feature-card h3 { font-size: 1.1rem; font-weight: 600; margin: 0; color: var(--text-light); text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .feature-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.4;}
+
+        .btn-huge { padding: 16px 40px; font-size: 1.2rem; font-weight: 700; border-radius: 16px; background: var(--accent) !important; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; align-self: center; margin: 0 auto; box-shadow: 0 8px 20px var(--accent-alpha) !important;}
+
+        /* Auth Card State */
+        #landing-auth { opacity: 0; transform: scale(0.9); display: none; transition: opacity 0.4s ease, transform 0.4s ease; z-index: 2;}
+        .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 450px; max-height: 95vh; overflow-y: auto;}
+        
         .auth-toggle-container { display: flex; background: var(--input-bg); border-radius: 12px; padding: 6px; margin-bottom: 20px; box-shadow: inset 3px 3px 6px var(--inset-dark), inset -3px -3px 6px var(--inset-light); }
         .auth-tab { flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent !important; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important;}
         .auth-tab.active { background: rgba(255, 255, 255, 0.08) !important; color: var(--text-light); box-shadow: -2px -2px 5px var(--shadow-light), 2px 2px 5px var(--shadow-dark) !important; }
@@ -236,16 +254,30 @@
         .ghost-badge.active { display: flex; animation: slideUp 0.3s; }
 
         .messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 20px; scroll-behavior: smooth; min-height: 0; padding-bottom: 30px;}
-        .message { display: flex; flex-direction: column; max-width: 85%; animation: slideUp 0.3s ease forwards; transform: translateZ(0);}
+        .message { display: flex; flex-direction: column; max-width: 85%; animation: slideUp 0.3s ease forwards; transform: translateZ(0); position: relative;}
         .message.user { align-self: flex-end; }
         .message.ai { align-self: flex-start; }
         .message-sender { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
         .message.user .message-sender { flex-direction: row-reverse; }
+        
+        /* Grok-Style Sources UI */
+        .message-sources { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .source-pill { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); color: var(--text-muted); }
+        .source-pill:hover { background: var(--accent-alpha); color: var(--text-light); border-color: var(--accent); }
+        
         .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); text-shadow: 0 1px 2px rgba(0,0,0,0.2);}
         .message.user .message-content { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 15px var(--accent-alpha); white-space: pre-wrap; border: 1px solid rgba(0,0,0,0.2);}
         .message.ai .message-content { border-bottom-left-radius: 4px; }
         .message-image { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
         .message-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; font-size: 0.9rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
+
+        /* Message Actions */
+        .message-actions { display: none; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+        .message:hover .message-actions { display: flex; animation: fadeIn 0.2s; }
+        .msg-action-btn { background: transparent !important; border: none !important; box-shadow: none !important; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; transition: color 0.2s; display: flex; align-items: center; gap: 4px;}
+        .msg-action-btn:hover { color: var(--accent); }
+        .message.user .message-actions { justify-content: flex-end; }
+        .message.ai .message-actions { justify-content: flex-start; }
 
         /* Smart Skeleton Loaders */
         .skeleton-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 200px; }
@@ -370,6 +402,12 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
         /* MOBILE FIXES */
+        @media (max-width: 850px) {
+            .landing-intro-container { padding: 20px; }
+            .intro-title { font-size: 2.2rem; }
+            .feature-cards-grid { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 768px) {
             #app-container { padding: 0; }
             .app-flex { gap: 0; }
@@ -515,7 +553,38 @@
         <video id="bg-video" autoplay loop muted playsinline>
             <source src="background.mp4" type="video/mp4">
         </video>
-        <div class="auth-card glass">
+        
+        <div id="landing-intro" class="glass landing-intro-container">
+            <h1 class="intro-title">Welcome to Horizon.AI</h1>
+            <p class="intro-tagline">Your intelligent, secure, and fully customizable AI workspace designed for developers and creators.</p>
+            
+            <div class="feature-cards-grid">
+                <div class="feature-card">
+                    <i class="ph-fill ph-shield-check"></i>
+                    <h3>100% Transparent</h3>
+                    <p>Open connections to AI models. No hidden middle-men.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="ph-fill ph-database"></i>
+                    <h3>Zero Data Collection</h3>
+                    <p>Your API keys and history are stored locally on your device.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="ph-fill ph-cpu"></i>
+                    <h3>Multiple Models</h3>
+                    <p>Switch between OpenAI, Claude, Gemini, and Local models instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="ph-fill ph-ghost"></i>
+                    <h3>Ephemeral Mode</h3>
+                    <p>Auto-purging 28-day ghost sessions for strict privacy hygiene.</p>
+                </div>
+            </div>
+            
+            <button id="btn-get-started" class="btn-huge">Get Started <i class="ph-bold ph-arrow-right"></i></button>
+        </div>
+
+        <div id="landing-auth" class="auth-card glass">
             <h2 style="margin-bottom: 15px; font-weight: 700;"><i class="ph-fill ph-planet" style="color:var(--accent);"></i> Horizon.AI</h2>
             
             <div class="auth-toggle-container">
@@ -555,6 +624,8 @@
             <button id="btn-login-ghost" class="btn-auth btn-ghost btn-extrude">
                 <i class="ph-fill ph-ghost"></i> Continue as Ghost
             </button>
+
+            <button id="btn-back-intro" style="margin-top: 20px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; text-decoration: underline;">Back to Features</button>
         </div>
     </div>
 
