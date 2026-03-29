@@ -38,10 +38,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
 
         body { 
-            position: fixed; /* Native app feel, stops scroll bouncing */
+            position: fixed; 
             inset: 0;
             width: 100vw;
-            height: 100dvh; /* Dynamic viewport height fixes the bottom clipping */
+            height: 100dvh; 
             color: var(--text-light); 
             overflow: hidden; 
             background: var(--bg-gradient);
@@ -92,6 +92,9 @@
         .btn-ghost { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); margin-top: 24px; }
         .btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--text-light); border-color: var(--text-light); }
 
+        /* Auth Loading Overlay */
+        #auth-loading-overlay { display: none; position: absolute; inset: 0; background: var(--bg-gradient); z-index: 200; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); }
+
         /* Toasts & Locks */
         #welcomeToast {
             display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
@@ -125,15 +128,22 @@
         .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; }
         
         .brand { font-weight: 700; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; white-space: nowrap;}
-        .sidebar-btn { background: transparent; color: var(--text-light); border: none; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; white-space: nowrap; transition: background 0.2s;}
+        .sidebar-btn { background: transparent; color: var(--text-light); border: none; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; white-space: nowrap; transition: background 0.2s; flex-shrink: 0;}
         .sidebar-btn:hover { background: rgba(255,255,255,0.1); }
         
-        .sidebar-links { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 5px; border-top: 1px solid var(--border); padding-top: 20px;}
+        /* Chat History Sidebar List */
+        .sidebar-section-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 10px; padding: 0 5px; flex-shrink: 0;}
+        #sidebarChatList { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; flex: 1; padding: 0 5px; margin-bottom: 10px;}
+        .chat-history-item { background: transparent; border: none; color: var(--text-muted); padding: 12px 10px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: all 0.2s;}
+        .chat-history-item:hover { background: rgba(255,255,255,0.05); color: var(--text-light); }
+        .chat-history-item.active { background: var(--accent-alpha); color: var(--text-light); border: 1px solid var(--accent); }
+
+        .sidebar-links { display: flex; flex-direction: column; gap: 10px; padding: 10px 5px; border-top: 1px solid var(--border); padding-top: 15px; flex-shrink: 0;}
         .sidebar-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transition: color 0.2s; white-space: nowrap; font-weight: 500;}
         .sidebar-links a:hover { color: var(--accent); }
         .sidebar-tagline { font-size: 0.7rem; color: var(--text-muted); opacity: 0.6; margin-top: 5px; line-height: 1.4; white-space: normal;}
 
-        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px; border: 1px solid var(--border); white-space: nowrap; cursor: pointer; transition: background 0.2s, transform 0.2s; }
+        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-top: 10px; border: 1px solid var(--border); white-space: nowrap; cursor: pointer; transition: background 0.2s, transform 0.2s; flex-shrink: 0;}
         .user-profile:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
         .user-profile img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover;}
         .user-profile-info { display: flex; flex-direction: column; }
@@ -164,12 +174,6 @@
             -webkit-backdrop-filter: blur(20px);
         }
         .quick-model-dropdown.active { display: flex; animation: slideDown 0.2s ease; }
-
-        /* Search Bar */
-        .chat-search-wrapper { position: relative; flex: 1; min-width: 120px; max-width: 300px; margin: 0 auto; display: flex; align-items: center;}
-        .chat-search-wrapper input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 20px; padding: 8px 15px 8px 35px; color: var(--text-light); outline: none; font-size: 0.85rem; transition: border-color 0.2s; }
-        .chat-search-wrapper input:focus { border-color: var(--accent); }
-        .chat-search-wrapper i { position: absolute; left: 12px; color: var(--text-muted); font-size: 1rem; }
 
         .btn-icon { background: transparent; border: none; color: var(--text-light); font-size: 1.4rem; cursor: pointer; padding: 8px; border-radius: 8px; display: flex; align-items: center; transition: background 0.2s, color 0.2s;}
         .btn-icon:hover { background: rgba(0,0,0,0.1); color: var(--accent); }
@@ -276,6 +280,7 @@
         
         .badge-lite { background: rgba(88, 101, 242, 0.2); color: var(--accent); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid var(--accent-alpha); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
         .badge-pro { background: rgba(255, 71, 87, 0.15); color: #ff4757; font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid rgba(255, 71, 87, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
+        .capability-badge { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 0.85rem; margin-left: -5px;}
 
         /* Capabilities List Modal */
         .capabilities-list { text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 0.95rem; line-height: 1.8; border: 1px solid var(--border); }
@@ -305,9 +310,10 @@
             
             /* Top Bar Redesign for Mobile */
             .top-bar { padding: 10px 15px; align-items: center; justify-content: space-between; gap: 8px;}
-            .chat-search-wrapper { flex: 1 1 100%; max-width: 100%; margin: 5px 0 0 0 !important; order: 5; }
-            .chat-model-selector { margin-right: auto; margin-left: 5px; max-width: 140px; order: 2; padding: 8px 10px;}
-            #btn-toggle-theme { order: 3; }
+            #chatTitleDisplay { flex: 1 1 100%; max-width: 100%; order: 5; margin-top: 5px; font-size: 0.95rem; }
+            .chat-model-selector { margin-right: auto; margin-left: 5px; max-width: 130px; order: 2; padding: 8px 10px;}
+            #btn-refresh-models-chat { order: 3; }
+            #btn-toggle-theme { order: 4; }
             
             .message { max-width: 95%; }
             .messages { padding: 15px; padding-bottom: 25px;}
@@ -322,6 +328,12 @@
     </style>
 </head>
 <body class="dark-mode">
+
+    <div id="auth-loading-overlay">
+        <i class="ph-bold ph-spinner ph-spin" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+        <h2 style="margin:0;">Authenticating...</h2>
+        <p style="color: var(--text-muted); margin-top: 5px;">Checking secure login state</p>
+    </div>
 
     <div id="welcomeToast">
         <i class="ph-bold ph-hand-pointing"></i> Tap on the sidebar to configure settings and access chat!
@@ -429,6 +441,9 @@
                     <i class="ph-fill ph-faders" style="color:var(--accent)"></i> Configuration
                 </button>
                 
+                <div class="sidebar-section-title">Recent Chats</div>
+                <div id="sidebarChatList"></div>
+                
                 <div class="sidebar-links">
                     <a href="https://aceyash.vercel.app" target="_blank"><i class="ph-fill ph-globe"></i> Support</a>
                     <a href="https://github.com/aceyash-dev" target="_blank"><i class="ph-fill ph-github-logo"></i> GitHub</a>
@@ -457,19 +472,22 @@
                         <div class="ghost-badge" id="ghostIndicator" title="Ghost Mode"><i class="ph-fill ph-ghost"></i></div>
                     </div>
 
-                    <div id="quickModelSelector" class="chat-model-selector" title="Switch Model" style="order: 2;">
-                        <span id="quickModelLabel">Select Model</span>
-                        <i class="ph-bold ph-caret-down"></i>
-                        <div id="quickModelDropdown" class="quick-model-dropdown"></div>
-                    </div>
+                    <div id="chatTitleDisplay" style="order: 2; flex: 1; text-align: center; font-weight: 600; font-size: 1rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">New Chat</div>
 
-                    <button id="btn-toggle-theme" class="btn-icon" title="Toggle Theme" style="order: 3;">
-                        <i class="ph-fill ph-sun-dim" id="themeIcon"></i>
-                    </button>
+                    <div style="display:flex; align-items:center; gap:8px; order: 3;">
+                        <div id="quickModelSelector" class="chat-model-selector" title="Switch Model">
+                            <span id="quickModelLabel">Select Model</span>
+                            <i class="ph-bold ph-caret-down"></i>
+                            <div id="quickModelDropdown" class="quick-model-dropdown"></div>
+                        </div>
 
-                    <div class="chat-search-wrapper" style="order: 4;">
-                        <i class="ph-bold ph-magnifying-glass"></i>
-                        <input type="text" id="chatSearch" placeholder="Search chat...">
+                        <button id="btn-refresh-models-chat" class="btn-icon" title="Refresh Models">
+                            <i class="ph-bold ph-arrows-clockwise"></i>
+                        </button>
+
+                        <button id="btn-toggle-theme" class="btn-icon" title="Toggle Theme">
+                            <i class="ph-fill ph-sun-dim" id="themeIcon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -491,9 +509,10 @@
                             <div id="expanded-actions" class="expanded-actions">
                                 <button id="btn-trigger-file" title="Upload File"><i class="ph-fill ph-file"></i> Files</button>
                                 <button id="btn-trigger-camera" title="Upload Image"><i class="ph-fill ph-image"></i> Image</button>
-                                <button id="btn-trigger-mic" title="Voice Input"><i class="ph-fill ph-microphone"></i> Audio</button>
                             </div>
                         </div>
+
+                        <button id="btn-trigger-mic" class="hardware-btn" title="Voice Input"><i class="ph-fill ph-microphone"></i></button>
 
                         <textarea id="userInput" placeholder="Message Horizon.AI..."></textarea>
                         <button id="btn-send" class="btn-send"><i class="ph-fill ph-paper-plane-tilt"></i></button>
@@ -518,7 +537,12 @@
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-speaker-high"></i> Sound Effects</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-speaker-high"></i> Voice Responses (TTS)</span>
+                <label class="switch"><input type="checkbox" id="voiceToggle"><span class="slider"></span></label>
+            </div>
+
+            <div class="switch-group">
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-music-notes"></i> Sound Effects</span>
                 <label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label>
             </div>
 
@@ -533,6 +557,17 @@
             </div>
 
             <div class="form-group" style="margin-top: 10px;">
+                <label><i class="ph-fill ph-chat-centered-text"></i> Assistant Tone</label>
+                <select id="chatTone">
+                    <option value="standard">Standard / Helpful</option>
+                    <option value="professional">Professional & Concise</option>
+                    <option value="casual">Casual & Friendly</option>
+                    <option value="sarcastic">Sarcastic & Witty</option>
+                    <option value="academic">Academic & Detailed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label><i class="ph-fill ph-terminal-window"></i> System Prompt (Custom Instructions)</label>
                 <textarea id="systemPrompt" rows="3" placeholder="e.g., You are a helpful expert coder..."></textarea>
             </div>
@@ -578,8 +613,5 @@
     </div>
 
     <script type="module" src="script.js"></script>
-    <script>
-        // Note: For full functionality, ensure the script provided in the previous step is saved as "script.js" in the same directory.
-    </script>
 </body>
 </html>
