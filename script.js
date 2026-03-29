@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
-import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
@@ -43,35 +43,56 @@ const TONE_DIRECTIVES = {
     'academic': 'Respond in a highly detailed, academic, and analytical tone with deep explanations.'
 };
 
-// --- AUTHENTICATION FLOW (ROBUST FIX) ---
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-const authLoader = document.getElementById('auth-loading-overlay');
+// --- THEME TOGGLE (INCLUDING PITCH BLACK) ---
+const themes = ['dark-mode', 'pitch-black-mode', 'light-mode'];
+const themeIcons = ['ph-moon', 'ph-star', 'ph-sun-dim'];
+let currentThemeIndex = parseInt(localStorage.getItem('horizon_theme_index')) || 0;
 
-// 1. Process any pending redirects FIRST
-authLoader.style.display = 'flex';
-getRedirectResult(auth).then((result) => {
-    // If successful, onAuthStateChanged will handle the UI
-    if (!result) authLoader.style.display = 'none'; 
-}).catch((error) => {
-    console.error("Redirect Auth Error:", error);
-    authLoader.style.display = 'none';
-    
-    // Clear corrupted state if we hit the partition/missing state error
-    if (error.code === 'auth/missing-or-invalid-nonce' || error.message.includes('missing initial state')) {
-        sessionStorage.clear();
-        alert("Mobile browser security blocked the login redirect. Please try again; we will use a secure popup instead.");
-        // Force popup on next attempt
-        window.forcePopupFallback = true;
-    } else if (error.code !== 'auth/redirect-cancelled-by-user') {
-        alert("Authentication Error: " + error.message);
-    }
+function applyTheme() {
+    document.body.className = themes[currentThemeIndex];
+    document.getElementById('themeIcon').className = `ph-fill ${themeIcons[currentThemeIndex]}`;
+    localStorage.setItem('horizon_theme_index', currentThemeIndex);
+}
+applyTheme();
+
+document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+    applyTheme();
 });
 
-// 2. Auth State Listener
+
+// --- AUTHENTICATION FLOW (ROBUST FIX & MEMORY) ---
+const authLoader = document.getElementById('auth-loading-overlay');
+
+// Function to securely activate Ghost Mode UI
+function activateGhostMode() {
+    isGhostMode = true;
+    document.getElementById('ghostToggle').checked = true;
+    document.getElementById('ghostIndicator').classList.add('active');
+    document.getElementById('landing-page').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
+    checkAndShowTutorialLock();
+    
+    document.getElementById('userProfileName').innerText = 'Ghost User';
+    document.getElementById('userProfileStatus').innerHTML = '<i class="ph-fill ph-eye-closed"></i> Incognito';
+    document.getElementById('userProfileAvatar').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
+    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 2.5rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
+    document.getElementById('sidebarChatList').innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; text-align:center;">History is turned off.</div>';
+}
+
+// Auto-Login Check on Load
+const savedAuthMethod = localStorage.getItem('horizon_auth_method');
+if (savedAuthMethod === 'ghost') {
+    activateGhostMode();
+} else {
+    authLoader.style.display = 'flex';
+}
+
 onAuthStateChanged(auth, (user) => {
     authLoader.style.display = 'none';
     if (isGhostMode) return; 
     if (user) {
+        localStorage.setItem('horizon_auth_method', 'firebase');
         document.getElementById('landing-page').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
         applyProfileOverrides(user);
@@ -83,45 +104,35 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 3. Login Handlers
-document.getElementById('btn-login-github').addEventListener('click', () => {
+// Force signInWithPopup to avoid mobile browser storage partitioning completely.
+document.getElementById('btn-login-github').addEventListener('click', async () => {
     const provider = new GithubAuthProvider();
-    if (isMobile && !window.forcePopupFallback) {
-        signInWithRedirect(auth, provider);
-    } else {
-        signInWithPopup(auth, provider).catch(err => alert("GitHub Login Error: " + err.message));
+    try {
+        await signInWithPopup(auth, provider);
+        localStorage.setItem('horizon_auth_method', 'firebase');
+    } catch (err) {
+        alert("GitHub Login Error: " + err.message);
     }
 });
 
-document.getElementById('btn-login-google').addEventListener('click', () => {
+document.getElementById('btn-login-google').addEventListener('click', async () => {
     const provider = new GoogleAuthProvider();
-    if (isMobile && !window.forcePopupFallback) {
-        signInWithRedirect(auth, provider);
-    } else {
-        signInWithPopup(auth, provider).catch(err => alert("Google Login Error: " + err.message));
+    try {
+        await signInWithPopup(auth, provider);
+        localStorage.setItem('horizon_auth_method', 'firebase');
+    } catch (err) {
+        alert("Google Login Error: " + err.message);
     }
 });
-
 
 document.getElementById('btn-login-ghost').addEventListener('click', () => {
-    isGhostMode = true;
-    document.getElementById('ghostToggle').checked = true;
-    document.getElementById('ghostIndicator').classList.add('active');
+    localStorage.setItem('horizon_auth_method', 'ghost');
     document.getElementById('landing-page').style.opacity = '0';
-    setTimeout(() => {
-        document.getElementById('landing-page').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-        checkAndShowTutorialLock();
-    }, 500);
-    
-    document.getElementById('userProfileName').innerText = 'Ghost User';
-    document.getElementById('userProfileStatus').innerHTML = '<i class="ph-fill ph-eye-closed"></i> Incognito';
-    document.getElementById('userProfileAvatar').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
-    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 2.5rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
-    document.getElementById('sidebarChatList').innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.8rem; text-align:center;">History is turned off.</div>';
+    setTimeout(activateGhostMode, 500);
 });
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
+    localStorage.removeItem('horizon_auth_method');
     if (!isGhostMode) await signOut(auth); 
     location.reload();
 });
@@ -141,9 +152,9 @@ function createNewSession() {
     chatHistory = [];
     uiHistory = [];
     currentSessionId = Date.now().toString();
-    sessions.unshift({ id: currentSessionId, title: 'New Chat', uiHistory: [], apiHistory: [], timestamp: Date.now() });
+    sessions.unshift({ id: currentSessionId, title: 'New Chat', pinned: false, uiHistory: [], apiHistory: [], timestamp: Date.now() });
     
-    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent);"></i><span>Welcome. Configure your API key to begin.</span></div>';
+    document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Welcome. Configure your API key to begin.</span></div>';
     
     const titleDisplay = document.getElementById('chatTitleDisplay');
     if (titleDisplay) titleDisplay.innerText = 'New Chat';
@@ -163,7 +174,7 @@ function loadSession(id) {
 
         document.getElementById('chatBox').innerHTML = '';
         if (uiHistory.length === 0) {
-            document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent);"></i><span>Welcome. Configure your API key to begin.</span></div>';
+            document.getElementById('chatBox').innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg"><i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i><span style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Welcome. Configure your API key to begin.</span></div>';
         } else {
             uiHistory.forEach(msg => renderMessageToDOM(msg.role, msg.text, msg.files, true));
             scrollToBottom();
@@ -247,19 +258,97 @@ function saveSessionData() {
     }
 }
 
+// Sidebar Context Menu
+let activeContextMenu = null;
+document.addEventListener('click', (e) => { 
+    // Safely close context menus
+    if(activeContextMenu && !e.target.closest('.context-menu')) { 
+        activeContextMenu.remove(); 
+        activeContextMenu = null; 
+    }
+    
+    // Safely handle dropdown clicks via Delegation to prevent unattached listener crashes
+    const modelSelector = e.target.closest('#quickModelSelector');
+    const modelDropdown = document.getElementById('quickModelDropdown');
+    if (modelSelector && !e.target.closest('.custom-option')) {
+        modelDropdown.classList.toggle('active');
+    } else if (!modelSelector && modelDropdown) {
+        modelDropdown.classList.remove('active');
+    }
+
+    // Safely handle Attachment Pin Clicks
+    const pinBtn = e.target.closest('#btn-pin-actions');
+    const pinWrapper = e.target.closest('.input-actions-wrapper');
+    const expandedActions = document.getElementById('expanded-actions');
+    const actualPinBtn = document.getElementById('btn-pin-actions');
+    
+    if (pinBtn) {
+        expandedActions.classList.toggle('active');
+        actualPinBtn.classList.toggle('active');
+    } else if (!pinWrapper && expandedActions) {
+        expandedActions.classList.remove('active');
+        actualPinBtn.classList.remove('active');
+    }
+});
+
 function renderSidebarSessions() {
     const list = document.getElementById('sidebarChatList');
     list.innerHTML = '';
-    sessions.forEach(session => {
-        const btn = document.createElement('button');
+
+    sessions.sort((a, b) => {
+        if (a.pinned === b.pinned) return b.timestamp - a.timestamp;
+        return a.pinned ? -1 : 1;
+    });
+
+    sessions.forEach((session, index) => {
+        const btn = document.createElement('div');
         btn.className = `chat-history-item ${session.id === currentSessionId ? 'active' : ''}`;
-        btn.innerHTML = `<i class="ph-fill ph-chat-circle-dots"></i> <span>${session.title}</span>`;
-        btn.addEventListener('click', () => {
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.innerHTML = `${session.pinned ? '<i class="ph-fill ph-push-pin" style="color:var(--accent)"></i>' : '<i class="ph-fill ph-chat-circle-dots"></i>'} <span style="overflow:hidden; text-overflow:ellipsis;">${session.title}</span>`;
+        titleSpan.style.flex = "1"; titleSpan.style.display = "flex"; titleSpan.style.alignItems = "center"; titleSpan.style.gap = "8px"; titleSpan.style.cursor = "pointer";
+        titleSpan.addEventListener('click', () => {
             if(session.id !== currentSessionId) {
                 loadSession(session.id);
                 if (window.innerWidth <= 768) toggleSidebar();
             }
         });
+        btn.appendChild(titleSpan);
+
+        if (session.id === currentSessionId) {
+            const optionsBtn = document.createElement('button');
+            optionsBtn.className = 'btn-icon chat-options-btn';
+            optionsBtn.innerHTML = '<i class="ph-bold ph-dots-three"></i>';
+            optionsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if(activeContextMenu) activeContextMenu.remove();
+                
+                const menu = document.createElement('div');
+                menu.className = 'context-menu glass';
+                menu.style.top = `${e.clientY + 10}px`;
+                menu.style.left = `${e.clientX}px`;
+
+                const renameBtn = document.createElement('button');
+                renameBtn.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Rename';
+                renameBtn.onclick = () => {
+                    const newTitle = prompt("Enter new chat name:", session.title);
+                    if (newTitle) updateSessionTitle(index, newTitle);
+                };
+
+                const pinBtn = document.createElement('button');
+                pinBtn.innerHTML = `<i class="ph-bold ph-push-pin"></i> ${session.pinned ? 'Unpin Chat' : 'Pin Chat'}`;
+                pinBtn.onclick = () => {
+                    session.pinned = !session.pinned;
+                    localStorage.setItem('horizon_sessions', JSON.stringify(sessions));
+                    renderSidebarSessions();
+                };
+
+                menu.appendChild(renameBtn); menu.appendChild(pinBtn);
+                document.body.appendChild(menu);
+                activeContextMenu = menu;
+            });
+            btn.appendChild(optionsBtn);
+        }
         list.appendChild(btn);
     });
 }
@@ -380,10 +469,6 @@ document.getElementById('btn-open-settings').addEventListener('click', () => {
 });
 document.getElementById('btn-close-settings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
 
-document.getElementById('btn-toggle-theme').addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    document.getElementById('themeIcon').className = document.body.classList.contains('light-mode') ? 'ph-fill ph-moon' : 'ph-fill ph-sun-dim';
-});
 
 // Profile Modal
 document.getElementById('btn-user-profile').addEventListener('click', async () => {
@@ -427,24 +512,6 @@ document.getElementById('btn-save-profile').addEventListener('click', () => {
     if (newPfp) localStorage.setItem('horizon_custom_pfp', newPfp);
     applyProfileOverrides(auth.currentUser);
     document.getElementById('profileModalOverlay').classList.remove('active');
-});
-
-// Pin Actions
-document.getElementById('quickModelSelector').addEventListener('click', (e) => {
-    if(e.target.closest('.custom-option')) return;
-    document.getElementById('quickModelDropdown').classList.toggle('active');
-});
-document.getElementById('btn-pin-actions').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('expanded-actions').classList.toggle('active');
-    document.getElementById('btn-pin-actions').classList.toggle('active');
-});
-document.addEventListener('click', (e) => {
-    if(!e.target.closest('.input-actions-wrapper')) {
-        document.getElementById('expanded-actions').classList.remove('active');
-        document.getElementById('btn-pin-actions').classList.remove('active');
-    }
-    if(!e.target.closest('#quickModelSelector')) document.getElementById('quickModelDropdown').classList.remove('active');
 });
 
 function hexToRgb(hex) {
@@ -492,6 +559,11 @@ const initSettings = () => {
         const shortName = savedModel.split('/').pop();
         document.getElementById('modelSelectTrigger').innerHTML = `<span>${shortName}</span> <i class="ph-bold ph-caret-down"></i>`;
         document.getElementById('quickModelLabel').innerText = shortName;
+    }
+
+    // SILENT AUTO-FETCH BACKGROUND MODELS LIST ON LOAD
+    if (document.getElementById('apiKey').value) {
+        fetchAvailableModels(true);
     }
 };
 initSettings();
@@ -577,15 +649,18 @@ document.getElementById('btn-confirm-model').addEventListener('click', () => {
     document.getElementById('quickModelDropdown').classList.remove('active');
 });
 
-async function fetchAvailableModels() {
+async function fetchAvailableModels(isSilent = false) {
     const provider = document.getElementById('provider').value;
     const apiKey = document.getElementById('apiKey').value;
     const trigger = document.getElementById('modelSelectTrigger');
     const chatRefreshBtn = document.getElementById('btn-refresh-models-chat');
 
-    if (!apiKey) return alert("Please enter an API key.");
+    if (!apiKey) {
+        if (!isSilent) alert("Please enter an API key.");
+        return;
+    }
     
-    trigger.innerHTML = `<span><i class="ph-bold ph-spinner ph-spin"></i> Loading...</span>`;
+    if (!isSilent) trigger.innerHTML = `<span><i class="ph-bold ph-spinner ph-spin"></i> Loading...</span>`;
     if (chatRefreshBtn) chatRefreshBtn.innerHTML = `<i class="ph-bold ph-spinner ph-spin"></i>`;
 
     try {
@@ -602,15 +677,14 @@ async function fetchAvailableModels() {
         }
         renderModelsList(modelsArray, provider);
     } catch (error) { 
-        trigger.innerHTML = `<span>Error</span>`; 
-        alert(error.message); 
+        if (!isSilent) { trigger.innerHTML = `<span>Error</span>`; alert(error.message); }
     } finally {
         if (chatRefreshBtn) chatRefreshBtn.innerHTML = `<i class="ph-bold ph-arrows-clockwise"></i>`;
     }
 }
 
-document.getElementById('btn-fetch-models').addEventListener('click', fetchAvailableModels);
-document.getElementById('btn-refresh-models-chat').addEventListener('click', fetchAvailableModels);
+document.getElementById('btn-fetch-models').addEventListener('click', () => fetchAvailableModels(false));
+document.getElementById('btn-refresh-models-chat').addEventListener('click', () => fetchAvailableModels(false));
 
 function renderModelsList(modelsArray, provider) {
     const containerSettings = document.getElementById('modelListContainer');
@@ -664,7 +738,14 @@ function renderModelsList(modelsArray, provider) {
             containerSettings.appendChild(buildOption()); containerQuick.appendChild(buildOption());
         });
     }
-    document.getElementById('modelSelectTrigger').innerHTML = `<span>Select a model...</span> <i class="ph-bold ph-caret-down"></i>`;
+    
+    const savedModel = document.getElementById('modelSelect').value;
+    if (savedModel) {
+        const shortName = savedModel.split('/').pop();
+        document.getElementById('modelSelectTrigger').innerHTML = `<span>${shortName}</span> <i class="ph-bold ph-caret-down"></i>`;
+    } else {
+        document.getElementById('modelSelectTrigger').innerHTML = `<span>Select a model...</span> <i class="ph-bold ph-caret-down"></i>`;
+    }
 }
 
 // --- ATTACHMENTS ---
@@ -695,34 +776,65 @@ function updateStagingArea() {
     });
 }
 
-// Voice Recognition
+// --- VOICE MODAL STT ---
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
     const recognition = new SpeechRecognition();
     const micBtn = document.getElementById('btn-trigger-mic');
+    const voiceModal = document.getElementById('voiceModalOverlay');
+    const voiceInterim = document.getElementById('voiceInterimText');
+    const btnStopVoice = document.getElementById('btn-stop-voice');
+
     let isRecording = false;
     recognition.continuous = false;
     recognition.interimResults = true;
 
-    recognition.onstart = () => { isRecording = true; micBtn.classList.add('active'); };
-    recognition.onend = () => { isRecording = false; micBtn.classList.remove('active'); };
+    recognition.onstart = () => { 
+        isRecording = true; 
+        micBtn.classList.add('active'); 
+        voiceModal.classList.add('active');
+        voiceInterim.innerText = "Speak now...";
+    };
+    recognition.onend = () => { 
+        isRecording = false; 
+        micBtn.classList.remove('active'); 
+        voiceModal.classList.remove('active');
+    };
+    
     recognition.onresult = (event) => {
         let finalTranscript = '';
+        let interimTranscript = '';
+        
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+            else interimTranscript += event.results[i][0].transcript;
         }
-        const input = document.getElementById('userInput');
-        if (finalTranscript) input.value += (input.value ? ' ' : '') + finalTranscript;
+        
+        if(interimTranscript) {
+            voiceInterim.innerText = interimTranscript;
+        }
+        if (finalTranscript) {
+            const input = document.getElementById('userInput');
+            input.value += (input.value ? ' ' : '') + finalTranscript;
+        }
     };
 
     micBtn.addEventListener('click', () => { isRecording ? recognition.stop() : recognition.start(); });
+    btnStopVoice.addEventListener('click', () => { recognition.stop(); });
 } else {
     document.getElementById('btn-trigger-mic').style.display = 'none';
 }
 
 // --- CHAT LOGIC WITH LONG-TERM MEMORY & TTS ---
 document.getElementById('userInput').addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); triggerSend(); }});
-document.getElementById('btn-send').addEventListener('click', triggerSend);
+document.getElementById('btn-send').addEventListener('click', () => {
+    try {
+        triggerSend();
+    } catch(e) {
+        console.error("Send button failed:", e);
+        alert("Action failed. Please refresh the page. " + e.message);
+    }
+});
 
 const scrollToBottom = () => requestAnimationFrame(() => document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight);
 
@@ -734,6 +846,19 @@ function showTypingIndicator() {
     box.appendChild(msgDiv); scrollToBottom();
 }
 function removeTypingIndicator() { const ind = document.getElementById('typingIndicatorActive'); if (ind) ind.remove(); }
+
+function createMessageShell(role) {
+    const box = document.getElementById('chatBox');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${role}`;
+    const savedName = localStorage.getItem('horizon_custom_name');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || 'Yash') : 'Yash');
+    if (isGhostMode) name = 'Ghost';
+    
+    msgDiv.innerHTML = `<div class="message-sender">${role === 'user' ? `${name} <i class="ph-fill ph-user-circle"></i>` : '<i class="ph-fill ph-planet"></i> Horizon'}</div><div class="message-content ${role === 'ai' ? 'glass' : ''}"></div>`;
+    box.appendChild(msgDiv);
+    return msgDiv;
+}
 
 async function triggerSend() {
     const inputEl = document.getElementById('userInput');
@@ -748,7 +873,16 @@ async function triggerSend() {
     playPopSound();
 
     const filesToLog = [...attachedFilesData];
-    renderMessageToDOM('user', text, filesToLog);
+    
+    // Render User message immediately
+    const userMsgDiv = createMessageShell('user');
+    const userContent = userMsgDiv.querySelector('.message-content');
+    userContent.innerText = text;
+    filesToLog.forEach(f => {
+        if(f.isImage) { const img = document.createElement('img'); img.src = f.base64; img.className = 'message-image'; userContent.appendChild(img); } 
+        else { const fileDiv = document.createElement('div'); fileDiv.className = 'message-file'; fileDiv.innerHTML = `<i class="ph-fill ph-file-text" style="font-size:1.5rem"></i> <span>${f.name}</span>`; userContent.appendChild(fileDiv); }
+    });
+    scrollToBottom();
     uiHistory.push({ role: 'user', text: text, files: filesToLog });
     
     let payloadContent = text;
@@ -762,12 +896,10 @@ async function triggerSend() {
 
     inputEl.value = ''; attachedFilesData = []; updateStagingArea(); sendBtn.disabled = true;
     
-    // Stop any ongoing voice output when you send a new message
     if(window.speechSynthesis) window.speechSynthesis.cancel();
     
     showTypingIndicator();
 
-    // Inject Tones into Prompt
     if (TONE_DIRECTIVES[currentTone]) {
         systemPrompt += `\n\n[ASSISTANT TONE DIRECTIVE]: ${TONE_DIRECTIVES[currentTone]}`;
     }
@@ -821,28 +953,58 @@ async function triggerSend() {
         }
 
         removeTypingIndicator(); playPopSound();
-        renderMessageToDOM('ai', aiResponse);
         
-        // Voice Chat TTS Execution
-        if (voiceResponseEnabled && window.speechSynthesis) {
-            // Strip markdown formatting for cleaner speech
-            const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
-            const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
-            window.speechSynthesis.speak(utterance);
+        // --- Word-by-Word Typewriter Execution ---
+        const aiMsgShell = createMessageShell('ai');
+        const contentNode = aiMsgShell.querySelector('.message-content');
+        
+        // Match words along with surrounding spaces to preserve layout
+        const words = aiResponse.match(/(\S+|\s+)/g) || [];
+        let wordIndex = 0;
+        let currentStreamedText = "";
+        
+        function streamNextWord() {
+            if (wordIndex < words.length) {
+                currentStreamedText += words[wordIndex];
+                contentNode.innerHTML = DOMPurify.sanitize(marked.parse(currentStreamedText));
+                wordIndex++;
+                scrollToBottom();
+                setTimeout(streamNextWord, 10); 
+            } else {
+                // Done Streaming
+                if (voiceResponseEnabled && window.speechSynthesis) {
+                    const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
+                    const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
+                    window.speechSynthesis.speak(utterance);
+                }
+                
+                const estimatedTokens = Math.ceil((text.length + aiResponse.length) / 4);
+                updateStatsUI(estimatedTokens);
+
+                if(!isGhostMode) { 
+                    uiHistory.push({ role: 'ai', text: aiResponse, files: [] }); 
+                    chatHistory.push({ role: 'assistant', content: aiResponse }); 
+                    saveSessionData(); 
+                }
+                sendBtn.disabled = false;
+            }
         }
         
-        const estimatedTokens = Math.ceil((text.length + aiResponse.length) / 4);
-        updateStatsUI(estimatedTokens);
-
-        if(!isGhostMode) { uiHistory.push({ role: 'ai', text: aiResponse, files: [] }); chatHistory.push({ role: 'assistant', content: aiResponse }); saveSessionData(); }
+        // Start streaming
+        streamNextWord();
 
     } catch (err) {
         console.error(err); removeTypingIndicator();
-        renderMessageToDOM('ai', `⚠️ Error: ${err.message}`);
+        
+        const errorShell = createMessageShell('ai');
+        errorShell.querySelector('.message-content').innerText = `⚠️ Error: ${err.message}`;
+        
         if(!isGhostMode) { chatHistory.pop(); uiHistory.pop(); saveSessionData(); }
-    } finally { sendBtn.disabled = false; }
+        sendBtn.disabled = false;
+    }
 }
 
+// Initial full-render function for historical messages
 function renderMessageToDOM(role, text, files = [], skipScroll = false) {
     document.getElementById('placeholderMsg')?.remove();
     const box = document.getElementById('chatBox');
