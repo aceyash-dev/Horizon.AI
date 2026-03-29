@@ -24,10 +24,10 @@
             --glass-bg: rgba(30, 32, 38, 0.35);
             --border: rgba(255, 255, 255, 0.1);
             
-            /* Trio-morphism Light Sources */
-            --shadow-light: rgba(255, 255, 255, 0.04);
-            --shadow-dark: rgba(0, 0, 0, 0.6);
-            --inset-light: rgba(255, 255, 255, 0.15);
+            /* Neumorphism Base Shadows */
+            --shadow-light: rgba(255, 255, 255, 0.08);
+            --shadow-dark: rgba(0, 0, 0, 0.4);
+            --inset-light: rgba(255, 255, 255, 0.1);
             --inset-dark: rgba(0, 0, 0, 0.4);
             --input-bg: rgba(5, 5, 8, 0.6);
         }
@@ -39,9 +39,9 @@
             --glass-bg: rgba(255, 255, 255, 0.4);
             --border: rgba(0, 0, 0, 0.1);
             
-            --shadow-light: rgba(255, 255, 255, 0.8);
+            --shadow-light: rgba(255, 255, 255, 0.9);
             --shadow-dark: rgba(0, 0, 0, 0.15);
-            --inset-light: rgba(255, 255, 255, 0.6);
+            --inset-light: rgba(255, 255, 255, 0.7);
             --inset-dark: rgba(0, 0, 0, 0.1);
             --input-bg: rgba(230, 230, 235, 0.6);
         }
@@ -53,8 +53,8 @@
             --glass-bg: rgba(10, 10, 10, 0.6);
             --border: rgba(255, 255, 255, 0.05);
             
-            --shadow-light: rgba(255, 255, 255, 0.01);
-            --shadow-dark: rgba(0, 0, 0, 0.9);
+            --shadow-light: rgba(255, 255, 255, 0.02);
+            --shadow-dark: rgba(0, 0, 0, 0.8);
             --inset-light: rgba(255, 255, 255, 0.05);
             --inset-dark: rgba(0, 0, 0, 0.8);
             --input-bg: rgba(2, 2, 2, 0.8);
@@ -84,64 +84,66 @@
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
-        /* TRIO-MORPHISM: Glass + Neu + Skeuo Classes */
+        /* GLASSMORPHISM BASE */
         .glass {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, var(--glass-bg) 100%) !important;
             backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
             border: 1px solid var(--border) !important;
-            box-shadow: 
-                -4px -4px 12px var(--shadow-light), 
-                4px 4px 12px var(--shadow-dark), 
-                inset 1px 1px 2px var(--inset-light), 
-                inset -1px -1px 2px var(--inset-dark) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
             transform: translateZ(0); 
         }
 
+        /* NEUMORPHISM BUTTONS */
         .btn-extrude, button, .chat-model-selector, .custom-select-trigger, .hardware-btn {
-            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.15)) !important;
-            border: 1px solid rgba(0,0,0,0.5) !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: none !important;
             box-shadow: 
-                -2px -2px 6px var(--shadow-light), 
-                2px 2px 6px var(--shadow-dark), 
-                inset 1px 1px 2px var(--inset-light), 
-                inset -1px -1px 2px var(--inset-dark) !important;
-            transition: all 0.15s ease !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                -4px -4px 10px var(--shadow-light), 
+                4px 4px 10px var(--shadow-dark) !important;
+            transition: all 0.2s ease !important;
         }
-        
-        body.light-mode .btn-extrude, body.light-mode button, body.light-mode .chat-model-selector { text-shadow: none; border: 1px solid rgba(0,0,0,0.1) !important;}
 
         .btn-extrude:active, button:active, .hardware-btn.active, .btn-icon.active {
             box-shadow: 
-                inset 2px 2px 5px var(--inset-dark), 
-                inset -1px -1px 2px var(--inset-light),
-                0 1px 1px var(--shadow-light) !important;
-            transform: translateY(2px);
-            background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(255,255,255,0.02)) !important;
+                inset 4px 4px 10px var(--inset-dark), 
+                inset -4px -4px 10px var(--inset-light) !important;
+            transform: translateY(1px);
+            background: rgba(0, 0, 0, 0.05) !important;
         }
 
-        .input-recess, textarea, input[type="text"], input[type="password"], select, .preview-area, .code-wrapper {
+        .input-recess, textarea, input[type="text"], input[type="password"], input[type="email"], select, .preview-area, .code-wrapper {
             background-color: var(--input-bg) !important;
-            border: 1px solid rgba(0,0,0,0.8) !important;
+            border: 1px solid transparent !important;
             box-shadow: 
-                inset 3px 3px 6px var(--inset-dark), 
-                inset -2px -2px 4px var(--inset-light),
-                1px 1px 2px var(--shadow-light) !important;
+                inset 4px 4px 8px var(--inset-dark), 
+                inset -4px -4px 8px var(--inset-light) !important;
+            transition: border 0.2s ease;
         }
-        body.light-mode .input-recess, body.light-mode textarea, body.light-mode input { border: 1px solid rgba(0,0,0,0.2) !important; }
 
         /* Background Video */
         #landing-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s ease; padding: 20px; overflow: hidden; background: #000;}
         #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.6; filter: brightness(0.8) contrast(1.1); pointer-events: none;}
         
-        .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 400px; animation: scaleIn 0.5s ease;}
-        .btn-auth { color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 12px; font-size: 1rem; }
+        .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 400px; animation: scaleIn 0.5s ease; max-height: 95vh; overflow-y: auto;}
+        
+        /* Auth Card Specific Layout */
+        .auth-toggle-container { display: flex; background: var(--input-bg); border-radius: 12px; padding: 6px; margin-bottom: 20px; box-shadow: inset 3px 3px 6px var(--inset-dark), inset -3px -3px 6px var(--inset-light); }
+        .auth-tab { flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent !important; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: none !important;}
+        .auth-tab.active { background: rgba(255, 255, 255, 0.08) !important; color: var(--text-light); box-shadow: -2px -2px 5px var(--shadow-light), 2px 2px 5px var(--shadow-dark) !important; }
+        
+        .btn-auth { color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-size: 1rem; margin-bottom: 12px;}
         .btn-github { background-color: #24292e !important; }
-        .btn-google { background-color: #ffffff !important; color: #333; text-shadow: none; border-color: #ccc !important;}
-        .btn-ghost { background-color: rgba(255,255,255,0.05) !important; color: var(--text-light); margin-top: 24px; }
+        .btn-google { background-color: #ffffff !important; color: #333; text-shadow: none; }
+        .btn-ghost { background-color: rgba(255,255,255,0.05) !important; color: var(--text-light); margin-top: 10px; margin-bottom: 0; }
+
+        .auth-divider { display: flex; align-items: center; text-align: center; margin: 15px 0; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;}
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+        .auth-divider span { padding: 0 10px; opacity: 0.7;}
+
+        .email-form-box { background: rgba(0,0,0,0.15); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: left;}
 
         #auth-loading-overlay { display: none; position: absolute; inset: 0; background: var(--bg-gradient); z-index: 200; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); }
-        #welcomeToast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 12px 20px; border-radius: 30px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.3); font-weight: 600; align-items: center; gap: 8px; animation: slideDown 0.4s ease forwards; width: max-content; max-width: 90vw; font-size: 0.9rem; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        #welcomeToast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 12px 20px; border-radius: 30px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: 600; align-items: center; gap: 8px; animation: slideDown 0.4s ease forwards; width: max-content; max-width: 90vw; font-size: 0.9rem; text-align: center; }
         
         #tutorialLock { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
         .tutorial-card { padding: 30px; border-radius: 24px; width: 100%; max-width: 450px; text-align: center; animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -153,10 +155,10 @@
         .sidebar { width: 280px; padding: 20px; display: flex; flex-direction: column; gap: 12px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
         .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; }
         
-        .brand { font-weight: 700; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+        .brand { font-weight: 700; font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
         .sidebar-btn { padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; white-space: nowrap; flex-shrink: 0;}
         
-        .sidebar-section-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 10px; padding: 0 5px; flex-shrink: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .sidebar-section-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 10px; padding: 0 5px; flex-shrink: 0; }
         #sidebarChatList { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; flex: 1; padding: 0 5px; margin-bottom: 10px;}
         .chat-history-item { background: transparent !important; box-shadow: none !important; border: none !important; color: var(--text-muted); padding: 12px 10px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; white-space: nowrap; transition: all 0.2s;}
         .chat-history-item:hover { background: rgba(255,255,255,0.05) !important; color: var(--text-light); }
@@ -173,16 +175,16 @@
         .sidebar-links a:hover { color: var(--accent); }
         .sidebar-tagline { font-size: 0.7rem; color: var(--text-muted); opacity: 0.6; margin-top: 5px; line-height: 1.4; white-space: normal;}
 
-        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-top: 10px; white-space: nowrap; cursor: pointer; flex-shrink: 0; background: var(--input-bg); border: 1px solid #000; box-shadow: inset 0 2px 4px var(--inset-dark), 0 1px 2px var(--shadow-light);}
-        .user-profile img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+        .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-top: 10px; white-space: nowrap; cursor: pointer; flex-shrink: 0; border: 1px solid transparent;}
+        .user-profile img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
         .user-profile-info { display: flex; flex-direction: column; }
-        .user-profile-name { font-weight: 600; font-size: 0.9rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .user-profile-name { font-weight: 600; font-size: 0.9rem; }
         .user-profile-status { font-size: 0.75rem; color: var(--accent); display: flex; align-items: center; gap: 4px; }
 
         .mobile-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 15; backdrop-filter: blur(4px); animation: fadeIn 0.2s;}
 
         .chat-container { flex: 1; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; min-height: 0; min-width: 0; position: relative; z-index: 10;}
-        .top-bar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); z-index: 5; gap: 10px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .top-bar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); z-index: 5; gap: 10px; flex-wrap: wrap; }
         
         .chat-model-selector { padding: 8px 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; position: relative; white-space: nowrap; max-width: 200px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .chat-model-selector span { overflow: hidden; text-overflow: ellipsis; }
@@ -192,38 +194,38 @@
         .btn-icon { font-size: 1.4rem; padding: 8px; border-radius: 8px; display: flex; align-items: center;}
         .btn-icon:hover { color: var(--accent); }
 
-        .ghost-badge { display: none; background: rgba(255, 255, 255, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #ff4757; border: 1px solid #ff4757; align-items: center; gap: 5px; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
+        .ghost-badge { display: none; background: rgba(255, 255, 255, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #ff4757; border: 1px solid #ff4757; align-items: center; gap: 5px; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);}
         .ghost-badge.active { display: flex; animation: slideUp 0.3s; }
 
         .messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 20px; scroll-behavior: smooth; min-height: 0; padding-bottom: 30px;}
         .message { display: flex; flex-direction: column; max-width: 85%; animation: slideUp 0.3s ease forwards; transform: translateZ(0);}
         .message.user { align-self: flex-end; }
         .message.ai { align-self: flex-start; }
-        .message-sender { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .message-sender { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
         .message.user .message-sender { flex-direction: row-reverse; }
-        .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); text-shadow: 0 1px 2px rgba(0,0,0,0.2);}
-        .message.user .message-content { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 15px var(--accent-alpha); white-space: pre-wrap; border: 1px solid rgba(0,0,0,0.2);}
+        .message-content { padding: 16px 20px; border-radius: 16px; line-height: 1.6; word-wrap: break-word; font-size: 1rem; color: var(--text-light); }
+        .message.user .message-content { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px var(--accent-alpha); white-space: pre-wrap; border: 1px solid rgba(0,0,0,0.2);}
         .message.ai .message-content { border-bottom-left-radius: 4px; }
         .message-image { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
-        .message-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; font-size: 0.9rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
+        .message-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 5px; font-size: 0.9rem; }
 
         /* Smart Skeleton Loaders */
-        .skeleton-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 200px; }
+        .skeleton-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 250px; }
         .skeleton-line { height: 14px; background: linear-gradient(90deg, rgba(150,150,150,0.1) 25%, rgba(150,150,150,0.2) 50%, rgba(150,150,150,0.1) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 4px; }
-        .skeleton-header { height: 20px; width: 30%; background: linear-gradient(90deg, rgba(150,150,150,0.2) 25%, rgba(150,150,150,0.3) 50%, rgba(150,150,150,0.2) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 4px; margin-bottom: 10px;}
-        .skeleton-box { height: 150px; width: 100%; background: linear-gradient(90deg, rgba(150,150,150,0.1) 25%, rgba(150,150,150,0.2) 50%, rgba(150,150,150,0.1) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 8px; margin-top: 5px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); border: 1px dashed var(--border);}
+        .skeleton-header { height: 20px; width: 40%; background: linear-gradient(90deg, rgba(150,150,150,0.2) 25%, rgba(150,150,150,0.3) 50%, rgba(150,150,150,0.2) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 4px; margin-bottom: 10px;}
+        .skeleton-box { height: 180px; width: 100%; background: linear-gradient(90deg, rgba(150,150,150,0.1) 25%, rgba(150,150,150,0.2) 50%, rgba(150,150,150,0.1) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite linear; border-radius: 8px; margin-top: 5px; border: 1px dashed var(--border);}
         @keyframes skeleton-shimmer { to { background-position: -200% 0; } }
 
         .code-wrapper { border-radius: 12px; margin: 16px 0; overflow: hidden; }
-        .code-header { background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(0,0,0,0.2)); padding: 8px 16px; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid #000; text-transform: uppercase; align-items: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .code-header { background: rgba(0,0,0,0.2); padding: 8px 16px; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.2); text-transform: uppercase; align-items: center; }
         .code-header-actions { display: flex; gap: 8px; }
         .code-action-btn { background: transparent !important; box-shadow: none !important; border: none !important; padding: 4px; font-size: 0.8rem;}
         .code-wrapper pre { padding: 16px; margin: 0; overflow-x: auto; }
         .code-wrapper code { font-family: 'Courier New', monospace; font-size: 0.95em; color: var(--text-light); }
-        .message-content p code { background-color: rgba(0,0,0,0.6); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; border: 1px solid #000; color: var(--accent); font-family: 'Courier New', monospace; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);}
+        .message-content p code { background-color: rgba(0,0,0,0.6); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; color: var(--accent); font-family: 'Courier New', monospace; }
 
-        .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: background 0.3s ease; box-shadow: 0 -4px 10px rgba(0,0,0,0.3);}
-        .preview-area { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; }
+        .input-container { border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: background 0.3s ease; box-shadow: 0 -4px 10px rgba(0,0,0,0.1);}
+        .preview-area { display: flex; gap: 10px; padding: 0 20px; overflow-x: auto; border-radius: 0 !important; box-shadow: none !important; border-bottom: 1px solid rgba(0,0,0,0.2) !important;}
         .preview-area:not(:empty) { padding-top: 15px; }
         .preview-item { position: relative; width: 60px; height: 60px; border-radius: 8px; border: 1px solid var(--accent); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.6rem; color: var(--text-muted);}
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
@@ -249,31 +251,30 @@
         .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease forwards; }
         .modal-content { padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;}
         .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
-        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
         .form-group input, .form-group select, .form-group textarea { padding: 14px; border-radius: 12px; color: var(--text-light); outline: none; font-size: 1rem; width: 100%;}
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent) !important; }
 
         .color-picker-wrapper { display: flex; align-items: center; gap: 15px; }
-        input[type="color"] { -webkit-appearance: none; border: none !important; box-shadow: 0 2px 5px rgba(0,0,0,0.5) !important; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; padding: 0; background: transparent !important; }
+        input[type="color"] { -webkit-appearance: none; border: none !important; box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; padding: 0; background: transparent !important; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 50%; }
 
-        /* Skeuomorphic Toggles */
         .switch-group { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { 
-            position: absolute; cursor: pointer; inset: 0; background: linear-gradient(180deg, #111, #333); transition: .4s; border-radius: 34px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.05); border: 1px solid rgba(0,0,0,0.8);
+            position: absolute; cursor: pointer; inset: 0; background: rgba(0,0,0,0.3); transition: .4s; border-radius: 34px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);
         }
         .slider:before { 
             position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-            background: linear-gradient(180deg, #eee, #aaa); transition: .4s; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 1px 1px white; border: 1px solid #888;
+            background: #fff; transition: .4s; border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
         }
         input:checked + .slider { 
-            background: linear-gradient(180deg, var(--accent-dark), var(--accent));
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.7), 0 1px 1px rgba(255,255,255,0.1); border-color: var(--accent-dark);
+            background: var(--accent);
+            border-color: var(--accent-dark);
         }
         input:checked + .slider:before { transform: translateX(22px); }
 
@@ -282,18 +283,18 @@
         .custom-select-options { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; max-height: 280px; border-radius: 12px; z-index: 10; padding: 0; flex-direction: column; overflow: hidden; }
         .custom-select-options.open { display: flex; animation: slideUp 0.2s ease forwards; }
         
-        .search-container { padding: 10px; border-bottom: 1px solid #000; display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 11;}
+        .search-container { padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 11;}
         .search-container input { width: 100%; background: transparent !important; box-shadow: none !important; border: none !important; color: var(--text-light); outline: none; padding: 0;}
         
         .options-list-scroll { overflow-y: auto; max-height: 230px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-        .optgroup-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; padding: 10px 12px 4px; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        .optgroup-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; padding: 10px 12px 4px; display: flex; align-items: center; gap: 6px; }
         .custom-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; transition: background 0.2s;}
         .custom-option:hover { background: rgba(255,255,255,0.1); }
         .custom-option.selected { background: var(--accent-alpha); border: 1px solid var(--accent); }
         
         .badge-lite { background: rgba(88, 101, 242, 0.2); color: var(--accent); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid var(--accent-alpha); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
         .badge-pro { background: rgba(255, 71, 87, 0.15); color: #ff4757; font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; margin-left: auto; border: 1px solid rgba(255, 71, 87, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 4px;}
-        .capability-badge { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: rgba(0,0,0,0.4); font-size: 0.85rem; margin-left: -5px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05);}
+        .capability-badge { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: rgba(0,0,0,0.4); font-size: 0.85rem; margin-left: -5px; }
 
         /* Stratified Voice Modal */
         #voiceModalOverlay { z-index: 9999 !important; backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
@@ -303,11 +304,11 @@
 
         .capabilities-list { text-align: left; padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 0.95rem; line-height: 1.8; }
         .capabilities-list div { display: flex; align-items: center; gap: 8px; }
-        .capabilities-list i { color: var(--accent); font-size: 1.2rem; width: 24px; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.8);}
+        .capabilities-list i { color: var(--accent); font-size: 1.2rem; width: 24px; text-align: center; }
 
         .user-stats-container { display: flex; justify-content: space-around; padding: 15px; border-radius: 12px; margin: 10px 0; }
         .stat-box { text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
         .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
         .api-credits-info { font-size: 0.85rem; color: #2ecc71; margin-top: 5px; text-align: center; display: none; padding: 8px; border-radius: 8px; }
 
@@ -345,20 +346,20 @@
 <body class="dark-mode">
 
     <div id="auth-loading-overlay">
-        <i class="ph-bold ph-spinner ph-spin" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--accent));"></i>
-        <h2 style="margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Logging In</h2>
+        <i class="ph-bold ph-spinner ph-spin" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+        <h2 style="margin:0;">Logging In</h2>
         <p style="color: var(--text-muted); margin-top: 5px;">Coding Data Blocks...</p>
     </div>
 
     <div id="welcomeToast">
-        <i class="ph-bold ph-hand-pointing"></i> Tap on the sidebar to switch between chats and configure Configurations. 😏
+        <i class="ph-bold ph-hand-pointing"></i> Tap on the sidebar to switch between chats and configure Configurations. 
         <button id="closeToast" style="background:transparent; border:none; color:white; margin-left:10px; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
     </div>
 
     <div id="tutorialLock">
         <div class="tutorial-card glass">
-            <h2 style="color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                <i class="ph-fill ph-rocket-launch" style="color: var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i> Welcome to Horizon.AI!
+            <h2 style="color: var(--text-light); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.6rem;">
+                <i class="ph-fill ph-rocket-launch" style="color: var(--accent);"></i> Welcome to Horizon.AI!
             </h2>
             <div class="tutorial-step">
                 <b>1.</b> Tap the <i class="ph-bold ph-list"></i> button in the top left to open the sidebar.
@@ -380,17 +381,17 @@
             <div class="voice-pulse-ring">
                 <button id="btn-stop-voice" class="btn-send btn-extrude" style="width: 80px; height: 80px; font-size: 2.5rem; border-radius: 50%;"><i class="ph-fill ph-microphone"></i></button>
             </div>
-            <h3 style="margin: 0; color: var(--accent); font-size: 1.5rem; text-shadow: 0 2px 5px rgba(0,0,0,0.8);">Listening...</h3>
+            <h3 style="margin: 0; color: var(--accent); font-size: 1.5rem;">Listening...</h3>
             <div class="input-recess" style="width: 100%; border-radius: 12px; padding: 15px;">
-                <div id="voiceInterimText" style="min-height: 50px; font-size: 1.1rem; color: var(--text-light); font-style: italic; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Speak into it</div>
+                <div id="voiceInterimText" style="min-height: 50px; font-size: 1.1rem; color: var(--text-light); font-style: italic; display: flex; align-items: center; justify-content: center;">Speak into it</div>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="capabilitiesModalOverlay" style="z-index: 300;">
         <div class="modal-content glass" style="max-width: 400px; text-align: center;">
-            <h2 style="font-size:1.3rem; display:flex; align-items:center; justify-content:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-cpu"></i> Select Model</h2>
-            <p id="capModelName" style="font-weight: 700; color: var(--accent); margin-top: 5px; font-size:1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></p>
+            <h2 style="font-size:1.3rem; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="ph-fill ph-cpu"></i> Select Model</h2>
+            <p id="capModelName" style="font-weight: 700; color: var(--accent); margin-top: 5px; font-size:1.1rem; "></p>
             
             <div class="capabilities-list input-recess" id="capList"></div>
             
@@ -403,7 +404,7 @@
 
     <div class="modal-overlay" id="profileModalOverlay" style="z-index: 300;">
         <div class="modal-content glass" style="max-width: 400px;">
-            <h2 style="font-size:1.3rem; display:flex; align-items:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-user-circle"></i> You</h2>
+            <h2 style="font-size:1.3rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-user-circle"></i> You</h2>
             
             <div class="user-stats-container input-recess">
                 <div class="stat-box">
@@ -439,20 +440,45 @@
             <source src="background.mp4" type="video/mp4">
         </video>
         <div class="auth-card glass">
-            <h1 style="margin-bottom:10px; text-shadow: 0 4px 8px rgba(0,0,0,0.8);"><i class="ph-fill ph-planet" style="color:var(--accent); filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));"></i> Horizon.AI</h1>
-            <p style="color:var(--text-muted); margin-bottom: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"><i class="ph-fill ph-lock-key"></i> Your Free Online AI Gateway</p>
+            <h2 style="margin-bottom: 15px; font-weight: 700;"><i class="ph-fill ph-planet" style="color:var(--accent);"></i> Horizon.AI</h2>
             
-            <button id="btn-login-github" class="btn-auth btn-github btn-extrude">
-                <i class="ph-fill ph-github-logo" style="font-size: 1.2rem;"></i> Login with GitHub
-            </button>
-            <button id="btn-login-google" class="btn-auth btn-google btn-extrude">
-                <i class="ph-fill ph-google-logo" style="font-size: 1.2rem;"></i> Login with Google
-            </button>
-            <button id="btn-login-ghost" class="btn-auth btn-ghost btn-extrude">
-                <i class="ph-fill ph-ghost" style="font-size: 1.2rem;"></i> Continue in Ghost Mode
-            </button>
+            <div class="auth-toggle-container">
+                <button id="tab-login" class="auth-tab active">LOGIN</button>
+                <button id="tab-signup" class="auth-tab">SIGN UP</button>
+            </div>
+            
+            <div class="social-auth-group">
+                <button id="btn-login-google" class="btn-auth btn-google btn-extrude">
+                    <i class="ph-fill ph-google-logo" style="font-size: 1.2rem;"></i> Continue with Google
+                </button>
+                <button id="btn-login-github" class="btn-auth btn-github btn-extrude">
+                    <i class="ph-fill ph-github-logo" style="font-size: 1.2rem;"></i> Continue with GitHub
+                </button>
+            </div>
+            
+            <div class="auth-divider"><span>OR</span></div>
+            
+            <div class="email-form-box">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <input type="email" id="auth-email" class="input-recess" placeholder="Email ID">
+                    <input type="password" id="auth-password" class="input-recess" placeholder="Password">
+                </div>
+                
+                <div id="tc-container" style="display: none; margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted);">
+                        <input type="checkbox" id="auth-tc" style="accent-color: var(--accent); width: 16px; height: 16px;"> 
+                        I agree to the T&C
+                    </label>
+                </div>
 
-            <p style="font-size: 0.8rem; margin-top: 20px; opacity: 0.6; text-shadow: 0 1px 2px rgba(0,0,0,0.8);"><i class="ph-fill ph-database"></i> We don't sell your data! It's on your device. </p>
+                <button id="btn-auth-go" class="btn-auth btn-extrude" style="background-color: var(--accent) !important; margin-bottom: 0;">GO</button>
+            </div>
+
+            <div class="auth-divider" style="margin-top: 25px;"><span>OR</span></div>
+            
+            <button id="btn-login-ghost" class="btn-auth btn-ghost btn-extrude">
+                <i class="ph-fill ph-ghost"></i> Continue as Ghost
+            </button>
         </div>
     </div>
 
@@ -462,7 +488,7 @@
 
             <div class="sidebar glass collapsed" id="mainSidebar">
                 <div class="brand">
-                    <i class="ph-fill ph-planet" style="color:var(--accent); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i> Horizon.AI
+                    <i class="ph-fill ph-planet" style="color:var(--accent);"></i> Horizon.AI
                 </div>
                 <button id="btn-new-chat" class="sidebar-btn btn-extrude">
                     <i class="ph-fill ph-plus-circle" style="color:var(--accent)"></i> New Chat
@@ -479,7 +505,7 @@
                     <a href="https://github.com/aceyash-dev" target="_blank"><i class="ph-fill ph-github-logo"></i> GitHub</a>
                     <a href="https://instagram.com/archives.of.yash" target="_blank"><i class="ph-fill ph-instagram-logo"></i> Instagram</a>
                     <a href="https://chai4.me/aceyash-dev" target="_blank"><i class="ph-fill ph-coffee"></i> Buy me a Chai</a>
-                    <div class="sidebar-tagline">©Ace Horizon 2024.Andi-Mandi-Sandi Jisne support nahi kiya...</div>
+                    <div class="sidebar-tagline">©Ace Horizon 2024</div>
                 </div>
 
                 <div class="user-profile input-recess" id="btn-user-profile" title="Edit Profile & Stats">
@@ -502,7 +528,7 @@
                         <div class="ghost-badge" id="ghostIndicator" title="Ghost Mode"><i class="ph-fill ph-ghost"></i></div>
                     </div>
 
-                    <div id="chatTitleDisplay" style="order: 2; flex: 1; text-align: center; font-weight: 600; font-size: 1rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">➕Start Fresh </div>
+                    <div id="chatTitleDisplay" style="order: 2; flex: 1; text-align: center; font-weight: 600; font-size: 1rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ">➕Start Fresh </div>
 
                     <div style="display:flex; align-items:center; gap:8px; order: 3;">
                         <div id="quickModelSelector" class="chat-model-selector btn-extrude" title="Switch Model">
@@ -523,13 +549,13 @@
 
                 <div class="messages" id="chatBox">
                     <div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;" id="placeholderMsg">
-                        <i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent); filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));"></i>
-                        <span style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Welcome to Horizon.AI..! What's in your mind today? </span>
+                        <i class="ph-fill ph-sparkle" style="font-size: 2.5rem; color: var(--accent);"></i>
+                        <span>Welcome to Horizon.AI..! What's in your mind today? </span>
                     </div>
                 </div>
                 
                 <div class="input-container">
-                    <div class="preview-area input-recess" id="imagePreviewContainer" style="box-shadow: none !important; border: none !important; border-bottom: 1px solid rgba(0,0,0,0.5) !important;"></div>
+                    <div class="preview-area input-recess" id="imagePreviewContainer"></div>
                     <div class="input-area">
                         <input type="file" id="fileAttach" accept="*/*" multiple style="display:none">
                         <input type="file" id="cameraAttach" accept="image/*" capture="environment" style="display:none">
@@ -555,34 +581,34 @@
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content glass">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h2 style="font-size:1.2rem; display:flex; align-items:center; gap:8px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);"><i class="ph-fill ph-sliders-horizontal"></i> Configuration</h2>
+                <h2 style="font-size:1.2rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-sliders-horizontal"></i> Configuration</h2>
                 <button id="btn-close-settings" class="btn-icon btn-extrude"><i class="ph-bold ph-x"></i></button>
             </div>
 
             <div class="switch-group" style="padding-top: 0;">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-palette"></i> Accent Color</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-palette"></i> Accent Color</span>
                 <div class="color-picker-wrapper">
                     <input type="color" id="accentColorPicker" value="#5865F2">
                 </div>
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-speaker-high"></i>Allow Voice Responses (TTS)?</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-speaker-high"></i>Allow Voice Responses (TTS)?</span>
                 <label class="switch"><input type="checkbox" id="voiceToggle"><span class="slider"></span></label>
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-music-notes"></i> Sound Effects(SFX) </span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-music-notes"></i> Sound Effects(SFX) </span>
                 <label class="switch"><input type="checkbox" id="sfxToggle" checked><span class="slider"></span></label>
             </div>
 
             <div class="switch-group">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-vibrate"></i> Haptic Feedback</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px;"><i class="ph-fill ph-vibrate"></i> Haptic Feedback</span>
                 <label class="switch"><input type="checkbox" id="hapticsToggle" checked><span class="slider"></span></label>
             </div>
 
             <div class="switch-group" id="settingsGhostToggleGroup">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; color: #ff4757; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-ghost"></i> Ghost Mode? 😏</span>
+                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; color: #ff4757;"><i class="ph-fill ph-ghost"></i> Ghost Mode? 😏</span>
                 <label class="switch"><input type="checkbox" id="ghostToggle"><span class="slider"></span></label>
             </div>
 
@@ -614,7 +640,7 @@
             <div class="form-group">
                 <label for="apiKey" style="display:flex; justify-content:space-between; width:100%;">
                     <span><i class="ph-fill ph-key"></i> API Key</span>
-                    <a id="apiKeyLink" href="https://openrouter.ai/keys" target="_blank" style="color: var(--accent); text-decoration: none; font-size: 0.75rem; text-shadow: none;"><i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key</a>
+                    <a id="apiKeyLink" href="https://openrouter.ai/keys" target="_blank" style="color: var(--accent); text-decoration: none; font-size: 0.75rem;"><i class="ph-bold ph-arrow-square-out"></i> Get OpenRouter Key</a>
                 </label>
                 <input type="password" id="apiKey" class="input-recess" placeholder="Enter API Key">
             </div>
