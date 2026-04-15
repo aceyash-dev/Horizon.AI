@@ -1,9 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 import { getAuth, signInWithPopup, GithubAuthProvider, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
 // NOTE: Using raw keys client-side is vulnerable to abuse. 
-// Must configure Firebase App Check & restrict domain usage in the Google Cloud Console.
 const firebaseConfig = {
     apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
     authDomain: "ace-horizon.firebaseapp.com",
@@ -17,6 +17,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Global Error Boundaries
+window.addEventListener('error', (event) => {
+    console.error('Global Error:', event.error);
+});
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled Promise Rejection:', event.reason);
+});
 
 // Cross-Session Long Term Memory
 let longTermMemory = JSON.parse(localStorage.getItem('horizon_long_term_memory')) || [];
@@ -41,6 +50,57 @@ let statMessages = parseInt(localStorage.getItem('horizon_stat_msgs')) || 0;
 let statTokens = parseInt(localStorage.getItem('horizon_stat_tokens')) || 0;
 window.allParsedModels = []; 
 
+// --- SPEECH SYNTHESIS VOICE CUSTOMIZATION ---
+let availableVoices = [];
+
+function loadAvailableVoices() {
+    if (!window.speechSynthesis) return; 
+    
+    availableVoices = window.speechSynthesis.getVoices();
+    const voiceSelect = document.getElementById('voiceSelect');
+    if (!voiceSelect) return;
+
+    voiceSelect.innerHTML = '';
+    
+    if (availableVoices.length === 0) {
+        voiceSelect.innerHTML = '<option value="">System Default Voice (Loading...)</option>';
+    } else {
+        availableVoices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            voiceSelect.appendChild(option);
+        });
+
+        const savedVoiceIndex = localStorage.getItem('horizon_selected_voice');
+        if (savedVoiceIndex !== null && availableVoices[savedVoiceIndex]) {
+            voiceSelect.value = savedVoiceIndex;
+        }
+    }
+}
+
+// SAFE INITIALIZATION: Polling required for Android WebViews which delay TTS loading
+if (window.speechSynthesis) {
+    loadAvailableVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadAvailableVoices;
+    }
+    
+    // Aggressive fallback polling for mobile environments
+    let voicePolls = 0;
+    const voiceInterval = setInterval(() => {
+        if (availableVoices.length > 0 || voicePolls > 5) {
+            clearInterval(voiceInterval);
+            if (availableVoices.length === 0 && document.getElementById('voiceSelect')) {
+                document.getElementById('voiceSelect').innerHTML = '<option value="">No Custom Voices Found (Using Default)</option>';
+            }
+        } else {
+            loadAvailableVoices();
+            voicePolls++;
+        }
+    }, 1000);
+}
+
 const TONE_DIRECTIVES = {
     'standard': '',
     'professional': 'Respond in a highly professional, objective, and concise manner.',
@@ -49,43 +109,25 @@ const TONE_DIRECTIVES = {
     'academic': 'Respond in a highly detailed, academic, and analytical tone with deep explanations.'
 };
 
-// --- SYSTEM INFO PARSING FOR FOOTER GRID ---
+// --- SYSTEM INFO (Privacy Friendly) ---
 function parseSystemInfo() {
-    const sysBrowserEl = document.getElementById('sysBrowserInfo');
-    const sysDeviceEl = document.getElementById('sysDeviceInfo');
     const sysTokensEl = document.getElementById('sysStatTokens');
-    
-    if(!sysBrowserEl || !sysDeviceEl || !sysTokensEl) return;
-
-    const ua = navigator.userAgent;
-    let browser = "Unknown Browser";
-    if (ua.includes("Firefox")) browser = "Firefox";
-    else if (ua.includes("SamsungBrowser")) browser = "Samsung Int";
-    else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
-    else if (ua.includes("Trident")) browser = "IE";
-    else if (ua.includes("Edge")) browser = "Edge";
-    else if (ua.includes("Chrome")) browser = "Chrome";
-    else if (ua.includes("Safari")) browser = "Safari";
-    
-    let os = "Unknown Device";
-    if (ua.includes("Win")) os = "Windows";
-    else if (ua.includes("Mac")) os = "macOS/iOS";
-    else if (ua.includes("Linux")) os = "Linux";
-    else if (ua.includes("Android")) os = "Android";
-
-    sysBrowserEl.innerHTML = `<i class="ph-bold ph-browser"></i> ${browser}`;
-    sysDeviceEl.innerHTML = `<i class="ph-bold ph-device-mobile"></i> ${os}`;
-    sysTokensEl.innerText = statTokens.toLocaleString() || '0';
+    document.getElementById('sysBrowserInfo')?.remove();
+    document.getElementById('sysDeviceInfo')?.remove();
+    if (sysTokensEl) sysTokensEl.innerText = statTokens.toLocaleString() || '0';
 }
 document.addEventListener("DOMContentLoaded", parseSystemInfo);
 
-// --- THEME TOGGLE ---
-const themes = ['dark-mode', 'pitch-black-mode', 'light-mode'];
-const themeIcons = ['ph-moon', 'ph-star', 'ph-sun-dim'];
+// --- THEME TOGGLE (Only Pitch Tar & Light) ---
+const themes = ['pitch-tar-mode', 'light-mode'];
+const themeIcons = ['ph-moon-stars', 'ph-sun-dim'];
 let currentThemeIndex = parseInt(localStorage.getItem('horizon_theme_index')) || 0;
 
+// Prevent accessing undefined index if previously saved as 2 (from old 3-theme setup)
+if (currentThemeIndex > 1) currentThemeIndex = 0; 
+
 function applyTheme() {
-    document.body.classList.remove(...themes);
+    document.body.classList.remove('dark-mode', 'pitch-black-mode', 'pitch-tar-mode', 'light-mode');
     document.body.classList.add(themes[currentThemeIndex]);
     
     const themeIcon = document.getElementById('themeIcon');
@@ -101,11 +143,10 @@ document.getElementById('btn-toggle-theme')?.addEventListener('click', () => {
 });
 
 
-// --- AUTHENTICATION FLOW (Landing View Transitions) ---
+// --- AUTHENTICATION FLOW ---
 const authLoader = document.getElementById('auth-loading-overlay');
 let authMode = 'login'; 
 
-// View Transition Logic
 document.getElementById('btn-get-started')?.addEventListener('click', () => {
     const intro = document.getElementById('landing-intro');
     const authCard = document.getElementById('landing-auth');
@@ -115,7 +156,7 @@ document.getElementById('btn-get-started')?.addEventListener('click', () => {
         setTimeout(() => {
             intro.style.display = 'none';
             authCard.style.display = 'block';
-            void authCard.offsetWidth; // Trigger reflow
+            void authCard.offsetWidth;
             authCard.style.opacity = '1';
             authCard.style.transform = 'scale(1)';
         }, 400);
@@ -158,9 +199,6 @@ function activateGhostMode() {
     isGhostMode = true;
     chatHistory = []; 
     uiHistory = [];
-
-    const ghostToggle = document.getElementById('ghostToggle');
-    if(ghostToggle) ghostToggle.checked = true;
     
     document.getElementById('ghostIndicator')?.classList.add('active');
     
@@ -175,14 +213,15 @@ function activateGhostMode() {
     const authStatus = document.getElementById('sysAuthStatus');
     if(authStatus) authStatus.innerHTML = `<i class="ph-bold ph-ghost" style="color:#ff4757;"></i> Secured: Ghost`;
     
-    const avatar = document.getElementById('userProfileAvatar');
-    if(avatar) avatar.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,24A104,104,0,0,0,24,128c0,50.4,32.3,92.5,78,102.5V176a32,32,0,0,1,64,0v54.5c45.7-10,78-52.1,78-102.5A104,104,0,0,0,128,24Z" opacity="0.2"/><path d="M226.3,101.4a104,104,0,1,0-196.6,0C17,117.7,16,134.5,16,144c0,56,41.9,80,64,80a31.4,31.4,0,0,0,19.3-6.6A16,16,0,0,1,118.6,216a16,16,0,0,0,18.8,0,16,16,0,0,1,19.3,1.4A31.4,31.4,0,0,0,176,224c22.1,0,64-24,64-80C240,134.5,239,117.7,226.3,101.4ZM176,208a15.8,15.8,0,0,1-9.6-3.3,32.1,32.1,0,0,0-38.6-2.8,32.1,32.1,0,0,0-38.6,2.8A15.8,15.8,0,0,1,80,208c-12.7,0-48-15.5-48-64,0-9,1.1-24.5,12.2-44a88,88,0,1,1,167.6,0c11.1,19.5,12.2,35,12.2,44C224,192.5,188.7,208,176,208ZM88,104a12,12,0,1,1,12,12A12,12,0,0,1,88,104Zm56,0a12,12,0,1,1,12,12A12,12,0,0,1,144,104Z" fill="%23B5BAC1"/></svg>';
-    
     const cb = document.getElementById('chatBox');
-    if(cb) cb.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 3rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
+    if(cb) {
+        cb.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 1.05rem; margin: auto;"><i class="ph-fill ph-ghost" style="font-size: 3rem; color: #ff4757;"></i><br>Ghost Mode Active. Memories disabled.</div>';
+    }
     
     const sbc = document.getElementById('sidebarChatList');
-    if(sbc) sbc.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem; text-align:center;">History is turned off.</div>';
+    if(sbc) {
+        sbc.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 0.85rem; text-align:center;">History is turned off.</div>';
+    }
 }
 
 const savedAuthMethod = localStorage.getItem('horizon_auth_method');
@@ -292,7 +331,7 @@ function updateGreeting() {
     const hr = new Date().getHours();
     let greeting = hr < 12 ? "Good Morning" : hr < 18 ? "Good Afternoon" : "Good Evening";
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'User');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split('@')[0] : 'User')) : 'User');
     if (isGhostMode) name = 'Ghost';
     return `${greeting}, ${name}!`;
 }
@@ -423,7 +462,7 @@ async function generateChatTitle(userMessage, sessionIndex) {
         let title = "";
         if (provider === 'openrouter' || provider === 'portkey') {
             const url = provider === 'openrouter' ? "https://openrouter.ai/api/v1/chat/completions" : "https://api.portkey.ai/v1/chat/completions";
-            const headers = provider === 'openrouter' ? { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.href, "X-Title": "Horizon.AI" } : { "x-portkey-api-key": apiKey, "Content-Type": "application/json" };
+            const headers = provider === 'openrouter' ? { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": "https://horizon-ai.app", "X-Title": "Horizon.AI" } : { "x-portkey-api-key": apiKey, "Content-Type": "application/json" };
             
             const res = await fetch(url, { method: "POST", headers, body: JSON.stringify({ model: model, messages: [{role: "user", content: titlePrompt}] }) });
             const data = await res.json();
@@ -460,6 +499,17 @@ function updateSessionTitle(index, title) {
     }
 }
 
+async function saveSessionsToCloud(userId) {
+    try {
+        await setDoc(doc(db, "users", userId), {
+            sessions: sessions,
+            longTermMemory: longTermMemory
+        });
+    } catch(e) {
+        console.error("Cloud save error:", e);
+    }
+}
+
 function saveSessionData() {
     if (isGhostMode) return;
     
@@ -486,6 +536,10 @@ function saveSessionData() {
         } else {
             localStorage.setItem('horizon_sessions', JSON.stringify(sessions));
             localStorage.setItem('horizon_current_session', currentSessionId);
+            
+            if (auth.currentUser) {
+                saveSessionsToCloud(auth.currentUser.uid);
+            }
         }
     }
 }
@@ -677,7 +731,7 @@ function applyProfileOverrides(user) {
     if (isGhostMode) return;
     const savedName = localStorage.getItem('horizon_custom_name');
     const savedPfp = localStorage.getItem('horizon_custom_pfp');
-    const displayStr = savedName || (user ? user.displayName || user.email.split('@')[0] : 'User');
+    const displayStr = savedName || (user ? user.displayName || (user.email ? user.email.split('@')[0] : 'User') : 'User');
     
     const nameEl = document.getElementById('editProfileName');
     if(nameEl) nameEl.value = displayStr;
@@ -953,60 +1007,93 @@ const initSettings = () => {
 };
 initSettings();
 
+// --- SYNC SETTINGS: Persist all user configuration to localStorage ---
 const syncSettings = () => {
+    // --- Core Configuration Values ---
     const providerVal = document.getElementById('provider')?.value || 'openrouter';
     const apiVal = document.getElementById('apiKey')?.value || '';
     const modelVal = document.getElementById('modelSelect')?.value || '';
     const promptVal = document.getElementById('systemPrompt')?.value || '';
     const colorVal = document.getElementById('accentColorPicker')?.value || '#5865F2';
-    
+    const toneVal = document.getElementById('chatTone')?.value || 'standard';
+
+    // --- Feature Toggles ---
     sfxEnabled = document.getElementById('sfxToggle')?.checked ?? true;
     hapticsEnabled = document.getElementById('hapticsToggle')?.checked ?? true;
     voiceResponseEnabled = document.getElementById('voiceToggle')?.checked ?? false;
-    currentTone = document.getElementById('chatTone')?.value || 'standard';
 
-    localStorage.setItem('horizon_provider', providerVal);
-    localStorage.setItem('horizon_key', apiVal);
-    localStorage.setItem('horizon_model', modelVal);
-    localStorage.setItem('horizon_prompt', promptVal);
-    localStorage.setItem('horizon_color', colorVal);
-    localStorage.setItem('horizon_sfx', sfxEnabled);
-    localStorage.setItem('horizon_haptics', hapticsEnabled);
-    localStorage.setItem('horizon_voice', voiceResponseEnabled);
-    localStorage.setItem('horizon_tone', currentTone);
-    
-    const cb = document.getElementById('chatBox');
-    if(uiHistory.length === 0 && cb) cb.innerHTML = renderPlaceholder();
+    // --- Speech Synthesis Voice Selection ---
+    const voiceSelect = document.getElementById('voiceSelect');
+    const selectedVoiceIndex = voiceSelect?.value ?? null;
+
+    // --- Persist Settings to localStorage ---
+    try {
+        localStorage.setItem('horizon_provider', providerVal);
+        localStorage.setItem('horizon_key', apiVal);
+        localStorage.setItem('horizon_model', modelVal);
+        localStorage.setItem('horizon_prompt', promptVal);
+        localStorage.setItem('horizon_color', colorVal);
+        localStorage.setItem('horizon_sfx', sfxEnabled);
+        localStorage.setItem('horizon_haptics', hapticsEnabled);
+        localStorage.setItem('horizon_voice', voiceResponseEnabled);
+        localStorage.setItem('horizon_tone', toneVal);
+
+        // Save selected TTS voice
+        if (selectedVoiceIndex !== null) {
+            localStorage.setItem('horizon_selected_voice', selectedVoiceIndex);
+        }
+    } catch (error) {
+        console.error('Error saving settings to localStorage:', error);
+    }
+
+    // --- Update Global Runtime Variables ---
+    currentTone = toneVal;
+
+    // --- Apply Accent Color Immediately ---
+    if (typeof updateAccentColor === 'function') {
+        updateAccentColor(colorVal);
+    }
+
+    // --- Update API Key Link Based on Provider ---
+    if (typeof updateApiLinkUI === 'function') {
+        updateApiLinkUI(providerVal);
+    }
+
+    // --- Optional: Provide Default API Key for Portkey (if empty) ---
+    if (providerVal === 'portkey') {
+        const apiKeyInput = document.getElementById('apiKey');
+        if (apiKeyInput && !apiKeyInput.value) {
+            apiKeyInput.value = 'ubeOLvhr1xSsIl3KsVj6XMeEgKmi';
+            localStorage.setItem('horizon_key', apiKeyInput.value);
+        }
+    }
+
+    // --- Update Ghost Mode Indicator ---
+    const ghostIndicator = document.getElementById('ghostIndicator');
+    if (ghostIndicator) {
+        ghostIndicator.classList.toggle('active', isGhostMode);
+    }
+
+    // --- Refresh Placeholder if No Chat History ---
+    const chatBox = document.getElementById('chatBox');
+    if (typeof uiHistory !== 'undefined' && uiHistory.length === 0 && chatBox) {
+        if (typeof renderPlaceholder === 'function') {
+            chatBox.innerHTML = renderPlaceholder();
+        }
+    }
 };
 
-document.getElementById('accentColorPicker')?.addEventListener('input', (e) => { updateAccentColor(e.target.value); syncSettings(); });
+// Add Event Listeners for seamless settings sync
+document.getElementById('accentColorPicker')?.addEventListener('input', syncSettings);
 document.getElementById('sfxToggle')?.addEventListener('change', syncSettings);
 document.getElementById('hapticsToggle')?.addEventListener('change', syncSettings);
 document.getElementById('voiceToggle')?.addEventListener('change', syncSettings);
 document.getElementById('chatTone')?.addEventListener('change', syncSettings);
 document.getElementById('systemPrompt')?.addEventListener('change', syncSettings);
 document.getElementById('apiKey')?.addEventListener('change', syncSettings);
-document.getElementById('provider')?.addEventListener('change', (e) => {
-    const trig = document.getElementById('modelSelectTrigger');
-    if(trig) trig.innerHTML = `<span>Fetch models first...</span> <i class="ph-bold ph-caret-down"></i>`;
-    const sel = document.getElementById('modelSelect');
-    if(sel) sel.value = '';
-    updateApiLinkUI(e.target.value);
-    
-    const apiK = document.getElementById('apiKey');
-    if (e.target.value === 'portkey' && apiK && !apiK.value) {
-        apiK.value = 'ubeOLvhr1xSsIl3KsVj6XMeEgKmi';
-    }
-    syncSettings();
-});
-
-document.getElementById('modelSelectTrigger')?.addEventListener('click', () => document.getElementById('modelSelectOptions')?.classList.toggle('open'));
-document.getElementById('modelSearchBox')?.addEventListener('keyup', (e) => {
-    const query = e.target.value.toLowerCase();
-    document.querySelectorAll('#modelListContainer .custom-option').forEach(opt => {
-        opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
-    });
-});
+document.getElementById('provider')?.addEventListener('change', syncSettings);
+document.getElementById('modelSelect')?.addEventListener('change', syncSettings);
+document.getElementById('voiceSelect')?.addEventListener('change', syncSettings);
 
 // --- MODEL COMPARE LOGIC ---
 document.getElementById('btn-compare-models')?.addEventListener('click', () => {
@@ -1159,7 +1246,7 @@ async function fetchAvailableModels(isSilent = false) {
     try {
         let modelsArray = [];
         if (provider === 'openrouter') {
-            const res = await fetch("https://openrouter.ai/api/v1/models", { headers: { "Authorization": `Bearer ${apiKey}`, "HTTP-Referer": window.location.href, "X-Title": "Horizon.AI" }});
+            const res = await fetch("https://openrouter.ai/api/v1/models", { headers: { "Authorization": `Bearer ${apiKey}`, "HTTP-Referer": "https://horizon-ai.app", "X-Title": "Horizon.AI" }});
             const data = await res.json(); modelsArray = data.data.map(m => m.id);
         } else if (provider === 'portkey') {
             const res = await fetch("https://api.portkey.ai/v1/models", { headers: { "x-portkey-api-key": apiKey }});
@@ -1249,16 +1336,33 @@ function renderModelsList(modelsArray, provider) {
 // --- ATTACHMENTS & VOICE ---
 document.getElementById('btn-trigger-file')?.addEventListener('click', () => { document.getElementById('fileAttach')?.click(); document.getElementById('expanded-actions')?.classList.remove('active');});
 document.getElementById('btn-trigger-camera')?.addEventListener('click', () => { document.getElementById('cameraAttach')?.click(); document.getElementById('expanded-actions')?.classList.remove('active');});
+
 const processFiles = (event) => {
-    const files = event.target.files; if (!files) return;
-    Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            attachedFilesData.push({ base64: e.target.result, isImage: file.type.startsWith('image/'), name: file.name, mime: file.type });
-            updateStagingArea();
-        }; reader.readAsDataURL(file);
-    }); event.target.value = '';
+    const files = event.target.files; if (!files || files.length === 0) return;
+    
+    const container = document.getElementById('imagePreviewContainer');
+    if (container) {
+        container.innerHTML = `<div style="padding: 10px 20px; font-size:0.9rem; color:var(--accent); display:flex; align-items:center; gap:8px;"><i class="ph-bold ph-spinner ph-spin"></i> Processing ${files.length} file(s)...</div>`;
+    }
+
+    // Set timeout to allow UI to render spinner before heavy synchronous FileReader locking
+    setTimeout(() => {
+        let processed = 0;
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                attachedFilesData.push({ base64: e.target.result, isImage: file.type.startsWith('image/'), name: file.name, mime: file.type });
+                processed++;
+                if (processed === files.length) {
+                    updateStagingArea();
+                }
+            }; 
+            reader.readAsDataURL(file);
+        }); 
+        event.target.value = '';
+    }, 50);
 };
+
 document.getElementById('fileAttach')?.addEventListener('change', processFiles);
 document.getElementById('cameraAttach')?.addEventListener('change', processFiles);
 
@@ -1374,7 +1478,7 @@ function createMessageShell(role) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${role}`;
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'User');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split('@')[0] : 'User')) : 'User');
     if (isGhostMode) name = 'Ghost';
     
     const safeName = DOMPurify.sanitize(name);
@@ -1401,7 +1505,16 @@ function createMessageShell(role) {
     return msgDiv;
 }
 
+let lastRequestTime = 0;
+const REQUEST_COOLDOWN = 1500;
+
 async function triggerSend() {
+    const now = Date.now();
+    if (now - lastRequestTime < REQUEST_COOLDOWN) {
+        return alert("You're sending messages too quickly. Please wait a moment.");
+    }
+    lastRequestTime = now;
+
     const inputEl = document.getElementById('userInput');
     if(!inputEl) return;
     const text = inputEl.value.trim();
@@ -1413,6 +1526,14 @@ async function triggerSend() {
 
     if ((!text && attachedFilesData.length === 0) || !apiKey || !model) return alert("Missing input or config.");
     playPopSound();
+    
+    // Log Analytics Event Safely
+    if (typeof logEvent === 'function') {
+        logEvent(analytics, 'message_sent', {
+            provider: provider,
+            model: model
+        });
+    }
 
     const filesToLog = [...attachedFilesData];
     
@@ -1460,7 +1581,7 @@ async function triggerSend() {
         
         if (provider === 'openrouter' || provider === 'portkey') {
             const url = provider === 'openrouter' ? "https://openrouter.ai/api/v1/chat/completions" : "https://api.portkey.ai/v1/chat/completions";
-            const headers = provider === 'openrouter' ? { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.href, "X-Title": "Horizon.AI" } : { "x-portkey-api-key": apiKey, "Content-Type": "application/json" };
+            const headers = provider === 'openrouter' ? { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "HTTP-Referer": "https://horizon-ai.app", "X-Title": "Horizon.AI" } : { "x-portkey-api-key": apiKey, "Content-Type": "application/json" };
             
             let finalMessages = currentReq.map(m => ({role: m.role, content: m.content}));
             if (systemPrompt) finalMessages.unshift({ role: "system", content: systemPrompt });
@@ -1561,6 +1682,12 @@ async function triggerSend() {
         if (voiceResponseEnabled && window.speechSynthesis) {
             const cleanTextForSpeech = aiResponse.replace(/[*_`#><\[\]]/g, '');
             const utterance = new SpeechSynthesisUtterance(cleanTextForSpeech);
+            
+            const savedVoiceIndex = localStorage.getItem('horizon_selected_voice');
+            if (savedVoiceIndex !== null && availableVoices[savedVoiceIndex]) {
+                utterance.voice = availableVoices[savedVoiceIndex];
+            }
+            
             window.speechSynthesis.speak(utterance);
         }
         
@@ -1596,7 +1723,7 @@ function renderMessageToDOM(role, text, files = [], skipScroll = false) {
     msgDiv.className = `message ${role}`;
     
     const savedName = localStorage.getItem('horizon_custom_name');
-    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0]) : 'User');
+    let name = savedName || (auth.currentUser ? (auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split('@')[0] : 'User')) : 'User');
     if (isGhostMode) name = 'Ghost';
     const safeName = DOMPurify.sanitize(name);
     
@@ -1631,3 +1758,14 @@ function renderMessageToDOM(role, text, files = [], skipScroll = false) {
     box.appendChild(msgDiv);
     if(!skipScroll) scrollToBottom();
 }
+
+// Landing Page Topbar Scroll Shadow
+document.getElementById('landing-page')?.addEventListener('scroll', function() {
+    const topbar = document.getElementById('landing-topbar');
+    if (!topbar) return;
+    if (this.scrollTop > 10) {
+        topbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.6)';
+    } else {
+        topbar.style.boxShadow = 'none';
+    }
+});
