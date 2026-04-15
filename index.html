@@ -2,65 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horizon.AI</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+    <link rel="manifest" href="./site.webmanifest">
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js" defer></script>
 
     <style>
         :root {
             --accent: #5865F2;
             --accent-dark: #4752C4;
             --accent-alpha: rgba(88, 101, 242, 0.4);
-            
-            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 80%, #1a1a2e 100%);
-            --text-light: #F2F3F5;
-            --text-muted: #B5BAC1;
-            --glass-bg: rgba(30, 32, 38, 0.35);
-            --border: rgba(255, 255, 255, 0.1);
-            
-            /* Trio-morphism Light Sources */
-            --shadow-light: rgba(255, 255, 255, 0.04);
-            --shadow-dark: rgba(0, 0, 0, 0.6);
-            --inset-light: rgba(255, 255, 255, 0.15);
-            --inset-dark: rgba(0, 0, 0, 0.4);
-            --input-bg: rgba(5, 5, 8, 0.6);
+            --accent-glow: rgba(88, 101, 242, 0.6);
+        }
+
+        body.pitch-tar-mode {
+            --bg-gradient: #000000;
+            --text-light: #FFFFFF;
+            --text-muted: #A0A0A0;
+            --glass-bg: rgba(18, 18, 18, 0.95);
+            --border: rgba(255, 255, 255, 0.12);
+            --shadow-light: rgba(255, 255, 255, 0.02);
+            --shadow-dark: rgba(0, 0, 0, 0.8);
+            --inset-light: rgba(255, 255, 255, 0.05);
+            --inset-dark: rgba(0, 0, 0, 0.6);
+            --input-bg: rgba(26, 26, 26, 1);
         }
 
         body.light-mode {
             --bg-gradient: linear-gradient(135deg, #e0e5ec 0%, #f0f2f5 100%);
             --text-light: #1A1D20;
             --text-muted: #5C636A;
-            --glass-bg: rgba(255, 255, 255, 0.5);
-            --border: rgba(0, 0, 0, 0.1);
-            
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.15);
             --shadow-light: rgba(255, 255, 255, 0.9);
             --shadow-dark: rgba(0, 0, 0, 0.15);
             --inset-light: rgba(255, 255, 255, 0.6);
             --inset-dark: rgba(0, 0, 0, 0.05);
-            --input-bg: rgba(240, 240, 245, 0.8);
-        }
-
-        body.pitch-black-mode {
-            --bg-gradient: #000000;
-            --text-light: #E0E0E0;
-            --text-muted: #888888;
-            --glass-bg: rgba(10, 10, 10, 0.6);
-            --border: rgba(255, 255, 255, 0.05);
-            
-            --shadow-light: rgba(255, 255, 255, 0.01);
-            --shadow-dark: rgba(0, 0, 0, 0.9);
-            --inset-light: rgba(255, 255, 255, 0.05);
-            --inset-dark: rgba(0, 0, 0, 0.8);
-            --input-bg: rgba(2, 2, 2, 0.8);
+            --input-bg: rgba(240, 240, 245, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
@@ -71,9 +57,6 @@
             background: var(--bg-gradient); background-size: 200% 200%;
         }
         
-        body:not(.pitch-black-mode) { animation: gradientBG 20s ease infinite; }
-
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -89,7 +72,7 @@
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
         .glass {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, var(--glass-bg) 100%) !important;
+            background: var(--glass-bg) !important;
             backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
             border: 1px solid var(--border) !important;
             box-shadow: 
@@ -133,14 +116,19 @@
                 inset -2px -2px 4px var(--inset-light),
                 1px 1px 2px var(--shadow-light) !important;
         }
-        body.light-mode .input-recess, body.light-mode textarea, body.light-mode input { border: 1px solid rgba(0,0,0,0.2) !important; }
+        body.light-mode .input-recess, body.light-mode textarea, body.light-mode input, body.light-mode select { border: 1px solid rgba(0,0,0,0.2) !important; }
 
         /* Landing Page Layout */
         #landing-page { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s ease; padding: 20px; overflow: auto; background: #000;}
         #bg-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.6; filter: brightness(0.8) contrast(1.1); pointer-events: none;}
         
+        /* Sticky Top Bar for Landing Page */
+        .landing-topbar { position: absolute; top: 0; left: 0; width: 100%; height: 70px; padding: 0 24px; display: flex; align-items: center; justify-content: flex-start; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); border-bottom: 1px solid var(--border); z-index: 200; box-sizing: border-box; transition: box-shadow 0.3s ease;}
+        .landing-brand { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 700; color: var(--text-light); letter-spacing: 0.5px; }
+        .landing-brand i { font-size: 1.8rem; color: var(--accent); filter: drop-shadow(0 0 8px var(--accent-glow)); }
+
         /* Intro State */
-        #landing-intro { max-width: 900px; width: 100%; text-align: center; padding: 40px; border-radius: 24px; transition: opacity 0.4s ease, transform 0.4s ease; animation: scaleIn 0.5s ease; display: flex; flex-direction: column; gap: 20px; z-index: 1;}
+        #landing-intro { max-width: 900px; width: 100%; text-align: center; padding: 40px; border-radius: 24px; transition: opacity 0.4s ease, transform 0.4s ease; animation: scaleIn 0.5s ease; display: flex; flex-direction: column; gap: 20px; z-index: 1; margin-top: 50px;}
         .intro-title { font-size: 3.5rem; font-weight: 700; line-height: 1.1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 10px;}
         .intro-tagline { font-size: 1.2rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
         
@@ -155,7 +143,7 @@
         .btn-huge { padding: 16px 40px; font-size: 1.2rem; font-weight: 700; border-radius: 16px; background: var(--accent) !important; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; align-self: center; margin: 0 auto; box-shadow: 0 8px 20px var(--accent-alpha) !important;}
 
         /* Auth Card State */
-        #landing-auth { opacity: 0; transform: scale(0.9); display: none; transition: opacity 0.4s ease, transform 0.4s ease; z-index: 2;}
+        #landing-auth { opacity: 0; transform: scale(0.9); display: none; transition: opacity 0.4s ease, transform 0.4s ease; z-index: 2; margin-top: 50px;}
         .auth-card { padding: 40px 30px; border-radius: 24px; text-align: center; width: 100%; max-width: 450px; max-height: 95vh; overflow-y: auto;}
         
         .auth-toggle-container { display: flex; background: var(--input-bg); border-radius: 12px; padding: 6px; margin-bottom: 20px; box-shadow: inset 3px 3px 6px var(--inset-dark), inset -3px -3px 6px var(--inset-light); }
@@ -184,8 +172,8 @@
         .app-flex { display: flex; height: 100%; width: 100%; gap: 10px; min-height: 0; position: relative; overflow: hidden;}
         
         /* SIDEBAR REDESIGN */
-        .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
-        .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; display: none; }
+        .sidebar { width: 300px; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-radius: 16px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s, opacity 0.3s, visibility 0.3s; overflow-y: auto; flex-shrink: 0; z-index: 20;}
+        .sidebar.collapsed { width: 0; padding: 0; opacity: 0; pointer-events: none; margin: 0; border: none !important; visibility: hidden; }
         
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 10px; }
         .brand { font-weight: 700; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
@@ -437,12 +425,12 @@
         }
     </style>
 </head>
-<body class="dark-mode">
+<body class="pitch-tar-mode">
 
     <div id="auth-loading-overlay">
         <i class="ph-bold ph-spinner ph-spin" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--accent));"></i>
-        <h2 style="margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Logging In</h2>
-        <p style="color: var(--text-muted); margin-top: 5px;">Coding Data Blocks...</p>
+        <h2 style="margin:0; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Logging In...</h2>
+        <p style="color: var(--text-muted); margin-top: 5px;">Coding & Doomscrolling...</p>
     </div>
 
     <div id="welcomeToast">
@@ -553,8 +541,14 @@
     </div>
 
     <div id="landing-page">
-        <video id="bg-video" autoplay loop muted playsinline>
-            <source src="background.mp4" type="video/mp4">
+        <div id="landing-topbar" class="landing-topbar">
+            <div class="landing-brand">
+                <i class="ph-fill ph-planet"></i> <span>Horizon.AI</span>
+            </div>
+        </div>
+
+        <video id="bg-video" autoplay loop muted playsinline poster="./background.jpg">
+            <source src="./background.mp4" type="video/mp4">
         </video>
         
         <div id="landing-intro" class="glass landing-intro-container">
@@ -681,8 +675,6 @@
                         </div>
 
                         <div class="sys-info-grid">
-                            <div class="sys-info-cell" id="sysBrowserInfo"><i class="ph-bold ph-browser"></i> Browser</div>
-                            <div class="sys-info-cell" id="sysDeviceInfo"><i class="ph-bold ph-device-mobile"></i> Device</div>
                             <div class="sys-info-cell" style="color:var(--accent);"><i class="ph-fill ph-coin"></i> <span id="sysStatTokens">0</span> All Time</div>
                             <div class="sys-info-full-row" id="sysAuthStatus"><i class="ph-bold ph-check-circle" style="color:#2ecc71;"></i> Secured: Unknown</div>
                         </div>
@@ -718,7 +710,7 @@
                         </button>
 
                         <button id="btn-toggle-theme" class="btn-icon btn-extrude" title="Toggle Theme">
-                            <i class="ph-fill ph-sun-dim" id="themeIcon"></i>
+                            <i class="ph-fill ph-moon-stars" id="themeIcon"></i>
                         </button>
                     </div>
                 </div>
@@ -768,6 +760,13 @@
                 <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-speaker-high"></i>Allow Voice Responses (TTS)?</span>
                 <label class="switch"><input type="checkbox" id="voiceToggle"><span class="slider"></span></label>
             </div>
+            
+            <div class="form-group">
+                <label for="voiceSelect">
+                    <i class="ph-fill ph-microphone-stage"></i> Assistant Voice
+                </label>
+                <select id="voiceSelect" class="input-recess"></select>
+            </div>
 
             <div class="switch-group">
                 <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-music-notes"></i> Sound Effects(SFX) </span>
@@ -777,11 +776,6 @@
             <div class="switch-group">
                 <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-vibrate"></i> Haptic Feedback</span>
                 <label class="switch"><input type="checkbox" id="hapticsToggle" checked><span class="slider"></span></label>
-            </div>
-
-            <div class="switch-group" id="settingsGhostToggleGroup">
-                <span style="font-weight:600; font-size:0.9rem; display:flex; align-items:center; gap:8px; color: #ff4757; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="ph-fill ph-ghost"></i> Ghost Mode? 😏</span>
-                <label class="switch"><input type="checkbox" id="ghostToggle"><span class="slider"></span></label>
             </div>
 
             <div class="form-group" style="margin-top: 10px;">
