@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+
+    <meta name="theme-color" content="#060609" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <title>Horizon.AI — Sign In</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg: #060609;
+            --surface: rgba(15, 15, 23, 0.78);
+            --text: #f7f7fb;
+            --muted: #a5a5b5;
+            --line: rgba(255, 255, 255, 0.1);
+
+            --purple: #7868ff;
+            --violet: #a76cff;
+            --blue: #548cff;
+
+            --radius-xl: 32px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+
+            --transition-fast: 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition-smooth: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition-spring: 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html {
+            color-scheme: dark;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            overscroll-behavior: none;
+            height: 100%;
+        }
+
+        body {
+            min-height: 100svh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            color: var(--text);
+            background: var(--bg);
+            font-family: "Lexend", sans-serif;
+            overscroll-behavior-y: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        input,
+        textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        button,
+        input,
+        a {
+            font: inherit;
+        }
+
+        button {
+            color: inherit;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        ::selection {
+            color: #fff;
+            background: rgba(120, 104, 255, 0.6);
+        }
+
+        /* ==============================
+        BACKGROUND CANVAS
+        ============================== */
+        #bendCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: -5;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .background-vignette {
+            position: fixed;
+            inset: 0;
+            z-index: -4;
+            pointer-events: none;
+            background: radial-gradient(circle at center,
+                    transparent 8%,
+                    rgba(6, 6, 9, 0.2) 48%,
+                    rgba(6, 6, 9, 0.92) 100%);
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            opacity: 0.032;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+        }
+
+        /* Glow orbs that follow interaction */
+        .glow-orb {
+            position: fixed;
+            z-index: -2;
+            pointer-events: none;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                    rgba(120, 104, 255, 0.18) 0%,
+                    rgba(120, 104, 255, 0.05) 35%,
+                    transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: opacity 0.6s ease;
+            opacity: 0;
+            will-change: left, top, opacity;
+        }
+
+        .glow-orb.visible {
+            opacity: 1;
+        }
+
+        /* ==============================
+        TOP NAV
+        ============================== */
+        .topbar {
+            position: fixed;
+            top: calc(18px + var(--safe-top));
+            left: 50%;
+            z-index: 100;
+            width: min(1180px, calc(100% - 32px - var(--safe-left) - var(--safe-right)));
+            height: 70px;
+            padding: 0 16px;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 22px;
+            background: rgba(13, 13, 20, 0.8);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4),
+                inset 0 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+        }
+
+        .topbar.scrolled {
+            box-shadow: 0 8px 36px rgba(0, 0, 0, 0.55),
+                inset 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .back-button {
+            justify-self: start;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 18px;
+            transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .back-button:active {
+            transform: scale(0.93);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 6px rgba(120, 104, 255, 0.08);
+        }
+
+        @media (hover: hover) {
+            .back-button:hover {
+                transform: translateX(-3px);
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        .logo {
+            grid-column: 2;
+            justify-self: center;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 19px;
+            font-weight: 500;
+            letter-spacing: -0.8px;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            display: block;
+            object-fit: contain;
+            filter: invert(1);
+        }
+
+        .gradient-text {
+            display: inline-block;
+            font-family: "Permanent Marker", sans-serif;
+            font-weight: 400;
+            color: transparent;
+            background: linear-gradient(90deg,
+                    #f5f5f5 0%,
+                    #c7c0ff 30%,
+                    #8ea7ff 60%,
+                    #d8b9ff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        .top-status {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #c9c8d3;
+            font-size: 11px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #a6ff6d;
+            box-shadow: 0 0 14px rgba(166, 255, 109, 0.85);
+            animation: statusPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(166, 255, 109, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 22px rgba(166, 255, 109, 1);
+            }
+        }
+
+        /* ==============================
+        MAIN LAYOUT
+        ============================== */
+        main {
+            min-height: 100svh;
+            min-height: 100dvh;
+            padding: calc(110px + var(--safe-top)) 20px calc(24px + var(--safe-bottom));
+            display: grid;
+            place-items: center;
+        }
+
+        .auth-shell {
+            position: relative;
+            width: min(1040px, 100%);
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: var(--radius-xl);
+            background: rgba(10, 10, 16, 0.74);
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55),
+                inset 0 1px rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .auth-shell::before {
+            content: "";
+            position: absolute;
+            left: -200px;
+            bottom: -230px;
+            width: 440px;
+            height: 440px;
+            border-radius: 50%;
+            background: rgba(126, 102, 255, 0.22);
+            filter: blur(90px);
+            pointer-events: none;
+            animation: orbDrift 8s ease-in-out infinite;
+        }
+
+        @keyframes orbDrift {
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+            33% {
+                transform: translate(30px, -20px);
+            }
+            66% {
+                transform: translate(-15px, 15px);
+            }
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ==============================
+        INTRO PANEL
+        ============================== */
+        .intro {
+            position: relative;
+            min-height: 660px;
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid var(--line);
+        }
+
+        .eyebrow {
+            width: fit-content;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            color: #c9c8d3;
+            background: rgba(12, 12, 18, 0.58);
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(14px);
+            transition: transform var(--transition-fast);
+        }
+
+        .eyebrow:active {
+            transform: scale(0.97);
+        }
+
+        .intro-copy {
+            max-width: 510px;
+        }
+
+        .intro h1 {
+            margin-top: 26px;
+            font-size: clamp(48px, 6vw, 78px);
+            line-height: 0.94;
+            letter-spacing: -4px;
+            font-weight: 600;
+        }
+
+        .marker {
+            display: inline-block;
+            font-family: "Permanent Marker", sans-serif;
+            font-weight: 400;
+            color: transparent;
+            background: linear-gradient(90deg,
+                    #f5f5f5,
+                    #c7c0ff 35%,
+                    #8ea7ff 65%,
+                    #d8b9ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .intro p {
+            max-width: 460px;
+            margin-top: 22px;
+            color: var(--muted);
+            font-size: 14.5px;
+            line-height: 1.7;
+        }
+
+        .trust-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .trust-pill {
+            padding: 9px 12px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            color: #b8b7c4;
+            background: rgba(255, 255, 255, 0.035);
+            font-size: 11px;
+            transition: background var(--transition-fast), border-color var(--transition-fast);
+        }
+
+        @media (hover: hover) {
+            .trust-pill:hover {
+                background: rgba(255, 255, 255, 0.06);
+                border-color: rgba(255, 255, 255, 0.18);
+            }
+        }
+
+        /* ==============================
+        AUTH PANEL
+        ============================== */
+        .auth-panel {
+            min-height: 660px;
+            padding: 42px 40px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(145deg,
+                    rgba(116, 92, 255, 0.06),
+                    rgba(255, 255, 255, 0.012));
+        }
+
+        .auth-inner {
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        .auth-heading h2 {
+            font-size: 30px;
+            letter-spacing: -1.3px;
+            transition: all var(--transition-smooth);
+        }
+
+        .auth-heading p {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+            transition: all var(--transition-smooth);
+        }
+
+        /* ==============================
+        TABS
+        ============================== */
+        .tabs {
+            margin: 24px 0 16px;
+            padding: 4px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.03);
+            position: relative;
+        }
+
+        .tabs::after {
+            content: "";
+            position: absolute;
+            inset: 4px;
+            width: calc(50% - 4px);
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            transition: transform var(--transition-spring);
+            z-index: 0;
+            pointer-events: none;
+            box-shadow: 0 8px 24px rgba(130, 105, 255, 0.16);
+        }
+
+        .tabs.signup-active::after {
+            transform: translateX(100%);
+        }
+
+        .tab {
+            position: relative;
+            z-index: 1;
+            min-height: 42px;
+            border: 0;
+            border-radius: 12px;
+            color: #8f8e9b;
+            background: transparent;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: color var(--transition-smooth);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .tab.active {
+            color: #0a0910;
+        }
+
+        .tab:active {
+            transform: scale(0.96);
+        }
+
+        /* ==============================
+        SOCIAL AUTH
+        ============================== */
+        .social-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .oauth {
+            min-width: 0;
+            min-height: 50px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform var(--transition-fast),
+                background var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .oauth:active {
+            transform: scale(0.94);
+            background: rgba(255, 255, 255, 0.09);
+            box-shadow: 0 0 0 8px rgba(120, 104, 255, 0.06);
+        }
+
+        @media (hover: hover) {
+            .oauth:hover {
+                transform: translateY(-2px);
+                border-color: rgba(255, 255, 255, 0.17);
+                background: rgba(255, 255, 255, 0.07);
+                box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+            }
+        }
+
+        .provider-icon {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+        }
+
+        .provider-icon svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .divider {
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #6f6e7a;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.3px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--line);
+        }
+
+        /* ==============================
+        FORM
+        ============================== */
+        form {
+            display: grid;
+            gap: 13px;
+        }
+
+        .field {
+            display: grid;
+            gap: 7px;
+        }
+
+        label {
+            color: #c8c7d1;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            min-height: 50px;
+            padding: 0 46px 0 15px;
+            border: 1px solid var(--line);
+            outline: 0;
+            border-radius: var(--radius-md);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.035);
+            font-size: 13.5px;
+            transition: border-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                background var(--transition-fast);
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        input::placeholder {
+            color: #686774;
+        }
+
+        input:focus {
+            border-color: rgba(142, 126, 255, 0.7);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 5px rgba(120, 104, 255, 0.09);
+        }
+
+        /* Autofill styling */
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 50px #0f0f17 inset;
+            -webkit-text-fill-color: #f7f7fb;
+            caret-color: #f7f7fb;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777684;
+            pointer-events: none;
+            font-size: 13px;
+            transition: color var(--transition-fast);
+        }
+
+        input:focus~.input-icon {
+            color: #a99cff;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            width: 36px;
+            height: 36px;
+            transform: translateY(-50%);
+            border: 0;
+            border-radius: 10px;
+            color: #8c8b98;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background var(--transition-fast), color var(--transition-fast);
+        }
+
+        .password-toggle:active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #c7c0ff;
+        }
+
+        @media (hover: hover) {
+            .password-toggle:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        .form-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            font-size: 11px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa9b6;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .remember input {
+            width: 16px;
+            min-height: 16px;
+            accent-color: var(--purple);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .forgot {
+            color: #a99cff;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+        }
+
+        .forgot:active {
+            color: #c7c0ff;
+        }
+
+        @media (hover: hover) {
+            .forgot:hover {
+                color: #c7c0ff;
+                text-decoration: underline;
+            }
+        }
+
+        .submit {
+            width: 100%;
+            min-height: 50px;
+            border: 0;
+            border-radius: var(--radius-md);
+            color: #0a0910;
+            background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            box-shadow: 0 12px 40px rgba(130, 105, 255, 0.2);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            transition: transform var(--transition-fast),
+                box-shadow var(--transition-fast);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .submit:active {
+            transform: scale(0.95);
+            box-shadow: 0 8px 28px rgba(130, 105, 255, 0.35);
+        }
+
+        @media (hover: hover) {
+            .submit:hover:not(:disabled) {
+                transform: translateY(-3px);
+                box-shadow: 0 18px 48px rgba(130, 105, 255, 0.3);
+            }
+        }
+
+        /* ==============================
+        GUEST
+        ============================== */
+        .guest-button {
+            width: 100%;
+            min-height: 44px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            color: #aaa9b6;
+            background: transparent;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color var(--transition-fast),
+                background var(--transition-fast),
+                border-color var(--transition-fast);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .guest-button:active {
+            color: #fff;
+            border-color: var(--line);
+            background: rgba(255, 255, 255, 0.04);
+            transform: scale(0.97);
+        }
+
+        @media (hover: hover) {
+            .guest-button:hover {
+                color: #fff;
+                border-color: var(--line);
+                background: rgba(255, 255, 255, 0.03);
+            }
+        }
+
+        .terms {
+            margin-top: 10px;
+            color: #73727d;
+            font-size: 10px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .terms a {
+            color: #a99cff;
+            font-weight: 500;
+        }
+
+        .terms a:active {
+            color: #c7c0ff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ==============================
+        TOAST
+        ============================== */
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(28px + var(--safe-bottom));
+            z-index: 300;
+            width: fit-content;
+            max-width: calc(100% - 28px);
+            padding: 12px 18px;
+            transform: translate(-50%, 30px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            color: #d9d8e2;
+            background: rgba(14, 14, 22, 0.94);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            font-size: 12px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            touch-action: pan-y;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+            pointer-events: auto;
+        }
+
+        .toast.error {
+            color: #ffd7dd;
+            border-color: rgba(255, 123, 139, 0.25);
+            background: rgba(45, 14, 22, 0.94);
+        }
+
+        .toast.swiping {
+            transition: none;
+        }
+
+        /* ==============================
+        LOADER
+        ============================== */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            border: 2px solid rgba(0, 0, 0, 0.18);
+            border-top-color: #09090d;
+            border-radius: 50%;
+            animation: spin 0.65s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ==============================
+        RESPONSIVE - TABLET & BELOW
+        ============================== */
+        @media (max-width: 820px) {
+            .topbar {
+                top: calc(10px + var(--safe-top));
+                width: calc(100% - 18px - var(--safe-left) - var(--safe-right));
+                height: 60px;
+                padding: 0 10px;
+                border-radius: 18px;
+            }
+
+            .back-button {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                font-size: 16px;
+            }
+
+            .top-status span:last-child {
+                display: none;
+            }
+
+            .logo {
+                font-size: 17px;
+                gap: 7px;
+            }
+
+            .brand-icon {
+                width: 28px;
+                height: 28px;
+            }
+
+            main {
+                padding: calc(88px + var(--safe-top)) 8px calc(16px + var(--safe-bottom));
+                align-items: start;
+            }
+
+            .auth-shell {
+                width: min(540px, 100%);
+                grid-template-columns: 1fr;
+                border-radius: 26px;
+                animation: riseMobile 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            @keyframes riseMobile {
+                from {
+                    opacity: 0;
+                    transform: translateY(40px) scale(0.96);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .intro {
+                min-height: auto;
+                padding: 28px 22px 22px;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                gap: 16px;
+            }
+
+            .intro h1 {
+                margin-top: 16px;
+                font-size: clamp(42px, 14vw, 62px);
+                letter-spacing: -3px;
+            }
+
+            .intro p {
+                font-size: 12.5px;
+                margin-top: 14px;
+            }
+
+            .trust-row {
+                margin-top: 16px;
+                gap: 6px;
+            }
+
+            .trust-pill {
+                font-size: 10px;
+                padding: 7px 10px;
+                border-radius: 9px;
+            }
+
+            .auth-panel {
+                min-height: auto;
+                padding: 28px 22px 32px;
+            }
+
+            .auth-inner {
+                max-width: 100%;
+            }
+
+            .social-grid {
+                gap: 8px;
+            }
+
+            .oauth {
+                min-height: 46px;
+                font-size: 11px;
+                border-radius: 14px;
+            }
+        }
+
+        /* ==============================
+        RESPONSIVE - SMALL PHONES
+        ============================== */
+        @media (max-width: 440px) {
+            .topbar {
+                height: 54px;
+                border-radius: 16px;
+                padding: 0 8px;
+            }
+
+            .back-button {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+            }
+
+            .logo {
+                font-size: 15px;
+                gap: 6px;
+            }
+
+            .brand-icon {
+                width: 26px;
+                height: 26px;
+            }
+
+            .intro {
+                padding: 24px 16px 18px;
+            }
+
+            .intro h1 {
+                font-size: clamp(36px, 12vw, 50px);
+                letter-spacing: -2.5px;
+            }
+
+            .auth-panel {
+                padding: 24px 16px 28px;
+            }
+
+            .auth-shell {
+                border-radius: 22px;
+            }
+
+            .social-grid {
+                grid-template-columns: 1fr;
+                gap: 7px;
+            }
+
+            .submit {
+                min-height: 46px;
+                font-size: 12px;
+                border-radius: 14px;
+            }
+
+            input {
+                min-height: 46px;
+                font-size: 13px;
+                border-radius: 14px;
+            }
+
+            .tabs {
+                border-radius: 13px;
+            }
+
+            .tab {
+                min-height: 38px;
+                font-size: 11px;
+            }
+
+            .tabs::after {
+                border-radius: 10px;
+            }
+        }
+
+        /* ==============================
+        REDUCED MOTION
+        ============================== */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bendCanvas"></canvas>
+    <div class="background-vignette"></div>
+    <div class="noise"></div>
+    <div class="glow-orb" id="glowOrb" aria-hidden="true"></div>
+
+    <!-- NAV -->
+    <header class="topbar" id="topbar">
+        <a class="back-button" href="index.html" aria-label="Back to Horizon">←</a>
+        <a class="logo" href="index.html" aria-label="Horizon.AI home">
+            <img src="saturn.png" class="brand-icon" alt="" />
+            <span class="gradient-text">Horizon.AI</span>
+        </a>
+        <div class="top-status">
+            <span class="status-dot"></span>
+            <span>Online</span>
+        </div>
+    </header>
+
+    <!-- AUTH -->
+    <main>
+        <section class="auth-shell">
+            <!-- INTRO -->
+            <div class="intro">
+                <div class="intro-copy">
+                    <div class="eyebrow">
+                        <span class="status-dot"></span>
+                        Your workspace is ready
+                    </div>
+                    <h1>Return to the <span class="marker">horizon</span>.</h1>
+                    <p>Sign in to continue your conversations, projects and ideas across the world's most capable AI models.</p>
+                </div>
+                <div class="trust-row">
+                    <span class="trust-pill">◌ Private workspace</span>
+                    <span class="trust-pill">⚡ Fast access</span>
+                    <span class="trust-pill">✦ One account</span>
+                </div>
+            </div>
+
+            <!-- AUTH PANEL -->
+            <div class="auth-panel">
+                <div class="auth-inner">
+                    <div class="auth-heading">
+                        <h2 id="authTitle">Welcome back.</h2>
+                        <p id="authSubtitle">Continue where you left off. Your tabs probably missed you.</p>
+                    </div>
+
+                    <!-- TABS -->
+                    <div class="tabs" id="tabContainer" role="tablist" aria-label="Authentication mode">
+                        <button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true">Sign in</button>
+                        <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Create account</button>
+                    </div>
+
+                    <!-- SOCIAL AUTH -->
+                    <div class="social-grid">
+                        <button class="oauth" id="googleButton" type="button">
+                            <span class="provider-icon">
+                                <svg viewBox="0 0 24 24"><path fill="#fff" d="M21.35 12.2c0-.71-.06-1.4-.18-2.07H12v3.91h5.24a4.48 4.48 0 0 1-1.94 2.94v2.54h3.14c1.84-1.69 2.91-4.19 2.91-7.32Z"/><path fill="#fff" opacity=".8" d="M12 21.72c2.63 0 4.84-.87 6.45-2.36l-3.14-2.54c-.87.58-1.99.93-3.31.93-2.54 0-4.69-1.71-5.46-4.01H3.29v2.62A9.74 9.74 0 0 0 12 21.72Z"/><path fill="#fff" opacity=".65" d="M6.54 13.74A5.85 5.85 0 0 1 6.23 12c0-.61.11-1.2.31-1.74V7.64H3.29A9.73 9.73 0 0 0 2.28 12c0 1.57.38 3.06 1.01 4.36l3.25-2.62Z"/><path fill="#fff" opacity=".5" d="M12 6.25c1.43 0 2.71.49 3.72 1.45l2.79-2.79A9.35 9.35 0 0 0 12 2.28a9.74 9.74 0 0 0-8.71 5.36l3.25 2.62C7.31 7.96 9.46 6.25 12 6.25Z"/></svg>
+                            </span>
+                            Google
+                        </button>
+                        <button class="oauth" id="githubButton" type="button">
+                            <span class="provider-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.75 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+                            </span>
+                            GitHub
+                        </button>
+                    </div>
+
+                    <div class="divider">or use email</div>
+
+                    <!-- FORM -->
+                    <form id="authForm" novalidate>
+                        <div class="field hidden" id="nameField">
+                            <label for="name">Name</label>
+                            <div class="input-wrap">
+                                <input id="name" type="text" autocomplete="name" placeholder="Ace Yash" />
+                                <span class="input-icon">✦</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <div class="input-wrap">
+                                <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                                <span class="input-icon">↗</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="password">Password</label>
+                            <div class="input-wrap">
+                                <input id="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required />
+                                <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password">◉</button>
+                            </div>
+                        </div>
+                        <div class="form-meta" id="loginMeta">
+                            <label class="remember">
+                                <input type="checkbox" id="remember" />Remember me
+                            </label>
+                            <a class="forgot" href="#">Forgot password?</a>
+                        </div>
+                        <button class="submit" id="submitButton" type="submit">Enter Horizon →</button>
+                    </form>
+
+                    <!-- GUEST -->
+                    <button class="guest-button" id="guestButton" type="button">◌ Continue as guest</button>
+                    <p class="terms">By continuing, you agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
+        import {
+            getAuth,
+            signInWithPopup,
+            GithubAuthProvider,
+            GoogleAuthProvider,
+            onAuthStateChanged,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signInAnonymously,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+        /* ==============================
+        FIREBASE CONFIG
+        ============================== */
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
+            authDomain: "ace-horizon.firebaseapp.com",
+            projectId: "ace-horizon",
+            storageBucket: "ace-horizon.firebasestorage.app",
+            messagingSenderId: "1017523773217",
+            appId: "1:1017523773217:web:dbd7f5aa31f234d32aa860",
+            measurementId: "G-8TF3HYRPK6"
+        };
+
+        /* ==============================
+        FIREBASE INIT
+        ============================== */
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let analytics = null;
+        try { analytics = getAnalytics(app); } catch (error) { console.warn("Analytics unavailable:", error); }
+
+        /* ==============================
+        DOM ELEMENTS
+        ============================== */
+        const loginTab = document.getElementById("loginTab");
+        const signupTab = document.getElementById("signupTab");
+        const tabContainer = document.getElementById("tabContainer");
+        const nameField = document.getElementById("nameField");
+        const nameInput = document.getElementById("name");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const passwordToggle = document.getElementById("passwordToggle");
+        const loginMeta = document.getElementById("loginMeta");
+        const authTitle = document.getElementById("authTitle");
+        const authSubtitle = document.getElementById("authSubtitle");
+        const submitButton = document.getElementById("submitButton");
+        const authForm = document.getElementById("authForm");
+        const googleButton = document.getElementById("googleButton");
+        const githubButton = document.getElementById("githubButton");
+        const guestButton = document.getElementById("guestButton");
+        const toast = document.getElementById("toast");
+        const glowOrb = document.getElementById("glowOrb");
+        const topbar = document.getElementById("topbar");
+
+        let mode = "login";
+        let loading = false;
+        let toastTimer;
+        let toastSwipeStart = null;
+        let toastSwipeOffset = 0;
+
+        /* ==============================
+        TOAST WITH SWIPE DISMISS
+        ============================== */
+        function showToast(message, type = "normal") {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.classList.toggle("error", type === "error");
+            toast.classList.add("show");
+            toast.style.transform = "translate(-50%, 0)";
+            toast.style.opacity = "1";
+            toastSwipeOffset = 0;
+            toastSwipeStart = null;
+            toast.classList.remove("swiping");
+            toastTimer = setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3500);
+        }
+
+        function dismissToast() {
+            clearTimeout(toastTimer);
+            toast.classList.remove("show");
+            toast.style.transform = "translate(-50%, 30px)";
+            toast.style.opacity = "0";
+            toastSwipeOffset = 0;
+            toastSwipeStart = null;
+            toast.classList.remove("swiping");
+        }
+
+        toast.addEventListener("pointerdown", (e) => {
+            if (!toast.classList.contains("show")) return;
+            toastSwipeStart = { x: e.clientX, y: e.clientY };
+            toastSwipeOffset = 0;
+            toast.classList.add("swiping");
+            toast.setPointerCapture(e.pointerId);
+        });
+
+        toast.addEventListener("pointermove", (e) => {
+            if (!toastSwipeStart) return;
+            const dy = e.clientY - toastSwipeStart.y;
+            toastSwipeOffset = dy;
+            const resistance = Math.max(0, Math.min(60, dy)) * 0.7;
+            toast.style.transform = `translate(-50%, ${resistance}px)`;
+            toast.style.opacity = `${Math.max(0.3, 1 - Math.abs(dy) / 120)}`;
+        });
+
+        toast.addEventListener("pointerup", () => {
+            if (!toastSwipeStart) return;
+            toast.classList.remove("swiping");
+            if (Math.abs(toastSwipeOffset) > 50) {
+                dismissToast();
+            } else {
+                toast.style.transform = "translate(-50%, 0)";
+                toast.style.opacity = "1";
+            }
+            toastSwipeStart = null;
+            toastSwipeOffset = 0;
+        });
+
+        toast.addEventListener("pointercancel", () => {
+            toast.classList.remove("swiping");
+            if (toastSwipeStart) {
+                toast.style.transform = "translate(-50%, 0)";
+                toast.style.opacity = "1";
+            }
+            toastSwipeStart = null;
+            toastSwipeOffset = 0;
+        });
+
+        /* ==============================
+        HELPERS
+        ============================== */
+        function track(eventName, params = {}) {
+            if (!analytics) return;
+            try { logEvent(analytics, eventName, params); } catch (error) { console.warn("Analytics event failed:", error); }
+        }
+
+        function setLoading(state, source = "email") {
+            loading = state;
+            const buttons = [submitButton, googleButton, githubButton, guestButton, loginTab, signupTab];
+            buttons.forEach(button => { button.disabled = state; });
+            if (source === "email") {
+                submitButton.innerHTML = state ? '<span class="spinner"></span>' : mode === "signup" ? "Create account →" : "Enter Horizon →";
+            }
+            if (source === "google") {
+                googleButton.innerHTML = state ? '<span class="spinner"></span>' : googleButton.dataset.original;
+            }
+            if (source === "github") {
+                githubButton.innerHTML = state ? '<span class="spinner"></span>' : githubButton.dataset.original;
+            }
+            if (source === "guest") {
+                guestButton.innerHTML = state ? '<span class="spinner"></span>' : guestButton.dataset.original;
+            }
+        }
+
+        googleButton.dataset.original = googleButton.innerHTML;
+        githubButton.dataset.original = githubButton.innerHTML;
+        guestButton.dataset.original = guestButton.innerHTML;
+
+        function getErrorMessage(error) {
+            const messages = {
+                "auth/invalid-credential": "Incorrect email or password.",
+                "auth/user-not-found": "No account exists with this email.",
+                "auth/wrong-password": "Incorrect password.",
+                "auth/email-already-in-use": "An account already uses this email.",
+                "auth/weak-password": "Use a password with at least 6 characters.",
+                "auth/invalid-email": "Enter a valid email address.",
+                "auth/popup-closed-by-user": "The sign-in window was closed.",
+                "auth/popup-blocked": "Your browser blocked the sign-in popup.",
+                "auth/account-exists-with-different-credential": "This email already uses another sign-in method.",
+                "auth/operation-not-allowed": "This login method is not enabled in Firebase.",
+                "auth/network-request-failed": "Network error. Check your connection.",
+                "auth/too-many-requests": "Too many attempts. Try again later."
+            };
+            return messages[error.code] || error.message || "Authentication failed.";
+        }
+
+        async function saveUser(user, provider) {
+            if (!user) return;
+            try {
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    name: user.displayName || nameInput.value.trim() || "Horizon User",
+                    email: user.email || null,
+                    photoURL: user.photoURL || null,
+                    provider,
+                    isGuest: user.isAnonymous,
+                    lastLoginAt: serverTimestamp()
+                }, { merge: true });
+            } catch (error) { console.error("Failed to save user:", error); }
+        }
+
+        function redirectToApp() {
+            document.body.style.opacity = "0";
+            document.body.style.transition = "opacity 0.2s ease";
+            setTimeout(() => { window.location.href = "app.html"; }, 180);
+        }
+
+        /* ==============================
+        AUTH MODE SWITCHING
+        ============================== */
+        function setMode(nextMode) {
+            if (loading) return;
+            mode = nextMode;
+            const isSignup = mode === "signup";
+            loginTab.classList.toggle("active", !isSignup);
+            signupTab.classList.toggle("active", isSignup);
+            loginTab.setAttribute("aria-selected", !isSignup);
+            signupTab.setAttribute("aria-selected", isSignup);
+            tabContainer.classList.toggle("signup-active", isSignup);
+            nameField.classList.toggle("hidden", !isSignup);
+            loginMeta.classList.toggle("hidden", isSignup);
+            nameInput.required = isSignup;
+            passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
+            authTitle.textContent = isSignup ? "Create your account." : "Welcome back.";
+            authSubtitle.textContent = isSignup ? "One account. Every model. Consider the tab situation handled." : "Continue where you left off. Your tabs probably missed you.";
+            submitButton.textContent = isSignup ? "Create account →" : "Enter Horizon →";
+        }
+
+        loginTab.addEventListener("click", () => setMode("login"));
+        signupTab.addEventListener("click", () => setMode("signup"));
+
+        /* ==============================
+        PASSWORD TOGGLE
+        ============================== */
+        passwordToggle.addEventListener("click", () => {
+            const hidden = passwordInput.type === "password";
+            passwordInput.type = hidden ? "text" : "password";
+            passwordToggle.textContent = hidden ? "◎" : "◉";
+            passwordToggle.setAttribute("aria-label", hidden ? "Hide password" : "Show password");
+        });
+
+        /* ==============================
+        GOOGLE AUTH
+        ============================== */
+        googleButton.addEventListener("click", async () => {
+            if (loading) return;
+            setLoading(true, "google");
+            try {
+                const provider = new GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: "select_account" });
+                const result = await signInWithPopup(auth, provider);
+                await saveUser(result.user, "google");
+                track("login", { method: "google" });
+                showToast("Welcome to Horizon.");
+                setTimeout(redirectToApp, 400);
+            } catch (error) {
+                console.error(error);
+                showToast(getErrorMessage(error), "error");
+                setLoading(false, "google");
+            }
+        });
+
+        /* ==============================
+        GITHUB AUTH
+        ============================== */
+        githubButton.addEventListener("click", async () => {
+            if (loading) return;
+            setLoading(true, "github");
+            try {
+                const provider = new GithubAuthProvider();
+                provider.addScope("read:user");
+                provider.addScope("user:email");
+                const result = await signInWithPopup(auth, provider);
+                await saveUser(result.user, "github");
+                track("login", { method: "github" });
+                showToast("GitHub connected.");
+                setTimeout(redirectToApp, 400);
+            } catch (error) {
+                console.error(error);
+                showToast(getErrorMessage(error), "error");
+                setLoading(false, "github");
+            }
+        });
+
+        /* ==============================
+        GUEST AUTH
+        ============================== */
+        guestButton.addEventListener("click", async () => {
+            if (loading) return;
+            setLoading(true, "guest");
+            try {
+                const result = await signInAnonymously(auth);
+                await saveUser(result.user, "guest");
+                track("login", { method: "guest" });
+                showToast("Entering as guest.");
+                setTimeout(redirectToApp, 400);
+            } catch (error) {
+                console.error(error);
+                showToast(getErrorMessage(error), "error");
+                setLoading(false, "guest");
+            }
+        });
+
+        /* ==============================
+        EMAIL AUTH
+        ============================== */
+        authForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            if (loading || !authForm.checkValidity()) {
+                authForm.reportValidity();
+                return;
+            }
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            setLoading(true, "email");
+            try {
+                let result;
+                if (mode === "signup") {
+                    result = await createUserWithEmailAndPassword(auth, email, password);
+                    const name = nameInput.value.trim();
+                    if (name) { await updateProfile(result.user, { displayName: name }); }
+                    await saveUser(result.user, "email");
+                    track("sign_up", { method: "email" });
+                    showToast("Account created.");
+                } else {
+                    result = await signInWithEmailAndPassword(auth, email, password);
+                    await saveUser(result.user, "email");
+                    track("login", { method: "email" });
+                    showToast("Welcome back.");
+                }
+                setTimeout(redirectToApp, 400);
+            } catch (error) {
+                console.error(error);
+                showToast(getErrorMessage(error), "error");
+                setLoading(false, "email");
+            }
+        });
+
+        /* ==============================
+        KEYBOARD-AWARE FOCUS (MOBILE)
+        ============================== */
+        const focusableInputs = [emailInput, passwordInput, nameInput];
+        focusableInputs.forEach(input => {
+            input.addEventListener("focus", () => {
+                if (window.innerWidth < 820) {
+                    setTimeout(() => {
+                        const rect = input.getBoundingClientRect();
+                        if (rect.bottom > window.innerHeight * 0.6) {
+                            input.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                    }, 350);
+                }
+            });
+        });
+
+        /* ==============================
+        AUTH STATE - REDIRECT IF LOGGED IN
+        ============================== */
+        let initialAuthCheck = true;
+        onAuthStateChanged(auth, user => {
+            if (initialAuthCheck && user) {
+                initialAuthCheck = false;
+                redirectToApp();
+                return;
+            }
+            initialAuthCheck = false;
+        });
+
+        /* ==============================
+        GLOW ORB - FOLLOWS POINTER
+        ============================== */
+        let orbTimeout;
+        function moveGlowOrb(x, y) {
+            glowOrb.style.left = x + "px";
+            glowOrb.style.top = y + "px";
+            glowOrb.classList.add("visible");
+            clearTimeout(orbTimeout);
+            orbTimeout = setTimeout(() => {
+                glowOrb.classList.remove("visible");
+            }, 1800);
+        }
+
+        document.addEventListener("pointermove", (e) => {
+            moveGlowOrb(e.clientX, e.clientY);
+        });
+
+        document.addEventListener("pointerdown", (e) => {
+            moveGlowOrb(e.clientX, e.clientY);
+        });
+
+        /* ==============================
+        CANVAS BACKGROUND
+        ============================== */
+        const canvas = document.getElementById("bendCanvas");
+        const ctx = canvas.getContext("2d");
+        let width = 0;
+        let height = 0;
+        let dpr = 1;
+
+        const mouse = { x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 };
+        const bends = [
+            { y: 0.18, amplitude: 85, frequency: 0.0018, speed: 0.00032, width: 150, colorA: "104, 91, 255", colorB: "91, 180, 255" },
+            { y: 0.49, amplitude: 130, frequency: 0.00135, speed: -0.00022, width: 180, colorA: "157, 91, 255", colorB: "78, 116, 255" },
+            { y: 0.78, amplitude: 105, frequency: 0.00155, speed: 0.00018, width: 170, colorA: "82, 127, 255", colorB: "174, 93, 255" }
+        ];
+
+        function resizeCanvas() {
+            dpr = Math.min(window.devicePixelRatio || 1, 1.7);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            canvas.style.width = width + "px";
+            canvas.style.height = height + "px";
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function drawBend(bend, time, index) {
+            const baseY = height * bend.y;
+            const mouseShift = (mouse.y - 0.5) * 100 * (index + 1) * 0.35;
+            const horizontalShift = (mouse.x - 0.5) * 130;
+            const points = [];
+            for (let x = -200; x <= width + 200; x += 16) {
+                const wave1 = Math.sin((x + horizontalShift) * bend.frequency + time * bend.speed) * bend.amplitude;
+                const wave2 = Math.sin(x * bend.frequency * 0.47 - time * bend.speed * 0.8 + index) * bend.amplitude * 0.45;
+                points.push({ x, y: baseY + wave1 + wave2 + mouseShift });
+            }
+            ctx.save();
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            points.forEach((point, i) => { i === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y); });
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, `rgba(${bend.colorA}, 0)`);
+            gradient.addColorStop(0.25, `rgba(${bend.colorA}, 0.25)`);
+            gradient.addColorStop(0.62, `rgba(${bend.colorB}, 0.3)`);
+            gradient.addColorStop(1, `rgba(${bend.colorB}, 0)`);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = bend.width;
+            ctx.filter = "blur(45px)";
+            ctx.globalCompositeOperation = "screen";
+            ctx.stroke();
+            ctx.filter = "blur(14px)";
+            ctx.lineWidth = bend.width * 0.28;
+            const innerGradient = ctx.createLinearGradient(0, 0, width, 0);
+            innerGradient.addColorStop(0, `rgba(${bend.colorA}, 0)`);
+            innerGradient.addColorStop(0.3, `rgba(${bend.colorA}, 0.25)`);
+            innerGradient.addColorStop(0.65, `rgba(${bend.colorB}, 0.22)`);
+            innerGradient.addColorStop(1, `rgba(${bend.colorB}, 0)`);
+            ctx.strokeStyle = innerGradient;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function animate(time) {
+            mouse.x += (mouse.targetX - mouse.x) * 0.04;
+            mouse.y += (mouse.targetY - mouse.y) * 0.04;
+            ctx.clearRect(0, 0, width, height);
+            const background = ctx.createRadialGradient(
+                width * mouse.x, height * mouse.y, 0,
+                width * 0.5, height * 0.5,
+                Math.max(width, height)
+            );
+            background.addColorStop(0, "rgba(32, 25, 72, 0.3)");
+            background.addColorStop(0.5, "rgba(12, 10, 25, 0.15)");
+            background.addColorStop(1, "rgba(6, 6, 9, 0)");
+            ctx.fillStyle = background;
+            ctx.fillRect(0, 0, width, height);
+            bends.forEach((bend, index) => { drawBend(bend, time, index); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener("pointermove", event => {
+            mouse.targetX = event.clientX / window.innerWidth;
+            mouse.targetY = event.clientY / window.innerHeight;
+        });
+
+        window.addEventListener("resize", resizeCanvas);
+
+        /* ==============================
+        SCROLL AWARENESS FOR TOPBAR
+        ============================== */
+        window.addEventListener("scroll", () => {
+            topbar.classList.toggle("scrolled", window.scrollY > 10);
+        }, { passive: true });
+
+        resizeCanvas();
+        animate(0);
+
+        /* ==============================
+        PREVENT OVERSCROLL BOUNCE ON FORM ELEMENTS
+        ============================== */
+        document.addEventListener("touchmove", function(e) {
+            if (e.target.closest("input, textarea")) return;
+        }, { passive: true });
+    </script>
+</body>
+</html>
