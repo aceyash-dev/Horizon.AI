@@ -265,6 +265,51 @@
     .message-action:hover,.message-action.active{background:var(--surface-hover);color:var(--text);transform:scale(1.05);}
     .message-action svg{width:14px;height:14px}
 
+    /* Reasoning / Thinking box */
+    .reasoning-box {
+      margin: 10px 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      overflow: hidden;
+      font-size: 12px;
+    }
+    .reasoning-box summary {
+      padding: 10px 14px;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 500;
+      user-select: none;
+    }
+    .reasoning-box summary::-webkit-details-marker { display: none; }
+    .reasoning-box .thinking-indicator {
+      display: inline-flex;
+      gap: 3px;
+    }
+    .reasoning-box .thinking-indicator i {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+      animation: thinking-bounce 1.2s infinite ease-in-out;
+    }
+    .reasoning-box .thinking-indicator i:nth-child(2) { animation-delay: 0.2s; }
+    .reasoning-box .thinking-indicator i:nth-child(3) { animation-delay: 0.4s; }
+    .reasoning-box[open] .thinking-indicator { display: none; }
+    .reasoning-box .reasoning-content {
+      padding: 8px 14px 14px;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      border-top: 1px solid var(--line);
+    }
+    @keyframes thinking-bounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
     .image-generation{margin:15px 0;min-height:260px;position:relative;overflow:hidden;display:grid;place-items:center;border:1px solid var(--line);border-radius:18px;background:var(--panel);}
     .image-generation::before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:conic-gradient(from 0deg,#765fff,#60baff,#d15fff,#765fff);filter:blur(35px);opacity:.45;animation:imagePulse 2.2s infinite linear;}
     .image-generation::after{content:"Generating image";position:relative;z-index:2;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--glass);backdrop-filter:blur(15px);font-size:10px;}
@@ -316,11 +361,65 @@
     .modal-sub{margin-top:3px;color:var(--muted);font-size:9px}
     .modal-body{padding:18px;overflow:auto}
 
+    /* Modern card wrapper for modal options */
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      transition: .2s;
+    }
+    .modal-card:last-child { margin-bottom: 0; }
+    .modal-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--line-strong);
+      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+    }
+    .modal-card .settings-label {
+      margin-bottom: 9px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .modal-card .setting-title {
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .modal-card .setting-copy {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.55;
+    }
+    .modal-card .input-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .modal-card .input,
+    .modal-card .search {
+      width: 100%;
+      height: 44px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      outline: 0;
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--surface);
+      font-size: 11px;
+      transition: border-color .2s;
+    }
+    .modal-card .input:focus,
+    .modal-card .search:focus {
+      border-color: rgba(139,124,255,.6);
+    }
+
     .settings-section+.settings-section{margin-top:24px}
     .settings-label{margin-bottom:9px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;}
-    .setting-card{padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);}
-    .setting-title{font-size:11px;font-weight:700}
-    .setting-copy{margin-top:5px;color:var(--muted);font-size:9px;line-height:1.55}
+
     .input-row{margin-top:12px;display:flex;gap:8px;}
 
     .input,.search{width:100%;height:44px;padding:0 13px;border:1px solid var(--line);outline:0;border-radius:12px;color:var(--text);background:var(--surface);font-size:11px;transition:border-color .2s;}
@@ -552,34 +651,31 @@
         <button class="icon-btn close-overlay">×</button>
       </div>
       <div class="modal-body">
-        <div class="settings-section">
+        <div class="modal-card">
           <div class="settings-label">Instructions</div>
-          <div class="setting-card">
-            <div class="setting-title">Personality</div>
-            <select class="input" id="personalityPreset" style="margin-top:8px;">
-              <option value="custom">Custom</option><option value="friendly">Friendly</option><option value="professional">Professional</option><option value="creative">Creative</option><option value="concise">Concise</option>
-            </select>
-            <div class="input-row" style="margin-top:12px;">
-              <textarea id="systemPrompt" rows="3" style="width:100%; resize:vertical; min-height:70px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px; color:var(--text); font-size:11px;"></textarea>
-            </div>
-            <div class="setting-actions">
-              <button class="small-btn primary" id="saveInstructions">Save instructions</button>
-            </div>
+          <div class="setting-title">Personality</div>
+          <select class="input" id="personalityPreset" style="margin-top:8px;">
+            <option value="custom">Custom</option><option value="friendly">Friendly</option><option value="professional">Professional</option><option value="creative">Creative</option><option value="concise">Concise</option>
+          </select>
+          <div class="input-row">
+            <textarea id="systemPrompt" rows="3" style="width:100%; resize:vertical; min-height:70px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px; color:var(--text); font-size:11px;"></textarea>
+          </div>
+          <div class="setting-actions">
+            <button class="small-btn primary" id="saveInstructions">Save instructions</button>
           </div>
         </div>
-        <div class="settings-section">
+
+        <div class="modal-card">
           <div class="settings-label">Account</div>
-          <div class="setting-card">
-            <div class="setting-title">Profile picture</div>
-            <div class="dicebear-preview" id="dicebearPreview"><img src="" alt="Avatar preview" id="avatarPreviewImg"></div>
-            <div class="input-row">
-              <input class="input" id="avatarSeed" placeholder="Seed (e.g. your name)">
-              <button class="small-btn" id="randomAvatar">Random</button>
-            </div>
-            <div class="setting-title" style="margin-top:16px;">Display name</div>
-            <div class="input-row"><input class="input" id="displayNameInput" placeholder="Your name"></div>
-            <div class="setting-actions"><button class="small-btn primary" id="saveAccount">Save account</button></div>
+          <div class="setting-title">Profile picture</div>
+          <div class="dicebear-preview" id="dicebearPreview"><img src="" alt="Avatar preview" id="avatarPreviewImg"></div>
+          <div class="input-row">
+            <input class="input" id="avatarSeed" placeholder="Seed (e.g. your name)">
+            <button class="small-btn" id="randomAvatar">Random</button>
           </div>
+          <div class="setting-title" style="margin-top:16px;">Display name</div>
+          <div class="input-row"><input class="input" id="displayNameInput" placeholder="Your name"></div>
+          <div class="setting-actions"><button class="small-btn primary" id="saveAccount">Save account</button></div>
         </div>
       </div>
     </section>
@@ -593,13 +689,16 @@
         <button class="icon-btn close-overlay">×</button>
       </div>
       <div class="modal-body">
-        <div class="input-row">
-          <input class="input" id="apiKey" type="password" placeholder="sk-or-v1-...">
-          <button class="small-btn" id="showKey">Show</button>
-        </div>
-        <div class="setting-actions">
-          <button class="small-btn primary" id="saveKey">Save & test</button>
-          <button class="small-btn danger" id="removeKey">Remove</button>
+        <div class="modal-card">
+          <div class="settings-label">API Key</div>
+          <div class="input-row">
+            <input class="input" id="apiKey" type="password" placeholder="sk-or-v1-...">
+            <button class="small-btn" id="showKey">Show</button>
+          </div>
+          <div class="setting-actions">
+            <button class="small-btn primary" id="saveKey">Save & test</button>
+            <button class="small-btn danger" id="removeKey">Remove</button>
+          </div>
         </div>
       </div>
     </section>
@@ -611,17 +710,21 @@
         <div><div class="modal-title">Choose intelligence</div><div class="modal-sub">Filter the absurdly large model catalogue.</div></div>
         <button class="icon-btn close-overlay">×</button>
       </div>
-      <div class="model-search"><input class="search" id="modelSearch" type="search" placeholder="Search models..."></div>
-      <div class="chips" id="filterChips">
-        <button class="chip active" data-filter="all">All</button>
-        <button class="chip" data-filter="free">Free</button>
-        <button class="chip" data-filter="image">Image</button>
-        <button class="chip" data-filter="fast">Fast</button>
-        <button class="chip" data-filter="code">Code</button>
-        <button class="chip" data-filter="reasoning">Reasoning</button>
-        <button class="chip" data-filter="large">Large context</button>
+      <div class="modal-body" style="padding:0;">
+        <div class="modal-card" style="margin:0; border-radius:0; border:none;">
+          <div class="model-search"><input class="search" id="modelSearch" type="search" placeholder="Search models..."></div>
+          <div class="chips" id="filterChips">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="free">Free</button>
+            <button class="chip" data-filter="image">Image</button>
+            <button class="chip" data-filter="fast">Fast</button>
+            <button class="chip" data-filter="code">Code</button>
+            <button class="chip" data-filter="reasoning">Reasoning</button>
+            <button class="chip" data-filter="large">Large context</button>
+          </div>
+        </div>
+        <div class="model-list" id="modelList"><div class="empty">Add your API key to load models.</div></div>
       </div>
-      <div class="model-list" id="modelList"><div class="empty">Add your API key to load models.</div></div>
     </section>
   </div>
 
@@ -733,7 +836,6 @@
       if(!user){ location.replace("auth.html"); return; }
       const savedName = localStorage.getItem(S.displayName) || (user.displayName || (user.isAnonymous?"Guest":user.email?.split("@")[0]) || "Horizon User");
       const savedSeed = localStorage.getItem(S.avatarSeed) || user.uid || "default";
-      // Use Google/GitHub photo if available
       const photoURL = user.photoURL;
       if(photoURL){
         $("#avatar").innerHTML = `<img src="${escapeHTML(photoURL)}" alt="avatar">`;
@@ -771,6 +873,8 @@
       renderChatList();
       renderChat();
       if(localStorage.getItem(S.key)) fetchModels();
+      // "Set Key" now opens the API Key modal directly
+      $("#openApiKeyModal").onclick = openApiKeyModal;
     }
 
     $("#personalityPreset").onchange = function(){
@@ -1040,8 +1144,11 @@
       $("#prompt").value=""; resizePrompt(); appendMessage(userMessage);
       const assistant={id:uid(),role:"assistant",content:"",model:selectedModel};
       chat.messages.push(assistant);
-      const el=appendMessage(assistant,true); const content=el.querySelector(".message-content");
+      const el=appendMessage(assistant,true);
+      const contentDiv=el.querySelector(".message-content");
       generating=true; controller=new AbortController(); updateSend(); scrollBottom();
+
+      let full="", reasoning="", reasoningDiv=null, reasoningContentEl=null;
       try{
         let system=localStorage.getItem(S.system)||personalityPresets.friendly;
         const selectedModelObj = models.find(m=>m.id===selectedModel);
@@ -1049,8 +1156,7 @@
         const payload={ model:selectedModel, messages:[{role:"system",content:system},...chat.messages.filter(m=>m.id!==assistant.id).map(m=>({role:m.role,content:m.content}))], temperature:Number(localStorage.getItem(S.temperature)||0.7), top_p:Number(localStorage.getItem(S.topP)||1), max_tokens:maxTokens, stream:true };
         const response=await fetch(`${API}/chat/completions`,{ method:"POST", signal:controller.signal, headers:{ "Content-Type":"application/json", Authorization:`Bearer ${key}`, "HTTP-Referer":location.origin, "X-Title":"Horizon.AI" }, body:JSON.stringify(payload) });
         if(!response.ok){ let msg=`OpenRouter error ${response.status}`; try{ const err=await response.json(); msg=err.error?.message||msg; }catch{} throw new Error(msg); }
-        const reader=response.body.getReader(); const decoder=new TextDecoder(); let buffer="", full="", images=[];
-        content.innerHTML="";
+        const reader=response.body.getReader(); const decoder=new TextDecoder(); let buffer="";
         while(true){
           const {value,done}=await reader.read(); if(done) break;
           buffer+=decoder.decode(value,{stream:true}); const lines=buffer.split("\n"); buffer=lines.pop()||"";
@@ -1058,24 +1164,58 @@
             const line=raw.trim(); if(!line.startsWith("data:")) continue; const data=line.slice(5).trim(); if(data==="[DONE]") continue;
             try{
               const json=JSON.parse(data); const delta=json.choices?.[0]?.delta||{};
+              // Capture reasoning content (OpenRouter passes through provider-specific keys)
+              const reasoningChunk = delta.reasoning || delta.reasoning_content || delta.thinking || "";
+              if(reasoningChunk && typeof reasoningChunk==="string") {
+                reasoning += reasoningChunk;
+                if (!reasoningDiv) {
+                  reasoningDiv = document.createElement('details');
+                  reasoningDiv.className = 'reasoning-box';
+                  reasoningDiv.innerHTML = `<summary><span class="thinking-indicator"><i></i><i></i><i></i></span> Thinking...</summary><div class="reasoning-content"></div>`;
+                  contentDiv.insertBefore(reasoningDiv, contentDiv.firstChild);
+                  reasoningContentEl = reasoningDiv.querySelector('.reasoning-content');
+                }
+                if(reasoningContentEl) reasoningContentEl.textContent = reasoning;
+              }
               if(typeof delta.content==="string") full+=delta.content;
-              const imageParts=delta.images||delta.content?.filter?.(x=>x.type==="image_url")||[];
-              if(Array.isArray(imageParts)) images.push(...imageParts);
-              assistant.content=full; content.innerHTML=markdown(full);
-              if(images.length){ images.forEach(img=>{ const url=img.image_url?.url||img.url; if(url && !content.querySelector(`img[src="${CSS.escape(url)}"]`)){ const image=document.createElement("img"); image.className="generated-image"; image.src=url; image.alt="Generated image"; content.appendChild(image); } }); }
+              assistant.content = full;
+              // Update main content (preserve reasoning box)
+              const mainHTML = markdown(full);
+              const typingEl = contentDiv.querySelector('.typing');
+              if(typingEl) typingEl.remove();
+              // If we already have a main text container, update it; otherwise set entire innerHTML (but careful not to overwrite reasoning)
+              let mainTextDiv = contentDiv.querySelector('.main-response');
+              if(!mainTextDiv) {
+                mainTextDiv = document.createElement('div');
+                mainTextDiv.className = 'main-response';
+                contentDiv.appendChild(mainTextDiv);
+              }
+              mainTextDiv.innerHTML = mainHTML;
               el.querySelectorAll("pre code:not([data-highlighted])").forEach(code=>hljs.highlightElement(code));
               scrollBottom(false);
             }catch{}
           }
         }
-        if(!full && !images.length) assistant.content="No response was returned.";
-        content.innerHTML=markdown(assistant.content);
-        images.forEach(img=>{ const url=img.image_url?.url||img.url; if(url){ const image=document.createElement("img"); image.className="generated-image"; image.src=url; image.alt="Generated image"; content.appendChild(image); } });
+        if(!full && !reasoning) assistant.content="No response was returned.";
+        // Finalize thinking section
+        if(reasoningDiv) {
+          reasoningDiv.querySelector('summary').innerHTML = '✅ Thinking (complete)';
+          reasoningDiv.open = false; // keep collapsed after finish
+        }
+        // Ensure final content is rendered
+        const mainHTML = markdown(assistant.content);
+        let mainTextDiv = contentDiv.querySelector('.main-response');
+        if(!mainTextDiv) {
+          mainTextDiv = document.createElement('div');
+          mainTextDiv.className = 'main-response';
+          contentDiv.appendChild(mainTextDiv);
+        }
+        mainTextDiv.innerHTML = mainHTML;
         enhanceMessage(el,assistant); chat.updatedAt=Date.now(); saveChats(); renderChat(); renderChatList();
       }catch(error){
         if(error.name==="AbortError"){ assistant.content=assistant.content||"Generation stopped."; }
         else{ assistant.content=`Error: ${error.message}`; toast(error.message); }
-        content.innerHTML=markdown(assistant.content); enhanceMessage(el,assistant); saveChats(); renderChat(); renderChatList();
+        contentDiv.innerHTML=markdown(assistant.content); enhanceMessage(el,assistant); saveChats(); renderChat(); renderChatList();
       }finally{ generating=false; controller=null; updateSend(); scrollBottom(); }
     }
 
