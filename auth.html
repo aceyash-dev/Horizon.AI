@@ -819,7 +819,10 @@
             sendResetLinkBtn.innerHTML = '<span class="spinner"></span>';
             resetEmailError.textContent = "";
             try {
-                await sendPasswordResetEmail(auth, email);
+                await sendPasswordResetEmail(auth, email, {
+  url: "https://horizon-llm.vercel.app/reset.html",
+  handleCodeInApp: true
+});
                 stepEmail.classList.remove("active");
                 stepSuccess.classList.add("active");
             } catch (error) {
