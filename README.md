@@ -2,11 +2,11 @@
 
 <div align="center">
 
-<img src="assets/logo.png" width="120" alt="Horizon.AI Logo">
+<img src="saturn.png" width="120" alt="Horizon.AI Logo">
 
 ### Beautiful. Fast. Open. AI Chat for the Web.
 
-*A modern AI client supporting multiple providers, multimodal models, image generation, voice input, markdown, syntax highlighting, chat history, and a polished glassmorphism interface.*
+*A modern web AI client supporting multiple providers, multimodal models, image generation, voice input, markdown, syntax highlighting, chat history, and a polished UI.*
 
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
