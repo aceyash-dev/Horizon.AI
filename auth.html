@@ -66,16 +66,11 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        input,
-        textarea {
+        input, textarea {
             -webkit-user-select: text;
             user-select: text;
         }
-        button,
-        input,
-        a {
-            font: inherit;
-        }
+        button, input, a { font: inherit; }
         button {
             color: inherit;
             cursor: pointer;
@@ -86,880 +81,323 @@
             opacity: 0.55;
             pointer-events: none;
         }
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-        ::selection {
-            color: #fff;
-            background: rgba(120, 104, 255, 0.6);
-        }
+        a { color: inherit; text-decoration: none; }
+        ::selection { color: #fff; background: rgba(120, 104, 255, 0.6); }
 
         /* ── Canvas ── */
-        #bendCanvas {
-            position: fixed;
-            inset: 0;
-            z-index: -5;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+        #bendCanvas { position: fixed; inset: 0; z-index: -5; width: 100%; height: 100%; pointer-events: none; }
         .background-vignette {
-            position: fixed;
-            inset: 0;
-            z-index: -4;
-            pointer-events: none;
-            background: radial-gradient(circle at center,
-                    transparent 8%,
-                    rgba(6, 6, 9, 0.2) 48%,
-                    rgba(6, 6, 9, 0.92) 100%);
+            position: fixed; inset: 0; z-index: -4; pointer-events: none;
+            background: radial-gradient(circle at center, transparent 8%, rgba(6,6,9,0.2) 48%, rgba(6,6,9,0.92) 100%);
         }
         .noise {
-            position: fixed;
-            inset: 0;
-            z-index: -3;
-            opacity: 0.025;
-            pointer-events: none;
+            position: fixed; inset: 0; z-index: -3; opacity: 0.025; pointer-events: none;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
         }
         .glow-orb {
-            position: fixed;
-            z-index: -2;
-            pointer-events: none;
-            width: 280px;
-            height: 280px;
-            border-radius: 50%;
-            background: radial-gradient(circle,
-                    rgba(120, 104, 255, 0.18) 0%,
-                    rgba(120, 104, 255, 0.05) 35%,
-                    transparent 70%);
-            transform: translate(-50%, -50%);
-            transition: opacity 0.6s ease;
-            opacity: 0;
-            will-change: left, top, opacity;
+            position: fixed; z-index: -2; pointer-events: none; width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(120,104,255,0.18) 0%, rgba(120,104,255,0.05) 35%, transparent 70%);
+            transform: translate(-50%, -50%); transition: opacity 0.6s ease; opacity: 0; will-change: left, top, opacity;
         }
-        .glow-orb.visible {
-            opacity: 1;
-        }
+        .glow-orb.visible { opacity: 1; }
 
         /* ── Topbar ── */
         .topbar {
-            position: fixed;
-            top: calc(18px + var(--safe-top));
-            left: 50%;
-            z-index: 100;
-            width: min(1180px, calc(100% - 32px - var(--safe-left) - var(--safe-right)));
-            height: 70px;
-            padding: 0 16px;
-            transform: translateX(-50%);
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.11);
-            border-radius: 22px;
-            background: rgba(13, 13, 20, 0.8);
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 1px rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(22px) saturate(140%);
-            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            position: fixed; top: calc(18px + var(--safe-top)); left: 50%; z-index: 100;
+            width: min(1180px, calc(100% - 32px - var(--safe-left) - var(--safe-right))); height: 70px;
+            padding: 0 16px; transform: translateX(-50%); display: grid; grid-template-columns: 1fr auto 1fr;
+            align-items: center; border: 1px solid rgba(255,255,255,0.11); border-radius: 22px;
+            background: rgba(13,13,20,0.8); box-shadow: 0 12px 48px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.05);
+            backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
             transition: box-shadow var(--transition-smooth);
         }
-        .topbar.scrolled {
-            box-shadow: 0 8px 36px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.05);
-        }
+        .topbar.scrolled { box-shadow: 0 8px 36px rgba(0,0,0,0.55), inset 0 1px rgba(255,255,255,0.05); }
         .back-button {
-            justify-self: start;
-            width: 44px;
-            height: 44px;
-            display: grid;
-            place-items: center;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.04);
-            font-size: 18px;
-            transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+            justify-self: start; width: 44px; height: 44px; display: grid; place-items: center;
+            border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,0.04);
+            font-size: 18px; transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .back-button:active {
-            transform: scale(0.93);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 0 6px rgba(120, 104, 255, 0.08);
-        }
-        @media (hover: hover) {
-            .back-button:hover {
-                transform: translateX(-3px);
-                background: rgba(255, 255, 255, 0.08);
-            }
-        }
+        .back-button:active { transform: scale(0.93); background: rgba(255,255,255,0.1); box-shadow: 0 0 0 6px rgba(120,104,255,0.08); }
+        @media (hover: hover) { .back-button:hover { transform: translateX(-3px); background: rgba(255,255,255,0.08); } }
         .logo {
-            grid-column: 2;
-            justify-self: center;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 19px;
-            font-weight: 500;
-            letter-spacing: -0.8px;
+            grid-column: 2; justify-self: center; display: flex; align-items: center; gap: 10px;
+            font-size: 19px; font-weight: 500; letter-spacing: -0.8px;
         }
-        .brand-icon {
-            width: 32px;
-            height: 32px;
-            display: block;
-            object-fit: contain;
-            filter: invert(1);
-        }
+        .brand-icon { width: 32px; height: 32px; display: block; object-fit: contain; filter: invert(1); }
         .gradient-text {
-            display: inline-block;
-            font-family: "Permanent Marker", sans-serif;
-            font-weight: 400;
-            color: transparent;
-            background: linear-gradient(90deg, #f5f5f5 0%, #c7c0ff 30%, #8ea7ff 60%, #d8b9ff 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
+            display: inline-block; font-family: "Permanent Marker", sans-serif; font-weight: 400;
+            color: transparent; background: linear-gradient(90deg, #f5f5f5 0%, #c7c0ff 30%, #8ea7ff 60%, #d8b9ff 100%);
+            background-clip: text; -webkit-background-clip: text;
         }
-        .top-status {
-            justify-self: end;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #c9c8d3;
-            font-size: 11px;
-        }
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #a6ff6d;
-            box-shadow: 0 0 14px rgba(166, 255, 109, 0.85);
-            animation: statusPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes statusPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 10px rgba(166, 255, 109, 0.7);
-            }
-            50% {
-                box-shadow: 0 0 22px rgba(166, 255, 109, 1);
-            }
-        }
+        .top-status { justify-self: end; display: flex; align-items: center; gap: 8px; color: #c9c8d3; font-size: 11px; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #a6ff6d; box-shadow: 0 0 14px rgba(166,255,109,0.85); animation: statusPulse 2.5s ease-in-out infinite; }
+        @keyframes statusPulse { 0%,100% { box-shadow: 0 0 10px rgba(166,255,109,0.7); } 50% { box-shadow: 0 0 22px rgba(166,255,109,1); } }
 
         /* ── Main ── */
         main {
-            min-height: 100svh;
-            min-height: 100dvh;
+            min-height: 100svh; min-height: 100dvh;
             padding: calc(110px + var(--safe-top)) 20px calc(24px + var(--safe-bottom));
-            display: grid;
-            place-items: center;
+            display: grid; place-items: center;
         }
 
         /* ── Card ── */
         .auth-shell {
-            position: relative;
-            width: min(1000px, 100%);
-            display: grid;
-            grid-template-columns: 1fr 0.95fr;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.11);
-            border-radius: var(--radius-xl);
-            background: rgba(10, 10, 16, 0.74);
-            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            animation: cardRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+            position: relative; width: min(1000px, 100%); display: grid; grid-template-columns: 1fr 0.95fr;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.11); border-radius: var(--radius-xl);
+            background: rgba(10,10,16,0.74); box-shadow: 0 40px 120px rgba(0,0,0,0.55), inset 0 1px rgba(255,255,255,0.06);
+            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+            animation: cardRise 0.7s cubic-bezier(0.22,1,0.36,1) both;
         }
         .auth-shell::before {
-            content: "";
-            position: absolute;
-            left: -180px;
-            bottom: -200px;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: rgba(126, 102, 255, 0.2);
-            filter: blur(80px);
-            pointer-events: none;
+            content: ""; position: absolute; left: -180px; bottom: -200px; width: 400px; height: 400px;
+            border-radius: 50%; background: rgba(126,102,255,0.2); filter: blur(80px); pointer-events: none;
             animation: orbDrift 10s ease-in-out infinite;
         }
         .auth-shell::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            pointer-events: none;
-            background: linear-gradient(135deg,
-                    rgba(120, 104, 255, 0.06) 0%,
-                    transparent 40%,
-                    transparent 60%,
-                    rgba(84, 140, 255, 0.04) 100%);
+            content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+            background: linear-gradient(135deg, rgba(120,104,255,0.06) 0%, transparent 40%, transparent 60%, rgba(84,140,255,0.04) 100%);
             z-index: 0;
         }
-        @keyframes orbDrift {
-            0%,
-            100% {
-                transform: translate(0, 0);
-            }
-            33% {
-                transform: translate(40px, -25px);
-            }
-            66% {
-                transform: translate(-20px, 20px);
-            }
-        }
-        @keyframes cardRise {
-            from {
-                opacity: 0;
-                transform: translateY(36px) scale(0.97);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
+        @keyframes orbDrift { 0%,100% { transform: translate(0,0); } 33% { transform: translate(40px,-25px); } 66% { transform: translate(-20px,20px); } }
+        @keyframes cardRise { from { opacity: 0; transform: translateY(36px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
         /* ── Intro Panel ── */
         .intro {
-            position: relative;
-            z-index: 1;
-            min-height: 620px;
-            padding: 52px 44px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border-right: 1px solid var(--line);
+            position: relative; z-index: 1; min-height: 620px; padding: 52px 44px;
+            display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--line);
         }
-        .intro-top {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .intro-top { display: flex; flex-direction: column; gap: 8px; }
         .eyebrow {
-            width: fit-content;
-            padding: 8px 14px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            color: #c9c8d3;
-            background: rgba(12, 12, 18, 0.58);
-            font-size: 12px;
-            font-weight: 600;
-            backdrop-filter: blur(14px);
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+            width: fit-content; padding: 8px 14px; display: flex; align-items: center; gap: 9px;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; color: #c9c8d3;
+            background: rgba(12,12,18,0.58); font-size: 12px; font-weight: 600; backdrop-filter: blur(14px);
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.08s both;
         }
         .intro h1 {
-            margin-top: 20px;
-            font-size: clamp(50px, 6vw, 72px);
-            line-height: 0.94;
-            letter-spacing: -3.5px;
-            font-weight: 600;
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+            margin-top: 20px; font-size: clamp(50px, 6vw, 72px); line-height: 0.94; letter-spacing: -3.5px; font-weight: 600;
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.16s both;
         }
         .marker {
-            display: inline-block;
-            font-family: "Permanent Marker", sans-serif;
-            font-weight: 400;
-            color: transparent;
-            background: linear-gradient(90deg, #f5f5f5, #c7c0ff 35%, #8ea7ff 65%, #d8b9ff);
-            background-clip: text;
-            -webkit-background-clip: text;
-            animation: shimmer 3s ease-in-out infinite;
-            background-size: 200% 100%;
+            display: inline-block; font-family: "Permanent Marker", sans-serif; font-weight: 400;
+            color: transparent; background: linear-gradient(90deg, #f5f5f5, #c7c0ff 35%, #8ea7ff 65%, #d8b9ff);
+            background-clip: text; -webkit-background-clip: text; animation: shimmer 3s ease-in-out infinite; background-size: 200% 100%;
         }
-        @keyframes shimmer {
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-        @keyframes fadeSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(14px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
         .intro p {
-            max-width: 440px;
-            margin-top: 18px;
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.7;
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
+            max-width: 440px; margin-top: 18px; color: var(--muted); font-size: 14px; line-height: 1.7;
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.24s both;
         }
-        .trust-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
-        }
+        .trust-row { display: flex; flex-wrap: wrap; gap: 8px; animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.32s both; }
         .trust-pill {
-            padding: 9px 13px;
-            border: 1px solid var(--line);
-            border-radius: 11px;
-            color: #b8b7c4;
-            background: rgba(255, 255, 255, 0.035);
-            font-size: 11px;
-            font-weight: 500;
+            padding: 9px 13px; border: 1px solid var(--line); border-radius: 11px; color: #b8b7c4;
+            background: rgba(255,255,255,0.035); font-size: 11px; font-weight: 500;
             transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
         }
-        @media (hover: hover) {
-            .trust-pill:hover {
-                background: rgba(255, 255, 255, 0.06);
-                border-color: rgba(255, 255, 255, 0.18);
-                transform: translateY(-1px);
-            }
-        }
+        @media (hover: hover) { .trust-pill:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18); transform: translateY(-1px); } }
 
         /* ── Auth Panel ── */
         .auth-panel {
-            position: relative;
-            z-index: 1;
-            min-height: 620px;
-            padding: 42px 38px;
-            display: flex;
-            align-items: center;
-            background: linear-gradient(145deg, rgba(116, 92, 255, 0.05), rgba(255, 255, 255, 0.01));
+            position: relative; z-index: 1; min-height: 620px; padding: 42px 38px;
+            display: flex; align-items: center; background: linear-gradient(145deg, rgba(116,92,255,0.05), rgba(255,255,255,0.01));
         }
-        .auth-inner {
-            width: 100%;
-            max-width: 370px;
-            margin: 0 auto;
-        }
-        .auth-heading h2 {
-            font-size: 28px;
-            letter-spacing: -1.1px;
-            transition: all var(--transition-smooth);
-        }
-        .auth-heading p {
-            margin-top: 6px;
-            color: var(--muted);
-            font-size: 12.5px;
-            line-height: 1.6;
-            transition: all var(--transition-smooth);
-        }
+        .auth-inner { width: 100%; max-width: 400px; margin: 0 auto; }
+
+        .auth-heading h2 { font-size: 28px; letter-spacing: -1.1px; transition: all var(--transition-smooth); }
+        .auth-heading p { margin-top: 6px; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
 
         /* ── Tabs ── */
         .tabs {
-            margin: 22px 0 14px;
-            padding: 4px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border: 1px solid var(--line);
-            border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.025);
+            margin: 22px 0 14px; padding: 4px; display: grid; grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(255,255,255,0.025);
             position: relative;
         }
         .tabs::after {
-            content: "";
-            position: absolute;
-            inset: 4px;
-            width: calc(50% - 4px);
-            border-radius: 12px;
-            background: linear-gradient(135deg, #ffffff, #ddd9ff);
-            transition: transform var(--transition-spring);
-            z-index: 0;
-            pointer-events: none;
-            box-shadow: 0 8px 28px rgba(130, 105, 255, 0.18);
+            content: ""; position: absolute; inset: 4px; width: calc(50% - 4px); border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff, #ddd9ff); transition: transform var(--transition-spring);
+            z-index: 0; pointer-events: none; box-shadow: 0 8px 28px rgba(130,105,255,0.18);
         }
-        .tabs.signup-active::after {
-            transform: translateX(100%);
-        }
+        .tabs.signup-active::after { transform: translateX(100%); }
         .tab {
-            position: relative;
-            z-index: 1;
-            min-height: 42px;
-            border: 0;
-            border-radius: 12px;
-            color: #8f8e9b;
-            background: transparent;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: color var(--transition-smooth);
+            position: relative; z-index: 1; min-height: 42px; border: 0; border-radius: 12px;
+            color: #8f8e9b; background: transparent; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: color var(--transition-smooth);
         }
-        .tab.active {
-            color: #0a0910;
-        }
-        .tab:active {
-            transform: scale(0.96);
-        }
+        .tab.active { color: #0a0910; }
+        .tab:active { transform: scale(0.96); }
 
-        /* ── Social ── */
+        /* ── Social Grid (now 3 cols) ── */
         .social-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;
         }
         .oauth {
-            min-width: 0;
-            min-height: 50px;
-            padding: 0 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-            border: 1px solid var(--line);
-            border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.04);
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
+            min-width: 0; min-height: 50px; padding: 0 8px; display: flex; align-items: center;
+            justify-content: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.04); font-size: 12px; font-weight: 700; cursor: pointer;
             transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .oauth:active {
-            transform: scale(0.94);
-            background: rgba(255, 255, 255, 0.09);
-            box-shadow: 0 0 0 8px rgba(120, 104, 255, 0.06);
-        }
-        @media (hover: hover) {
-            .oauth:hover {
-                transform: translateY(-2px);
-                border-color: rgba(255, 255, 255, 0.17);
-                background: rgba(255, 255, 255, 0.07);
-                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
-            }
-        }
-        .provider-icon {
-            width: 20px;
-            height: 20px;
-            flex: 0 0 auto;
-            display: grid;
-            place-items: center;
-        }
-        .provider-icon svg {
-            width: 18px;
-            height: 18px;
-            display: block;
-        }
+        .oauth:active { transform: scale(0.94); background: rgba(255,255,255,0.09); box-shadow: 0 0 0 8px rgba(120,104,255,0.06); }
+        @media (hover: hover) { .oauth:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.17); background: rgba(255,255,255,0.07); box-shadow: 0 8px 28px rgba(0,0,0,0.28); } }
+        .provider-icon { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; }
+        .provider-icon svg { width: 18px; height: 18px; display: block; }
+
+        /* ── Divider ── */
         .divider {
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #6f6e7a;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1.3px;
+            margin: 12px 0; display: flex; align-items: center; gap: 12px;
+            color: #6f6e7a; font-size: 10px; text-transform: uppercase; letter-spacing: 1.3px;
         }
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--line);
-        }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
         /* ── Form ── */
-        form {
-            display: grid;
-            gap: 12px;
-        }
-        .field {
-            display: grid;
-            gap: 6px;
-        }
-        label {
-            color: #c8c7d1;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-        .input-wrap {
-            position: relative;
-        }
+        form { display: grid; gap: 12px; }
+        .field { display: grid; gap: 6px; }
+        label { color: #c8c7d1; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+        .input-wrap { position: relative; }
         input {
-            width: 100%;
-            min-height: 50px;
-            padding: 0 46px 0 15px;
-            border: 1px solid var(--line);
-            outline: 0;
-            border-radius: var(--radius-md);
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.035);
-            font-size: 13.5px;
+            width: 100%; min-height: 50px; padding: 0 46px 0 15px; border: 1px solid var(--line);
+            outline: 0; border-radius: var(--radius-md); color: var(--text);
+            background: rgba(255,255,255,0.035); font-size: 13.5px;
             transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
         }
-        input::placeholder {
-            color: #686774;
-        }
-        input:focus {
-            border-color: rgba(142, 126, 255, 0.7);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 0 5px rgba(120, 104, 255, 0.09);
-        }
-        input:-webkit-autofill {
-            -webkit-box-shadow: 0 0 0 50px #0f0f17 inset;
-            -webkit-text-fill-color: #f7f7fb;
-            caret-color: #f7f7fb;
-        }
+        input::placeholder { color: #686774; }
+        input:focus { border-color: rgba(142,126,255,0.7); background: rgba(255,255,255,0.05); box-shadow: 0 0 0 5px rgba(120,104,255,0.09); }
+        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 50px #0f0f17 inset; -webkit-text-fill-color: #f7f7fb; caret-color: #f7f7fb; }
         .input-icon {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #777684;
-            pointer-events: none;
-            font-size: 13px;
-            transition: color var(--transition-fast);
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            color: #777684; pointer-events: none; font-size: 13px; transition: color var(--transition-fast);
         }
-        input:focus~.input-icon {
-            color: #a99cff;
-        }
+        input:focus~.input-icon { color: #a99cff; }
         .password-toggle {
-            position: absolute;
-            right: 6px;
-            top: 50%;
-            width: 36px;
-            height: 36px;
-            transform: translateY(-50%);
-            border: 0;
-            border-radius: 10px;
-            color: #8c8b98;
-            background: transparent;
-            cursor: pointer;
-            font-size: 13px;
-            transition: background var(--transition-fast), color var(--transition-fast);
-            z-index: 2;
+            position: absolute; right: 6px; top: 50%; width: 36px; height: 36px;
+            transform: translateY(-50%); border: 0; border-radius: 10px; color: #8c8b98;
+            background: transparent; cursor: pointer; font-size: 13px;
+            transition: background var(--transition-fast), color var(--transition-fast); z-index: 2;
         }
-        .password-toggle:active {
-            background: rgba(255, 255, 255, 0.08);
-            color: #c7c0ff;
-        }
-        @media (hover: hover) {
-            .password-toggle:hover {
-                background: rgba(255, 255, 255, 0.05);
-            }
-        }
-        .form-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 14px;
-            font-size: 11px;
-        }
-        .remember {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #aaa9b6;
-            cursor: pointer;
-        }
-        .remember input {
-            width: 16px;
-            min-height: 16px;
-            accent-color: var(--purple);
-            cursor: pointer;
-            border-radius: 4px;
-            padding: 0;
-        }
-        .forgot {
-            color: #a99cff;
-            font-weight: 500;
-            transition: color var(--transition-fast);
-        }
-        .forgot:active {
-            color: #c7c0ff;
-        }
-        @media (hover: hover) {
-            .forgot:hover {
-                color: #c7c0ff;
-                text-decoration: underline;
-            }
-        }
+        .password-toggle:active { background: rgba(255,255,255,0.08); color: #c7c0ff; }
+        @media (hover: hover) { .password-toggle:hover { background: rgba(255,255,255,0.05); } }
+        .form-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 11px; }
+        .remember { display: flex; align-items: center; gap: 8px; color: #aaa9b6; cursor: pointer; }
+        .remember input { width: 16px; min-height: 16px; accent-color: var(--purple); cursor: pointer; border-radius: 4px; padding: 0; }
+        .forgot { color: #a99cff; font-weight: 500; transition: color var(--transition-fast); }
+        .forgot:active { color: #c7c0ff; }
+        @media (hover: hover) { .forgot:hover { color: #c7c0ff; text-decoration: underline; } }
         .submit {
-            width: 100%;
-            min-height: 50px;
-            border: 0;
-            border-radius: var(--radius-md);
-            color: #0a0910;
-            background: linear-gradient(135deg, #ffffff, #ddd9ff);
-            box-shadow: 0 12px 40px rgba(130, 105, 255, 0.2);
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-            cursor: pointer;
+            width: 100%; min-height: 50px; border: 0; border-radius: var(--radius-md);
+            color: #0a0910; background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            box-shadow: 0 12px 40px rgba(130,105,255,0.2); font-size: 13px; font-weight: 800;
+            letter-spacing: 0.2px; cursor: pointer;
             transition: transform var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .submit:active {
-            transform: scale(0.95);
-            box-shadow: 0 8px 28px rgba(130, 105, 255, 0.35);
-        }
-        @media (hover: hover) {
-            .submit:hover:not(:disabled) {
-                transform: translateY(-3px);
-                box-shadow: 0 18px 48px rgba(130, 105, 255, 0.3);
-            }
-        }
+        .submit:active { transform: scale(0.95); box-shadow: 0 8px 28px rgba(130,105,255,0.35); }
+        @media (hover: hover) { .submit:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 18px 48px rgba(130,105,255,0.3); } }
 
-        /* ── Guest ── */
-        .guest-button {
-            width: 100%;
-            min-height: 44px;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: 1px solid transparent;
-            border-radius: var(--radius-sm);
-            color: #aaa9b6;
-            background: transparent;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
-        }
-        .guest-button:active {
-            color: #fff;
-            border-color: var(--line);
-            background: rgba(255, 255, 255, 0.04);
-            transform: scale(0.97);
-        }
-        @media (hover: hover) {
-            .guest-button:hover {
-                color: #fff;
-                border-color: var(--line);
-                background: rgba(255, 255, 255, 0.03);
-            }
-        }
+        /* ── Terms ── */
         .terms {
-            margin-top: 10px;
-            color: #73727d;
-            font-size: 10px;
-            line-height: 1.6;
-            text-align: center;
+            margin-top: 12px; color: #73727d; font-size: 10px; line-height: 1.6; text-align: center;
         }
-        .terms a {
-            color: #a99cff;
-            font-weight: 500;
-        }
-        .terms a:active {
-            color: #c7c0ff;
-        }
-        .hidden {
-            display: none !important;
-        }
+        .terms a { color: #a99cff; font-weight: 500; }
+        .terms a:active { color: #c7c0ff; }
+
+        .hidden { display: none !important; }
 
         /* ── Toast ── */
         .toast {
-            position: fixed;
-            left: 50%;
-            bottom: calc(28px + var(--safe-bottom));
-            z-index: 300;
-            width: fit-content;
-            max-width: calc(100% - 28px);
-            padding: 12px 18px;
-            transform: translate(-50%, 30px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 14px;
-            color: #d9d8e2;
-            background: rgba(14, 14, 22, 0.94);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            font-size: 12px;
-            text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: fixed; left: 50%; bottom: calc(28px + var(--safe-bottom)); z-index: 300;
+            width: fit-content; max-width: calc(100% - 28px); padding: 12px 18px;
+            transform: translate(-50%, 30px); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px; color: #d9d8e2; background: rgba(14,14,22,0.94);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.45); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); font-size: 12px; text-align: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
             touch-action: pan-y;
         }
-        .toast.show {
-            opacity: 1;
-            transform: translate(-50%, 0);
-            pointer-events: auto;
-        }
-        .toast.error {
-            color: #ffd7dd;
-            border-color: rgba(255, 123, 139, 0.25);
-            background: rgba(45, 14, 22, 0.94);
-        }
-        .toast.swiping {
-            transition: none;
-        }
+        .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+        .toast.error { color: #ffd7dd; border-color: rgba(255,123,139,0.25); background: rgba(45,14,22,0.94); }
+        .toast.swiping { transition: none; }
 
-        /* ── Spinner ── */
         .spinner {
-            width: 16px;
-            height: 16px;
-            display: inline-block;
-            border: 2px solid rgba(0, 0, 0, 0.18);
-            border-top-color: #09090d;
-            border-radius: 50%;
-            animation: spin 0.65s linear infinite;
+            width: 16px; height: 16px; display: inline-block; border: 2px solid rgba(0,0,0,0.18);
+            border-top-color: #09090d; border-radius: 50%; animation: spin 0.65s linear infinite;
         }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Responsive: Tablet & below ── */
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200; display: flex; align-items: center;
+            justify-content: center; padding: 20px; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            width: 100%; max-width: 420px; padding: 32px 28px 28px; border-radius: var(--radius-xl);
+            background: rgba(16,16,26,0.85); border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5); transform: translateY(20px) scale(0.97);
+            transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+        }
+        .modal-overlay.active .modal-card { transform: translateY(0) scale(1); }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .modal-header h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+        .modal-close {
+            width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line);
+            border-radius: 12px; background: rgba(255,255,255,0.04); font-size: 18px;
+            transition: background var(--transition-fast);
+        }
+        .modal-close:active { background: rgba(255,255,255,0.1); }
+        .step-container { display: none; flex-direction: column; gap: 16px; }
+        .step-container.active { display: flex; }
+        .step-desc { color: var(--muted); font-size: 13px; line-height: 1.5; }
+        .modal-error { color: #ff8a9a; font-size: 12px; min-height: 18px; }
+        .modal-btn {
+            width: 100%; min-height: 48px; border: 0; border-radius: var(--radius-md);
+            font-weight: 700; font-size: 13px; cursor: pointer;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .modal-btn:active { transform: scale(0.96); }
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #ffffff, #ddd9ff); color: #0a0910;
+            box-shadow: 0 10px 30px rgba(130,105,255,0.25);
+        }
+        .modal-btn.primary:disabled { opacity: 0.5; pointer-events: none; }
+
+        /* ── Responsive ── */
         @media (max-width: 820px) {
             .topbar {
                 top: calc(10px + var(--safe-top));
                 width: calc(100% - 18px - var(--safe-left) - var(--safe-right));
-                height: 60px;
-                padding: 0 10px;
-                border-radius: 18px;
+                height: 60px; padding: 0 10px; border-radius: 18px;
             }
-            .back-button {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px;
-                font-size: 16px;
-            }
-            .top-status span:last-child {
-                display: none;
-            }
-            .logo {
-                font-size: 17px;
-                gap: 7px;
-            }
-            .brand-icon {
-                width: 28px;
-                height: 28px;
-            }
-            main {
-                padding: calc(88px + var(--safe-top)) 8px calc(16px + var(--safe-bottom));
-                align-items: start;
-            }
+            .back-button { width: 40px; height: 40px; border-radius: 12px; font-size: 16px; }
+            .top-status span:last-child { display: none; }
+            .logo { font-size: 17px; gap: 7px; }
+            .brand-icon { width: 28px; height: 28px; }
+            main { padding: calc(88px + var(--safe-top)) 8px calc(16px + var(--safe-bottom)); align-items: start; }
             .auth-shell {
-                width: min(540px, 100%);
-                grid-template-columns: 1fr;
-                border-radius: 26px;
-                animation: cardRiseMobile 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+                width: min(540px, 100%); grid-template-columns: 1fr; border-radius: 26px;
+                animation: cardRiseMobile 0.55s cubic-bezier(0.22,1,0.36,1) both;
             }
-            @keyframes cardRiseMobile {
-                from {
-                    opacity: 0;
-                    transform: translateY(40px) scale(0.96);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0) scale(1);
-                }
-            }
+            @keyframes cardRiseMobile { from { opacity: 0; transform: translateY(40px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
             .intro {
-                min-height: auto;
-                padding: 28px 22px 20px;
-                border-right: 0;
-                border-bottom: 1px solid var(--line);
-                gap: 14px;
+                min-height: auto; padding: 28px 22px 20px; border-right: 0;
+                border-bottom: 1px solid var(--line); gap: 14px;
             }
-            .intro h1 {
-                margin-top: 14px;
-                font-size: clamp(40px, 13vw, 58px);
-                letter-spacing: -2.5px;
-            }
-            .intro p {
-                font-size: 12px;
-                margin-top: 10px;
-                max-width: 100%;
-            }
-            .trust-row {
-                margin-top: 12px;
-                gap: 6px;
-            }
-            .trust-pill {
-                font-size: 10px;
-                padding: 7px 10px;
-                border-radius: 9px;
-            }
-            .auth-panel {
-                min-height: auto;
-                padding: 26px 22px 30px;
-            }
-            .auth-inner {
-                max-width: 100%;
-            }
-            .social-grid {
-                gap: 8px;
-            }
-            .oauth {
-                min-height: 46px;
-                font-size: 11px;
-                border-radius: 14px;
-            }
+            .intro h1 { margin-top: 14px; font-size: clamp(40px, 13vw, 58px); letter-spacing: -2.5px; }
+            .intro p { font-size: 12px; margin-top: 10px; max-width: 100%; }
+            .trust-row { margin-top: 12px; gap: 6px; }
+            .trust-pill { font-size: 10px; padding: 7px 10px; border-radius: 9px; }
+            .auth-panel { min-height: auto; padding: 26px 22px 30px; }
+            .auth-inner { max-width: 100%; }
+            .social-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+            .oauth { min-height: 46px; font-size: 11px; border-radius: 14px; }
         }
 
-        /* ── Responsive: Small phones ── */
-        @media (max-width: 440px) {
-            .topbar {
-                height: 54px;
-                border-radius: 16px;
-                padding: 0 8px;
-            }
-            .back-button {
-                width: 36px;
-                height: 36px;
-                border-radius: 10px;
-            }
-            .logo {
-                font-size: 15px;
-                gap: 6px;
-            }
-            .brand-icon {
-                width: 26px;
-                height: 26px;
-            }
-            .intro {
-                padding: 22px 16px 16px;
-            }
-            .intro h1 {
-                font-size: clamp(34px, 11vw, 46px);
-                letter-spacing: -2px;
-            }
-            .auth-panel {
-                padding: 22px 16px 26px;
-            }
-            .auth-shell {
-                border-radius: 22px;
-            }
-            .social-grid {
-                grid-template-columns: 1fr;
-                gap: 7px;
-            }
-            .submit {
-                min-height: 46px;
-                font-size: 12px;
-                border-radius: 14px;
-            }
-            input {
-                min-height: 46px;
-                font-size: 13px;
-                border-radius: 14px;
-            }
-            .tabs {
-                border-radius: 13px;
-            }
-            .tab {
-                min-height: 38px;
-                font-size: 11px;
-            }
-            .tabs::after {
-                border-radius: 10px;
-            }
-        }
-
-        /* ── Reduced motion ── */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+        @media (max-width: 480px) {
+            .social-grid { grid-template-columns: 1fr 1fr; }
+            .oauth:nth-child(3) { grid-column: span 2; } /* guest spans full width on small phones */
         }
     </style>
 </head>
-
 <body>
     <canvas id="bendCanvas"></canvas>
     <div class="background-vignette"></div>
@@ -1008,12 +446,12 @@
                     </div>
 
                     <!-- TABS -->
-                    <div class="tabs" id="tabContainer" role="tablist" aria-label="Authentication mode">
+                    <div class="tabs" id="tabContainer" role="tablist">
                         <button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true">Sign in</button>
                         <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Create account</button>
                     </div>
 
-                    <!-- SOCIAL AUTH -->
+                    <!-- SOCIAL + GUEST (now 3‑column) -->
                     <div class="social-grid">
                         <button class="oauth" id="googleButton" type="button">
                             <span class="provider-icon">
@@ -1026,6 +464,10 @@
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.75 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
                             </span>
                             GitHub
+                        </button>
+                        <button class="oauth" id="guestButton" type="button">
+                            <span class="provider-icon">◌</span>
+                            Guest
                         </button>
                     </div>
 
@@ -1058,13 +500,11 @@
                             <label class="remember">
                                 <input type="checkbox" id="remember" />Remember me
                             </label>
-                            <a class="forgot" href="#">Forgot password?</a>
+                            <a class="forgot" href="#" id="forgotLink">Forgot password?</a>
                         </div>
                         <button class="submit" id="submitButton" type="submit">Enter Horizon →</button>
                     </form>
 
-                    <!-- GUEST -->
-                    <button class="guest-button" id="guestButton" type="button">◌ Continue as guest</button>
                     <p class="terms">By continuing, you agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
                 </div>
             </div>
@@ -1073,32 +513,46 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <!-- FORGOT PASSWORD MODAL (uses built‑in Firebase reset) -->
+    <div class="modal-overlay" id="forgotPasswordModal" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalTitle">Reset password</h3>
+                <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+            </div>
+            <div class="step-container active" id="stepEmail">
+                <p class="step-desc">Enter your email and we'll send a secure reset link.</p>
+                <div class="field">
+                    <label for="resetEmail">Email</label>
+                    <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email" />
+                </div>
+                <div class="modal-error" id="resetEmailError"></div>
+                <button class="modal-btn primary" id="sendResetLinkBtn">Send Reset Link</button>
+            </div>
+            <div class="step-container" id="stepSuccess">
+                <p style="text-align:center; font-size:15px;">✅ Reset link sent! Check your inbox.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
         import {
             getAuth,
-            signInWithRedirect,
-            getRedirectResult,
-            GithubAuthProvider,
+            signInWithPopup,
             GoogleAuthProvider,
+            GithubAuthProvider,
             onAuthStateChanged,
             signInWithEmailAndPassword,
             createUserWithEmailAndPassword,
             signInAnonymously,
-            updateProfile
+            updateProfile,
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-        import {
-            getFirestore,
-            doc,
-            setDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        /* ==============================
-        FIREBASE CONFIG
-        ============================== */
         const firebaseConfig = {
             apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
             authDomain: "ace-horizon.firebaseapp.com",
@@ -1109,18 +563,12 @@
             measurementId: "G-8TF3HYRPK6"
         };
 
-        /* ==============================
-        FIREBASE INIT
-        ============================== */
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         let analytics = null;
-        try { analytics = getAnalytics(app); } catch (error) { console.warn("Analytics unavailable:", error); }
+        try { analytics = getAnalytics(app); } catch (_) {}
 
-        /* ==============================
-        DOM ELEMENTS
-        ============================== */
         const loginTab = document.getElementById("loginTab");
         const signupTab = document.getElementById("signupTab");
         const tabContainer = document.getElementById("tabContainer");
@@ -1143,14 +591,8 @@
 
         let mode = "login";
         let loading = false;
-        let redirectProcessed = false;
         let toastTimer;
-        let toastSwipeStart = null;
-        let toastSwipeOffset = 0;
 
-        /* ==============================
-        TOAST WITH SWIPE DISMISS
-        ============================== */
         function showToast(message, type = "normal") {
             clearTimeout(toastTimer);
             toast.textContent = message;
@@ -1158,67 +600,9 @@
             toast.classList.add("show");
             toast.style.transform = "translate(-50%, 0)";
             toast.style.opacity = "1";
-            toastSwipeOffset = 0;
-            toastSwipeStart = null;
-            toast.classList.remove("swiping");
-            toastTimer = setTimeout(() => {
-                toast.classList.remove("show");
-            }, 3500);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 3500);
         }
 
-        function dismissToast() {
-            clearTimeout(toastTimer);
-            toast.classList.remove("show");
-            toast.style.transform = "translate(-50%, 30px)";
-            toast.style.opacity = "0";
-            toastSwipeOffset = 0;
-            toastSwipeStart = null;
-            toast.classList.remove("swiping");
-        }
-
-        toast.addEventListener("pointerdown", (e) => {
-            if (!toast.classList.contains("show")) return;
-            toastSwipeStart = { x: e.clientX, y: e.clientY };
-            toastSwipeOffset = 0;
-            toast.classList.add("swiping");
-            toast.setPointerCapture(e.pointerId);
-        });
-
-        toast.addEventListener("pointermove", (e) => {
-            if (!toastSwipeStart) return;
-            const dy = e.clientY - toastSwipeStart.y;
-            toastSwipeOffset = dy;
-            const resistance = Math.max(0, Math.min(60, dy)) * 0.7;
-            toast.style.transform = `translate(-50%, ${resistance}px)`;
-            toast.style.opacity = `${Math.max(0.3, 1 - Math.abs(dy) / 120)}`;
-        });
-
-        toast.addEventListener("pointerup", () => {
-            if (!toastSwipeStart) return;
-            toast.classList.remove("swiping");
-            if (Math.abs(toastSwipeOffset) > 50) {
-                dismissToast();
-            } else {
-                toast.style.transform = "translate(-50%, 0)";
-                toast.style.opacity = "1";
-            }
-            toastSwipeStart = null;
-            toastSwipeOffset = 0;
-        });
-
-        toast.addEventListener("pointercancel", () => {
-            toast.classList.remove("swiping");
-            if (toastSwipeStart) {
-                toast.style.transform = "translate(-50%, 0)";
-                toast.style.opacity = "1";
-            }
-            toastSwipeStart = null;
-            toastSwipeOffset = 0;
-        });
-
-        /* ==============================
-        HELPERS
-        ============================== */
         function track(eventName, params = {}) {
             if (!analytics) return;
             try { logEvent(analytics, eventName, params); } catch (error) { console.warn("Analytics event failed:", error); }
@@ -1227,10 +611,9 @@
         function setLoading(state, source = "email") {
             loading = state;
             const buttons = [submitButton, googleButton, githubButton, guestButton, loginTab, signupTab];
-            buttons.forEach(button => { button.disabled = state; });
+            buttons.forEach(b => { b.disabled = state; });
             if (source === "email") {
-                submitButton.innerHTML = state ? '<span class="spinner"></span>' : mode === "signup" ?
-                    "Create account →" : "Enter Horizon →";
+                submitButton.innerHTML = state ? '<span class="spinner"></span>' : mode === "signup" ? "Create account →" : "Enter Horizon →";
             }
             if (source === "google") {
                 googleButton.innerHTML = state ? '<span class="spinner"></span>' : googleButton.dataset.original;
@@ -1286,17 +669,12 @@
             setTimeout(() => { window.location.href = "app.html"; }, 180);
         }
 
-        /* ==============================
-        AUTH MODE SWITCHING
-        ============================== */
         function setMode(nextMode) {
             if (loading) return;
             mode = nextMode;
             const isSignup = mode === "signup";
             loginTab.classList.toggle("active", !isSignup);
             signupTab.classList.toggle("active", isSignup);
-            loginTab.setAttribute("aria-selected", !isSignup);
-            signupTab.setAttribute("aria-selected", isSignup);
             tabContainer.classList.toggle("signup-active", isSignup);
             nameField.classList.toggle("hidden", !isSignup);
             loginMeta.classList.toggle("hidden", isSignup);
@@ -1310,56 +688,40 @@
         loginTab.addEventListener("click", () => setMode("login"));
         signupTab.addEventListener("click", () => setMode("signup"));
 
-        /* ==============================
-        PASSWORD TOGGLE
-        ============================== */
         passwordToggle.addEventListener("click", () => {
             const hidden = passwordInput.type === "password";
             passwordInput.type = hidden ? "text" : "password";
             passwordToggle.textContent = hidden ? "◎" : "◉";
-            passwordToggle.setAttribute("aria-label", hidden ? "Hide password" : "Show password");
         });
 
-        /* ==============================
-        GOOGLE AUTH — redirect
-        ============================== */
-        googleButton.addEventListener("click", async () => {
+        async function handleSocialLogin(provider, providerName) {
             if (loading) return;
-            setLoading(true, "google");
+            setLoading(true, providerName);
             try {
-                const provider = new GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: "select_account" });
-                await signInWithRedirect(auth, provider);
-                // Page will redirect away; loading stays until redirect completes
+                const result = await signInWithPopup(auth, provider);
+                await saveUser(result.user, providerName);
+                track("login", { method: providerName });
+                showToast("Welcome to Horizon.");
+                setTimeout(redirectToApp, 400);
             } catch (error) {
-                console.error(error);
                 showToast(getErrorMessage(error), "error");
-                setLoading(false, "google");
+                setLoading(false, providerName);
             }
+        }
+
+        googleButton.addEventListener("click", () => {
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: "select_account" });
+            handleSocialLogin(provider, "google");
         });
 
-        /* ==============================
-        GITHUB AUTH — redirect
-        ============================== */
-        githubButton.addEventListener("click", async () => {
-            if (loading) return;
-            setLoading(true, "github");
-            try {
-                const provider = new GithubAuthProvider();
-                provider.addScope("read:user");
-                provider.addScope("user:email");
-                await signInWithRedirect(auth, provider);
-                // Page will redirect away
-            } catch (error) {
-                console.error(error);
-                showToast(getErrorMessage(error), "error");
-                setLoading(false, "github");
-            }
+        githubButton.addEventListener("click", () => {
+            const provider = new GithubAuthProvider();
+            provider.addScope("read:user");
+            provider.addScope("user:email");
+            handleSocialLogin(provider, "github");
         });
 
-        /* ==============================
-        GUEST AUTH
-        ============================== */
         guestButton.addEventListener("click", async () => {
             if (loading) return;
             setLoading(true, "guest");
@@ -1370,21 +732,14 @@
                 showToast("Entering as guest.");
                 setTimeout(redirectToApp, 400);
             } catch (error) {
-                console.error(error);
                 showToast(getErrorMessage(error), "error");
                 setLoading(false, "guest");
             }
         });
 
-        /* ==============================
-        EMAIL AUTH
-        ============================== */
         authForm.addEventListener("submit", async event => {
             event.preventDefault();
-            if (loading || !authForm.checkValidity()) {
-                authForm.reportValidity();
-                return;
-            }
+            if (loading || !authForm.checkValidity()) { authForm.reportValidity(); return; }
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             setLoading(true, "email");
@@ -1393,7 +748,7 @@
                 if (mode === "signup") {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     const name = nameInput.value.trim();
-                    if (name) { await updateProfile(result.user, { displayName: name }); }
+                    if (name) await updateProfile(result.user, { displayName: name });
                     await saveUser(result.user, "email");
                     track("sign_up", { method: "email" });
                     showToast("Account created.");
@@ -1405,106 +760,96 @@
                 }
                 setTimeout(redirectToApp, 400);
             } catch (error) {
-                console.error(error);
                 showToast(getErrorMessage(error), "error");
                 setLoading(false, "email");
             }
         });
 
-        /* ==============================
-        KEYBOARD-AWARE FOCUS (MOBILE)
-        ============================== */
-        const focusableInputs = [emailInput, passwordInput, nameInput];
-        focusableInputs.forEach(input => {
+        // Focus handling for mobile
+        [emailInput, passwordInput, nameInput].forEach(input => {
             input.addEventListener("focus", () => {
                 if (window.innerWidth < 820) {
                     setTimeout(() => {
                         const rect = input.getBoundingClientRect();
-                        if (rect.bottom > window.innerHeight * 0.6) {
-                            input.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }
+                        if (rect.bottom > window.innerHeight * 0.6) input.scrollIntoView({ behavior: "smooth", block: "center" });
                     }, 350);
                 }
             });
         });
 
-        /* ==============================
-        HANDLE REDIRECT RESULT ON PAGE LOAD
-        ============================== */
-        async function handleRedirectResult() {
-            try {
-                const result = await getRedirectResult(auth);
-                if (result && !redirectProcessed) {
-                    redirectProcessed = true;
-                    const providerId = result.user.providerData[0]?.providerId || "";
-                    const provider = providerId.includes("google") ? "google" :
-                        providerId.includes("github") ? "github" : "redirect";
-                    await saveUser(result.user, provider);
-                    track("login", { method: provider });
-                    showToast("Welcome to Horizon.");
-                    setTimeout(redirectToApp, 400);
-                }
-            } catch (error) {
-                console.error("Redirect sign-in failed:", error);
-                showToast(getErrorMessage(error), "error");
-            }
-        }
-
-        /* ==============================
-        AUTH STATE — REDIRECT IF LOGGED IN
-        ============================== */
         let initialAuthCheck = true;
         onAuthStateChanged(auth, user => {
-            if (redirectProcessed) return;
-            if (initialAuthCheck && user) {
-                initialAuthCheck = false;
-                redirectProcessed = true;
-                redirectToApp();
-                return;
-            }
+            if (initialAuthCheck && user) { initialAuthCheck = false; redirectToApp(); return; }
             initialAuthCheck = false;
         });
 
-        // Check for redirect result on load
-        handleRedirectResult();
+        // ── Forgot Password (real link, no mock) ──
+        const modalOverlay = document.getElementById("forgotPasswordModal");
+        const modalClose = document.getElementById("modalClose");
+        const forgotLink = document.getElementById("forgotLink");
+        const stepEmail = document.getElementById("stepEmail");
+        const stepSuccess = document.getElementById("stepSuccess");
+        const resetEmail = document.getElementById("resetEmail");
+        const resetEmailError = document.getElementById("resetEmailError");
+        const sendResetLinkBtn = document.getElementById("sendResetLinkBtn");
 
-        /* ==============================
-        GLOW ORB
-        ============================== */
+        function openModal() {
+            modalOverlay.classList.add("active");
+            stepEmail.classList.add("active");
+            stepSuccess.classList.remove("active");
+            resetEmail.value = "";
+            resetEmailError.textContent = "";
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove("active");
+        }
+
+        forgotLink.addEventListener("click", e => { e.preventDefault(); openModal(); });
+        modalClose.addEventListener("click", closeModal);
+        modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) closeModal(); });
+
+        sendResetLinkBtn.addEventListener("click", async () => {
+            const email = resetEmail.value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                resetEmailError.textContent = "Enter a valid email.";
+                return;
+            }
+            sendResetLinkBtn.disabled = true;
+            sendResetLinkBtn.innerHTML = '<span class="spinner"></span>';
+            resetEmailError.textContent = "";
+            try {
+                await sendPasswordResetEmail(auth, email);
+                stepEmail.classList.remove("active");
+                stepSuccess.classList.add("active");
+            } catch (error) {
+                resetEmailError.textContent = getErrorMessage(error);
+            } finally {
+                sendResetLinkBtn.disabled = false;
+                sendResetLinkBtn.textContent = "Send Reset Link";
+            }
+        });
+
+        // ── Canvas & glow ──
         let orbTimeout;
-
         function moveGlowOrb(x, y) {
             glowOrb.style.left = x + "px";
             glowOrb.style.top = y + "px";
             glowOrb.classList.add("visible");
             clearTimeout(orbTimeout);
-            orbTimeout = setTimeout(() => {
-                glowOrb.classList.remove("visible");
-            }, 1800);
+            orbTimeout = setTimeout(() => glowOrb.classList.remove("visible"), 1800);
         }
-        document.addEventListener("pointermove", (e) => {
-            moveGlowOrb(e.clientX, e.clientY);
-        });
-        document.addEventListener("pointerdown", (e) => {
-            moveGlowOrb(e.clientX, e.clientY);
-        });
+        document.addEventListener("pointermove", e => moveGlowOrb(e.clientX, e.clientY));
+        document.addEventListener("pointerdown", e => moveGlowOrb(e.clientX, e.clientY));
 
-        /* ==============================
-        CANVAS BACKGROUND
-        ============================== */
         const canvas = document.getElementById("bendCanvas");
         const ctx = canvas.getContext("2d");
-        let width = 0;
-        let height = 0;
-        let dpr = 1;
+        let width, height, dpr = 1;
         const mouse = { x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 };
         const bends = [
-            { y: 0.18, amplitude: 85, frequency: 0.0018, speed: 0.00032, width: 150, colorA: "104, 91, 255",
-                colorB: "91, 180, 255" },
-            { y: 0.49, amplitude: 130, frequency: 0.00135, speed: -0.00022, width: 180, colorA: "157, 91, 255",
-                colorB: "78, 116, 255" },
-            { y: 0.78, amplitude: 105, frequency: 0.00155, speed: 0.00018, width: 170, colorA: "82, 127, 255",
-                colorB: "174, 93, 255" }
+            { y: 0.18, amplitude: 85, frequency: 0.0018, speed: 0.00032, width: 150, colorA: "104, 91, 255", colorB: "91, 180, 255" },
+            { y: 0.49, amplitude: 130, frequency: 0.00135, speed: -0.00022, width: 180, colorA: "157, 91, 255", colorB: "78, 116, 255" },
+            { y: 0.78, amplitude: 105, frequency: 0.00155, speed: 0.00018, width: 170, colorA: "82, 127, 255", colorB: "174, 93, 255" }
         ];
 
         function resizeCanvas() {
@@ -1525,21 +870,17 @@
             const points = [];
             for (let x = -200; x <= width + 200; x += 16) {
                 const wave1 = Math.sin((x + horizontalShift) * bend.frequency + time * bend.speed) * bend.amplitude;
-                const wave2 = Math.sin(x * bend.frequency * 0.47 - time * bend.speed * 0.8 + index) * bend.amplitude *
-                    0.45;
+                const wave2 = Math.sin(x * bend.frequency * 0.47 - time * bend.speed * 0.8 + index) * bend.amplitude * 0.45;
                 points.push({ x, y: baseY + wave1 + wave2 + mouseShift });
             }
             ctx.save();
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
             ctx.beginPath();
-            points.forEach((point, i) => { i === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point
-                    .y); });
+            points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
             const gradient = ctx.createLinearGradient(0, 0, width, height);
-            gradient.addColorStop(0, `rgba(${bend.colorA}, 0)`);
-            gradient.addColorStop(0.25, `rgba(${bend.colorA}, 0.25)`);
-            gradient.addColorStop(0.62, `rgba(${bend.colorB}, 0.3)`);
-            gradient.addColorStop(1, `rgba(${bend.colorB}, 0)`);
+            gradient.addColorStop(0, `rgba(${bend.colorA},0)`);
+            gradient.addColorStop(0.25, `rgba(${bend.colorA},0.25)`);
+            gradient.addColorStop(0.62, `rgba(${bend.colorB},0.3)`);
+            gradient.addColorStop(1, `rgba(${bend.colorB},0)`);
             ctx.strokeStyle = gradient;
             ctx.lineWidth = bend.width;
             ctx.filter = "blur(45px)";
@@ -1547,12 +888,12 @@
             ctx.stroke();
             ctx.filter = "blur(14px)";
             ctx.lineWidth = bend.width * 0.28;
-            const innerGradient = ctx.createLinearGradient(0, 0, width, 0);
-            innerGradient.addColorStop(0, `rgba(${bend.colorA}, 0)`);
-            innerGradient.addColorStop(0.3, `rgba(${bend.colorA}, 0.25)`);
-            innerGradient.addColorStop(0.65, `rgba(${bend.colorB}, 0.22)`);
-            innerGradient.addColorStop(1, `rgba(${bend.colorB}, 0)`);
-            ctx.strokeStyle = innerGradient;
+            const innerGrad = ctx.createLinearGradient(0, 0, width, 0);
+            innerGrad.addColorStop(0, `rgba(${bend.colorA},0)`);
+            innerGrad.addColorStop(0.3, `rgba(${bend.colorA},0.25)`);
+            innerGrad.addColorStop(0.65, `rgba(${bend.colorB},0.22)`);
+            innerGrad.addColorStop(1, `rgba(${bend.colorB},0)`);
+            ctx.strokeStyle = innerGrad;
             ctx.stroke();
             ctx.restore();
         }
@@ -1561,42 +902,23 @@
             mouse.x += (mouse.targetX - mouse.x) * 0.04;
             mouse.y += (mouse.targetY - mouse.y) * 0.04;
             ctx.clearRect(0, 0, width, height);
-            const background = ctx.createRadialGradient(
-                width * mouse.x, height * mouse.y, 0,
-                width * 0.5, height * 0.5,
-                Math.max(width, height)
-            );
-            background.addColorStop(0, "rgba(32, 25, 72, 0.3)");
-            background.addColorStop(0.5, "rgba(12, 10, 25, 0.15)");
-            background.addColorStop(1, "rgba(6, 6, 9, 0)");
-            ctx.fillStyle = background;
+            const bg = ctx.createRadialGradient(width * mouse.x, height * mouse.y, 0, width * 0.5, height * 0.5, Math.max(width, height));
+            bg.addColorStop(0, "rgba(32,25,72,0.3)");
+            bg.addColorStop(0.5, "rgba(12,10,25,0.15)");
+            bg.addColorStop(1, "rgba(6,6,9,0)");
+            ctx.fillStyle = bg;
             ctx.fillRect(0, 0, width, height);
-            bends.forEach((bend, index) => { drawBend(bend, time, index); });
+            bends.forEach((b, i) => drawBend(b, time, i));
             requestAnimationFrame(animate);
         }
 
-        window.addEventListener("pointermove", event => {
-            mouse.targetX = event.clientX / window.innerWidth;
-            mouse.targetY = event.clientY / window.innerHeight;
-        });
+        window.addEventListener("pointermove", e => { mouse.targetX = e.clientX / width; mouse.targetY = e.clientY / height; });
         window.addEventListener("resize", resizeCanvas);
-
-        /* ==============================
-        SCROLL AWARENESS
-        ============================== */
-        window.addEventListener("scroll", () => {
-            topbar.classList.toggle("scrolled", window.scrollY > 10);
-        }, { passive: true });
+        window.addEventListener("scroll", () => topbar.classList.toggle("scrolled", window.scrollY > 10), { passive: true });
 
         resizeCanvas();
         animate(0);
-
-        /* ==============================
-        PREVENT OVERSCROLL BOUNCE
-        ============================== */
-        document.addEventListener("touchmove", function(e) {
-            if (e.target.closest("input, textarea")) return;
-        }, { passive: true });
+        document.addEventListener("touchmove", e => { if (e.target.closest("input, textarea")) return; }, { passive: true });
     </script>
 </body>
 </html>
