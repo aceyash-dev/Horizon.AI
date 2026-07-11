@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#060609" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Horizon.AI — Reset Password</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg: #060609;
+            --surface: rgba(15, 15, 23, 0.78);
+            --text: #f7f7fb;
+            --muted: #a5a5b5;
+            --line: rgba(255, 255, 255, 0.1);
+            --purple: #7868ff;
+            --violet: #a76cff;
+            --blue: #548cff;
+            --radius-xl: 32px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+            --transition-fast: 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition-smooth: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+        html { color-scheme: dark; -webkit-font-smoothing: antialiased; text-size-adjust: 100%; overscroll-behavior: none; height: 100%; }
+        body {
+            min-height: 100svh; min-height: 100dvh; overflow-x: hidden; color: var(--text); background: var(--bg);
+            font-family: "Lexend", sans-serif; overscroll-behavior-y: none; -webkit-overflow-scrolling: touch;
+        }
+        input { user-select: text; }
+        button, input { font: inherit; }
+        button { color: inherit; cursor: pointer; touch-action: manipulation; }
+        button:disabled { opacity: 0.45; pointer-events: none; }
+        a { color: inherit; text-decoration: none; }
+
+        /* Canvas & effects */
+        #bendCanvas { position: fixed; inset: 0; z-index: -5; width: 100%; height: 100%; pointer-events: none; }
+        .background-vignette {
+            position: fixed; inset: 0; z-index: -4; pointer-events: none;
+            background: radial-gradient(circle at center, transparent 8%, rgba(6,6,9,0.2) 48%, rgba(6,6,9,0.92) 100%);
+        }
+        .noise {
+            position: fixed; inset: 0; z-index: -3; opacity: 0.025; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+        }
+        .glow-orb {
+            position: fixed; z-index: -2; pointer-events: none; width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(120,104,255,0.18) 0%, rgba(120,104,255,0.05) 35%, transparent 70%);
+            transform: translate(-50%, -50%); transition: opacity 0.6s ease; opacity: 0; will-change: left, top, opacity;
+        }
+        .glow-orb.visible { opacity: 1; }
+
+        /* Topbar */
+        .topbar {
+            position: fixed; top: calc(18px + var(--safe-top)); left: 50%; z-index: 100;
+            width: min(1180px, calc(100% - 32px - var(--safe-left) - var(--safe-right))); height: 70px;
+            padding: 0 16px; transform: translateX(-50%); display: grid; grid-template-columns: 1fr auto 1fr;
+            align-items: center; border: 1px solid rgba(255,255,255,0.11); border-radius: 22px;
+            background: rgba(13,13,20,0.8); box-shadow: 0 12px 48px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.05);
+            backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+        }
+        .back-button {
+            justify-self: start; width: 44px; height: 44px; display: grid; place-items: center;
+            border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,0.04);
+            font-size: 18px; transition: transform var(--transition-fast), background var(--transition-fast);
+        }
+        .back-button:active { transform: scale(0.93); background: rgba(255,255,255,0.1); }
+        @media (hover: hover) { .back-button:hover { transform: translateX(-3px); background: rgba(255,255,255,0.08); } }
+        .logo {
+            grid-column: 2; justify-self: center; display: flex; align-items: center; gap: 10px;
+            font-size: 19px; font-weight: 500; letter-spacing: -0.8px;
+        }
+        .brand-icon { width: 32px; height: 32px; display: block; object-fit: contain; filter: invert(1); }
+        .gradient-text {
+            display: inline-block; font-family: "Permanent Marker", sans-serif; font-weight: 400;
+            color: transparent; background: linear-gradient(90deg, #f5f5f5 0%, #c7c0ff 30%, #8ea7ff 60%, #d8b9ff 100%);
+            background-clip: text; -webkit-background-clip: text;
+        }
+
+        /* Main */
+        main {
+            min-height: 100svh; padding: calc(110px + var(--safe-top)) 20px calc(24px + var(--safe-bottom));
+            display: grid; place-items: center;
+        }
+
+        /* Card */
+        .reset-card {
+            position: relative; width: 100%; max-width: 440px; padding: 44px 36px 36px;
+            border: 1px solid rgba(255,255,255,0.11); border-radius: var(--radius-xl);
+            background: rgba(16,16,26,0.78); box-shadow: 0 40px 120px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.06);
+            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+            animation: cardRise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .reset-card::before {
+            content: ""; position: absolute; top: -120px; right: -120px; width: 300px; height: 300px;
+            border-radius: 50%; background: rgba(120,104,255,0.15); filter: blur(80px); pointer-events: none;
+        }
+        @keyframes cardRise { from { opacity: 0; transform: translateY(36px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .reset-heading {
+            text-align: center; margin-bottom: 28px;
+        }
+        .reset-heading .icon-lock {
+            display: block; width: 48px; height: 48px; margin: 0 auto 14px; background: rgba(255,255,255,0.06);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px;
+        }
+        .reset-heading h2 { font-size: 28px; font-weight: 600; letter-spacing: -1px; }
+        .reset-heading p { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 6px; }
+
+        .field { display: grid; gap: 6px; margin-bottom: 14px; }
+        label { color: #c8c7d1; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+        .input-wrap { position: relative; }
+        input {
+            width: 100%; min-height: 50px; padding: 0 46px 0 15px; border: 1px solid var(--line);
+            outline: 0; border-radius: var(--radius-md); color: var(--text);
+            background: rgba(255,255,255,0.035); font-size: 13.5px;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+        }
+        input::placeholder { color: #686774; }
+        input:focus { border-color: rgba(142,126,255,0.7); background: rgba(255,255,255,0.05); box-shadow: 0 0 0 5px rgba(120,104,255,0.09); }
+        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 50px #0f0f17 inset; -webkit-text-fill-color: #f7f7fb; }
+
+        /* Eye button */
+        .password-toggle {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent;
+            cursor: pointer; display: grid; place-items: center; transition: background var(--transition-fast);
+            z-index: 2;
+        }
+        .password-toggle svg { width: 20px; height: 20px; stroke: #8c8b98; transition: stroke var(--transition-fast); }
+        .password-toggle:active { background: rgba(255,255,255,0.08); }
+        .password-toggle:active svg { stroke: #c7c0ff; }
+        @media (hover: hover) { .password-toggle:hover { background: rgba(255,255,255,0.05); } }
+
+        .password-strength {
+            height: 3px; border-radius: 2px; background: var(--line); margin-top: -8px; margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .password-strength span {
+            display: block; height: 100%; width: 0%; border-radius: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff6b);
+            transition: width 0.3s ease;
+        }
+
+        .error-message { color: #ff8a9a; font-size: 12px; min-height: 18px; margin-bottom: 12px; }
+
+        .submit-btn {
+            width: 100%; min-height: 50px; border: 0; border-radius: var(--radius-md);
+            color: #0a0910; background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            box-shadow: 0 12px 40px rgba(130,105,255,0.2); font-size: 13px; font-weight: 800;
+            letter-spacing: 0.2px; cursor: pointer;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .submit-btn:active { transform: scale(0.96); box-shadow: 0 8px 28px rgba(130,105,255,0.35); }
+
+        .success-message {
+            display: none; text-align: center; padding: 16px; color: #a6ff6d; font-size: 14px;
+        }
+        .success-message.visible { display: block; }
+        .spinner {
+            width: 16px; height: 16px; display: inline-block; border: 2px solid rgba(0,0,0,0.18);
+            border-top-color: #09090d; border-radius: 50%; animation: spin 0.65s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .reset-card { padding: 32px 22px 28px; }
+            .topbar { height: 60px; border-radius: 18px; padding: 0 10px; }
+            .back-button { width: 40px; height: 40px; }
+            .logo { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bendCanvas"></canvas>
+    <div class="background-vignette"></div>
+    <div class="noise"></div>
+    <div class="glow-orb" id="glowOrb" aria-hidden="true"></div>
+
+    <header class="topbar" id="topbar">
+        <a class="back-button" href="signin.html" aria-label="Back to sign in">←</a>
+        <a class="logo" href="index.html" aria-label="Horizon.AI home">
+            <img src="saturn.png" class="brand-icon" alt="" />
+            <span class="gradient-text">Horizon.AI</span>
+        </a>
+        <div></div>
+    </header>
+
+    <main>
+        <div class="reset-card">
+            <div class="reset-heading">
+                <div class="icon-lock">🔐</div>
+                <h2>Set new password</h2>
+                <p>Choose a strong password you don’t use elsewhere.</p>
+            </div>
+
+            <form id="resetForm" novalidate>
+                <div class="field">
+                    <label for="newPassword">New password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="newPassword" placeholder="At least 6 characters" minlength="6" required />
+                        <button class="password-toggle" id="toggleNew" type="button" aria-label="Show password">
+                            <!-- Eye open (default) -->
+                            <svg id="eyeNewOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <!-- Eye closed (hidden by default) -->
+                            <svg id="eyeNewClosed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="password-strength"><span id="strengthBar"></span></div>
+                </div>
+                <div class="field">
+                    <label for="confirmPassword">Confirm password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="confirmPassword" placeholder="Re‑enter new password" minlength="6" required />
+                        <button class="password-toggle" id="toggleConfirm" type="button" aria-label="Show password">
+                            <svg id="eyeConfirmOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg id="eyeConfirmClosed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="error-message" id="errorMessage"></div>
+                <button class="submit-btn" id="resetBtn" type="submit">Reset Password</button>
+            </form>
+
+            <div class="success-message" id="successMessage">
+                ✅ Password updated! Redirecting to sign in…
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getAuth, confirmPasswordReset } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
+            authDomain: "ace-horizon.firebaseapp.com",
+            projectId: "ace-horizon",
+            storageBucket: "ace-horizon.firebasestorage.app",
+            messagingSenderId: "1017523773217",
+            appId: "1:1017523773217:web:dbd7f5aa31f234d32aa860",
+            measurementId: "G-8TF3HYRPK6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const resetForm = document.getElementById("resetForm");
+        const newPasswordInput = document.getElementById("newPassword");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const errorMessage = document.getElementById("errorMessage");
+        const resetBtn = document.getElementById("resetBtn");
+        const successMessage = document.getElementById("successMessage");
+        const strengthBar = document.getElementById("strengthBar");
+
+        // Eye toggle functions
+        function setupEyeToggle(button, input, openEye, closedEye) {
+            button.addEventListener("click", () => {
+                const isPassword = input.type === "password";
+                input.type = isPassword ? "text" : "password";
+                openEye.style.display = isPassword ? "none" : "block";
+                closedEye.style.display = isPassword ? "block" : "none";
+            });
+        }
+
+        const toggleNew = document.getElementById("toggleNew");
+        const eyeNewOpen = document.getElementById("eyeNewOpen");
+        const eyeNewClosed = document.getElementById("eyeNewClosed");
+        setupEyeToggle(toggleNew, newPasswordInput, eyeNewOpen, eyeNewClosed);
+
+        const toggleConfirm = document.getElementById("toggleConfirm");
+        const eyeConfirmOpen = document.getElementById("eyeConfirmOpen");
+        const eyeConfirmClosed = document.getElementById("eyeConfirmClosed");
+        setupEyeToggle(toggleConfirm, confirmPasswordInput, eyeConfirmOpen, eyeConfirmClosed);
+
+        // Password strength indicator
+        newPasswordInput.addEventListener("input", () => {
+            const val = newPasswordInput.value;
+            let strength = 0;
+            if (val.length >= 6) strength = 25;
+            if (val.length >= 8) strength = 50;
+            if (/[A-Z]/.test(val) && /[0-9]/.test(val)) strength = 75;
+            if (/[^A-Za-z0-9]/.test(val)) strength = 100;
+            strengthBar.style.width = strength + "%";
+        });
+
+        // Extract oobCode from URL
+        const params = new URLSearchParams(window.location.search);
+        const oobCode = params.get("oobCode");
+
+        if (!oobCode) {
+            errorMessage.textContent = "Invalid reset link. Please request a new password reset.";
+            resetBtn.disabled = true;
+        }
+
+        resetForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (!oobCode) {
+                errorMessage.textContent = "Missing reset code. Request a new link.";
+                return;
+            }
+
+            const newPass = newPasswordInput.value;
+            const confirm = confirmPasswordInput.value;
+
+            if (newPass.length < 6) {
+                errorMessage.textContent = "Password must be at least 6 characters.";
+                return;
+            }
+            if (newPass !== confirm) {
+                errorMessage.textContent = "Passwords do not match.";
+                return;
+            }
+
+            resetBtn.disabled = true;
+            resetBtn.innerHTML = '<span class="spinner"></span>';
+            errorMessage.textContent = "";
+
+            try {
+                await confirmPasswordReset(auth, oobCode, newPass);
+                resetForm.style.display = "none";
+                successMessage.classList.add("visible");
+                setTimeout(() => {
+                    window.location.href = "signin.html";
+                }, 2500);
+            } catch (error) {
+                console.error(error);
+                const messages = {
+                    "auth/expired-action-code": "Reset link has expired. Request a new one.",
+                    "auth/invalid-action-code": "Invalid reset link. Request a new one.",
+                    "auth/user-disabled": "This account has been disabled.",
+                    "auth/user-not-found": "No account found with this email.",
+                    "auth/weak-password": "Password is too weak. Use at least 6 characters."
+                };
+                errorMessage.textContent = messages[error.code] || "Password reset failed. Please try again.";
+                resetBtn.disabled = false;
+                resetBtn.textContent = "Reset Password";
+            }
+        });
+
+        /* ── Canvas & glow ── */
+        const glowOrb = document.getElementById("glowOrb");
+        let orbTimeout;
+        function moveGlowOrb(x, y) {
+            glowOrb.style.left = x + "px";
+            glowOrb.style.top = y + "px";
+            glowOrb.classList.add("visible");
+            clearTimeout(orbTimeout);
+            orbTimeout = setTimeout(() => glowOrb.classList.remove("visible"), 1800);
+        }
+        document.addEventListener("pointermove", e => moveGlowOrb(e.clientX, e.clientY));
+        document.addEventListener("pointerdown", e => moveGlowOrb(e.clientX, e.clientY));
+
+        const canvas = document.getElementById("bendCanvas");
+        const ctx = canvas.getContext("2d");
+        let width, height, dpr = 1;
+        const mouse = { x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 };
+        const bends = [
+            { y: 0.18, amplitude: 85, frequency: 0.0018, speed: 0.00032, width: 150, colorA: "104, 91, 255", colorB: "91, 180, 255" },
+            { y: 0.49, amplitude: 130, frequency: 0.00135, speed: -0.00022, width: 180, colorA: "157, 91, 255", colorB: "78, 116, 255" },
+            { y: 0.78, amplitude: 105, frequency: 0.00155, speed: 0.00018, width: 170, colorA: "82, 127, 255", colorB: "174, 93, 255" }
+        ];
+
+        function resizeCanvas() {
+            dpr = Math.min(window.devicePixelRatio || 1, 1.7);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            canvas.style.width = width + "px";
+            canvas.style.height = height + "px";
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function drawBend(bend, time, index) {
+            const baseY = height * bend.y;
+            const mouseShift = (mouse.y - 0.5) * 100 * (index + 1) * 0.35;
+            const horizontalShift = (mouse.x - 0.5) * 130;
+            const points = [];
+            for (let x = -200; x <= width + 200; x += 16) {
+                const wave1 = Math.sin((x + horizontalShift) * bend.frequency + time * bend.speed) * bend.amplitude;
+                const wave2 = Math.sin(x * bend.frequency * 0.47 - time * bend.speed * 0.8 + index) * bend.amplitude * 0.45;
+                points.push({ x, y: baseY + wave1 + wave2 + mouseShift });
+            }
+            ctx.save();
+            ctx.beginPath();
+            points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, `rgba(${bend.colorA},0)`);
+            gradient.addColorStop(0.25, `rgba(${bend.colorA},0.25)`);
+            gradient.addColorStop(0.62, `rgba(${bend.colorB},0.3)`);
+            gradient.addColorStop(1, `rgba(${bend.colorB},0)`);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = bend.width;
+            ctx.filter = "blur(45px)";
+            ctx.globalCompositeOperation = "screen";
+            ctx.stroke();
+            ctx.filter = "blur(14px)";
+            ctx.lineWidth = bend.width * 0.28;
+            const innerGrad = ctx.createLinearGradient(0, 0, width, 0);
+            innerGrad.addColorStop(0, `rgba(${bend.colorA},0)`);
+            innerGrad.addColorStop(0.3, `rgba(${bend.colorA},0.25)`);
+            innerGrad.addColorStop(0.65, `rgba(${bend.colorB},0.22)`);
+            innerGrad.addColorStop(1, `rgba(${bend.colorB},0)`);
+            ctx.strokeStyle = innerGrad;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function animate(time) {
+            mouse.x += (mouse.targetX - mouse.x) * 0.04;
+            mouse.y += (mouse.targetY - mouse.y) * 0.04;
+            ctx.clearRect(0, 0, width, height);
+            const bg = ctx.createRadialGradient(width * mouse.x, height * mouse.y, 0, width * 0.5, height * 0.5, Math.max(width, height));
+            bg.addColorStop(0, "rgba(32,25,72,0.3)");
+            bg.addColorStop(0.5, "rgba(12,10,25,0.15)");
+            bg.addColorStop(1, "rgba(6,6,9,0)");
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, width, height);
+            bends.forEach((b, i) => drawBend(b, time, i));
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener("pointermove", e => { mouse.targetX = e.clientX / width; mouse.targetY = e.clientY / height; });
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+        animate(0);
+    </script>
+</body>
+</html>
