@@ -64,6 +64,11 @@
             font-family: "Lexend", sans-serif;
             overscroll-behavior-y: none;
             -webkit-overflow-scrolling: touch;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        body.fade-out {
+            opacity: 0;
+            transform: translateY(-8px);
         }
 
         input, textarea {
@@ -226,7 +231,7 @@
         .tab.active { color: #0a0910; }
         .tab:active { transform: scale(0.96); }
 
-        /* ── Social Grid (now 3 cols) ── */
+        /* ── Social Grid (3 cols) ── */
         .social-grid {
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;
         }
@@ -322,6 +327,39 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ── New additions: validation, strength, skeleton, verification ── */
+        .field .error-message {
+            font-size: 10px; color: #ff8a9a; min-height: 16px; margin-top: 2px;
+        }
+        .password-strength { margin-top: 4px; }
+        .strength-bar {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.1);
+            border-radius: 4px; overflow: hidden; margin-bottom: 3px;
+        }
+        .strength-fill {
+            height: 100%; width: 0%; border-radius: 4px;
+            transition: width 0.25s, background 0.25s;
+        }
+        .strength-label { font-size: 10px; color: #a5a5b5; }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%; animation: shimmerSkel 1.5s infinite; border-radius: 8px;
+        }
+        @keyframes shimmerSkel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .verification-screen {
+            display: none; flex-direction: column; align-items: center; gap: 20px;
+            padding: 30px 20px;
+        }
+        .verification-screen.active { display: flex; }
+        .verification-screen h2 { font-size: 24px; }
+        .verification-screen p { color: var(--muted); font-size: 13px; text-align: center; }
+
+        .inline-resend {
+            margin-top: 6px; color: #a99cff; font-size: 11px; cursor: pointer;
+        }
+
         /* ── Modal ── */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 200; display: flex; align-items: center;
@@ -394,7 +432,7 @@
 
         @media (max-width: 480px) {
             .social-grid { grid-template-columns: 1fr 1fr; }
-            .oauth:nth-child(3) { grid-column: span 2; } /* guest spans full width on small phones */
+            .oauth:nth-child(3) { grid-column: span 2; }
         }
     </style>
 </head>
@@ -403,6 +441,17 @@
     <div class="background-vignette"></div>
     <div class="noise"></div>
     <div class="glow-orb" id="glowOrb" aria-hidden="true"></div>
+
+    <!-- SKELETON LOADER -->
+    <div id="skeletonLoader" style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:#060609;">
+        <div style="display:flex;flex-direction:column;gap:16px;width:320px;">
+            <div class="skeleton" style="height:20px;width:70%"></div>
+            <div class="skeleton" style="height:12px;width:40%"></div>
+            <div class="skeleton" style="height:50px;width:100%"></div>
+            <div class="skeleton" style="height:50px;width:100%"></div>
+            <div class="skeleton" style="height:50px;width:100%"></div>
+        </div>
+    </div>
 
     <!-- NAV -->
     <header class="topbar" id="topbar">
@@ -438,8 +487,9 @@
             </div>
 
             <!-- AUTH PANEL -->
-            <div class="auth-panel">
-                <div class="auth-inner">
+            <div class="auth-panel" id="authPanel">
+                <!-- Normal auth UI -->
+                <div class="auth-inner" id="authFormContainer">
                     <div class="auth-heading">
                         <h2 id="authTitle">Welcome back.</h2>
                         <p id="authSubtitle">Pick up where you left off.</p>
@@ -451,23 +501,23 @@
                         <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Create account</button>
                     </div>
 
-                    <!-- SOCIAL + GUEST (now 3‑column) -->
+                    <!-- SOCIAL + GUEST (3 columns) -->
                     <div class="social-grid">
                         <button class="oauth" id="googleButton" type="button">
                             <span class="provider-icon">
                                 <svg viewBox="0 0 24 24"><path fill="#fff" d="M21.35 12.2c0-.71-.06-1.4-.18-2.07H12v3.91h5.24a4.48 4.48 0 0 1-1.94 2.94v2.54h3.14c1.84-1.69 2.91-4.19 2.91-7.32Z"/><path fill="#fff" opacity=".8" d="M12 21.72c2.63 0 4.84-.87 6.45-2.36l-3.14-2.54c-.87.58-1.99.93-3.31.93-2.54 0-4.69-1.71-5.46-4.01H3.29v2.62A9.74 9.74 0 0 0 12 21.72Z"/><path fill="#fff" opacity=".65" d="M6.54 13.74A5.85 5.85 0 0 1 6.23 12c0-.61.11-1.2.31-1.74V7.64H3.29A9.73 9.73 0 0 0 2.28 12c0 1.57.38 3.06 1.01 4.36l3.25-2.62Z"/><path fill="#fff" opacity=".5" d="M12 6.25c1.43 0 2.71.49 3.72 1.45l2.79-2.79A9.35 9.35 0 0 0 12 2.28a9.74 9.74 0 0 0-8.71 5.36l3.25 2.62C7.31 7.96 9.46 6.25 12 6.25Z"/></svg>
                             </span>
-                            Google
+                            <span class="btn-text">Google</span>
                         </button>
                         <button class="oauth" id="githubButton" type="button">
                             <span class="provider-icon">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.75 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
                             </span>
-                            GitHub
+                            <span class="btn-text">GitHub</span>
                         </button>
                         <button class="oauth" id="guestButton" type="button">
                             <span class="provider-icon">◌</span>
-                            Guest
+                            <span class="btn-text">Guest</span>
                         </button>
                     </div>
 
@@ -481,6 +531,7 @@
                                 <input id="name" type="text" autocomplete="name" placeholder="Ace Yash" />
                                 <span class="input-icon">✦</span>
                             </div>
+                            <div class="error-message" id="nameError"></div>
                         </div>
                         <div class="field">
                             <label for="email">Email</label>
@@ -488,6 +539,7 @@
                                 <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required />
                                 <span class="input-icon">↗</span>
                             </div>
+                            <div class="error-message" id="emailError"></div>
                         </div>
                         <div class="field">
                             <label for="password">Password</label>
@@ -495,6 +547,19 @@
                                 <input id="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required />
                                 <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password">◉</button>
                             </div>
+                            <div class="password-strength hidden" id="passwordStrengthMeter">
+                                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                                <span class="strength-label" id="strengthLabel"></span>
+                            </div>
+                            <div class="error-message" id="passwordError"></div>
+                        </div>
+                        <div class="field hidden" id="confirmField">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <div class="input-wrap">
+                                <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat password" minlength="6" />
+                                <span class="input-icon">✓</span>
+                            </div>
+                            <div class="error-message" id="confirmError"></div>
                         </div>
                         <div class="form-meta" id="loginMeta">
                             <label class="remember">
@@ -507,13 +572,23 @@
 
                     <p class="terms">By continuing, you agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
                 </div>
+
+                <!-- Email Verification Screen -->
+                <div class="verification-screen" id="verificationScreen">
+                    <h2>Verify your email</h2>
+                    <p>We’ve sent a verification link to <strong id="verifyEmailDisplay"></strong>.<br>Check your inbox and click the link, then continue.</p>
+                    <button class="submit" id="checkVerificationBtn" style="width:fit-content;padding:10px 24px;">I've verified</button>
+                    <span class="inline-resend" id="resendVerificationBtn">Resend email</span>
+                    <p style="color:var(--muted);font-size:11px;">Wrong email? <a href="#" id="changeEmailLink" style="color:#a99cff;">Change it</a></p>
+                    <div class="error-message" id="verificationError"></div>
+                </div>
             </div>
         </section>
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <!-- FORGOT PASSWORD MODAL (uses built‑in Firebase reset) -->
+    <!-- FORGOT PASSWORD MODAL (improved) -->
     <div class="modal-overlay" id="forgotPasswordModal" role="dialog" aria-modal="true">
         <div class="modal-card">
             <div class="modal-header">
@@ -525,12 +600,14 @@
                 <div class="field">
                     <label for="resetEmail">Email</label>
                     <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email" />
+                    <div class="error-message" id="resetEmailError"></div>
                 </div>
-                <div class="modal-error" id="resetEmailError"></div>
                 <button class="modal-btn primary" id="sendResetLinkBtn">Send Reset Link</button>
             </div>
             <div class="step-container" id="stepSuccess">
-                <p style="text-align:center; font-size:15px;">✅ Reset link sent! Check your inbox.</p>
+                <p style="text-align:center; font-size:15px;">📨 Check your inbox</p>
+                <p style="text-align:center; color:var(--muted); font-size:12px;">Didn't receive it? <a href="#" id="resendInModal" style="color:#a99cff;">Resend</a> or <a href="#" id="changeEmailInModal" style="color:#a99cff;">change email</a></p>
+                <div class="error-message" id="modalSuccessError" style="text-align:center;"></div>
             </div>
         </div>
     </div>
@@ -549,7 +626,11 @@
             createUserWithEmailAndPassword,
             signInAnonymously,
             updateProfile,
-            sendPasswordResetEmail
+            sendPasswordResetEmail,
+            sendEmailVerification,
+            browserLocalPersistence,
+            browserSessionPersistence,
+            setPersistence
         } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
@@ -569,6 +650,7 @@
         let analytics = null;
         try { analytics = getAnalytics(app); } catch (_) {}
 
+        // ── DOM Elements ──
         const loginTab = document.getElementById("loginTab");
         const signupTab = document.getElementById("signupTab");
         const tabContainer = document.getElementById("tabContainer");
@@ -576,6 +658,8 @@
         const nameInput = document.getElementById("name");
         const emailInput = document.getElementById("email");
         const passwordInput = document.getElementById("password");
+        const confirmField = document.getElementById("confirmField");
+        const confirmInput = document.getElementById("confirmPassword");
         const passwordToggle = document.getElementById("passwordToggle");
         const loginMeta = document.getElementById("loginMeta");
         const authTitle = document.getElementById("authTitle");
@@ -588,11 +672,30 @@
         const toast = document.getElementById("toast");
         const glowOrb = document.getElementById("glowOrb");
         const topbar = document.getElementById("topbar");
+        const authFormContainer = document.getElementById("authFormContainer");
+        const verificationScreen = document.getElementById("verificationScreen");
+        const verifyEmailDisplay = document.getElementById("verifyEmailDisplay");
+        const checkVerificationBtn = document.getElementById("checkVerificationBtn");
+        const resendVerificationBtn = document.getElementById("resendVerificationBtn");
+        const changeEmailLink = document.getElementById("changeEmailLink");
+        const verificationError = document.getElementById("verificationError");
+        const skeletonLoader = document.getElementById("skeletonLoader");
+        const strengthMeter = document.getElementById("passwordStrengthMeter");
+        const strengthFill = document.getElementById("strengthFill");
+        const strengthLabel = document.getElementById("strengthLabel");
+        const nameError = document.getElementById("nameError");
+        const emailError = document.getElementById("emailError");
+        const passwordError = document.getElementById("passwordError");
+        const confirmError = document.getElementById("confirmError");
 
         let mode = "login";
         let loading = false;
         let toastTimer;
+        let failedAttempts = parseInt(localStorage.getItem("failedAttempts") || "0");
+        let rateLimitUntil = parseInt(localStorage.getItem("rateLimitUntil") || "0");
+        let offlineMode = false;
 
+        // ── Utility ──
         function showToast(message, type = "normal") {
             clearTimeout(toastTimer);
             toast.textContent = message;
@@ -608,28 +711,446 @@
             try { logEvent(analytics, eventName, params); } catch (error) { console.warn("Analytics event failed:", error); }
         }
 
-        function setLoading(state, source = "email") {
-            loading = state;
-            const buttons = [submitButton, googleButton, githubButton, guestButton, loginTab, signupTab];
-            buttons.forEach(b => { b.disabled = state; });
-            if (source === "email") {
-                submitButton.innerHTML = state ? '<span class="spinner"></span>' : mode === "signup" ? "Create account →" : "Enter Horizon →";
-            }
-            if (source === "google") {
-                googleButton.innerHTML = state ? '<span class="spinner"></span>' : googleButton.dataset.original;
-            }
-            if (source === "github") {
-                githubButton.innerHTML = state ? '<span class="spinner"></span>' : githubButton.dataset.original;
-            }
-            if (source === "guest") {
-                guestButton.innerHTML = state ? '<span class="spinner"></span>' : guestButton.dataset.original;
+        function clearAllErrors() {
+            nameError.textContent = emailError.textContent = passwordError.textContent = confirmError.textContent = "";
+        }
+
+        function setLoadingState(source, isLoading, message = "") {
+            loading = isLoading;
+            const buttons = { submit: submitButton, google: googleButton, github: githubButton, guest: guestButton };
+            if (source === "submit") {
+                submitButton.disabled = isLoading || offlineMode || rateLimited();
+                submitButton.innerHTML = isLoading ? `<span class="spinner"></span> ${message}` : (mode === "signup" ? "Create account →" : "Enter Horizon →");
+            } else if (buttons[source]) {
+                buttons[source].disabled = isLoading || offlineMode || rateLimited();
+                if (isLoading) {
+                    buttons[source].querySelector('.btn-text').textContent = message;
+                } else {
+                    buttons[source].querySelector('.btn-text').textContent = buttons[source].dataset.original;
+                }
             }
         }
 
-        googleButton.dataset.original = googleButton.innerHTML;
-        githubButton.dataset.original = githubButton.innerHTML;
-        guestButton.dataset.original = guestButton.innerHTML;
+        googleButton.dataset.original = "Google";
+        githubButton.dataset.original = "GitHub";
+        guestButton.dataset.original = "Guest";
 
+        function rateLimited() {
+            const now = Date.now();
+            if (now < rateLimitUntil) {
+                showToast(`Too many attempts. Try again in ${Math.ceil((rateLimitUntil - now)/1000)}s`, "error");
+                return true;
+            }
+            return false;
+        }
+
+        function incrementFailedAttempt() {
+            failedAttempts++;
+            localStorage.setItem("failedAttempts", failedAttempts);
+            if (failedAttempts >= 5) {
+                const lockout = Date.now() + 30000;
+                localStorage.setItem("rateLimitUntil", lockout);
+                rateLimitUntil = lockout;
+                showToast("Too many failed attempts. Locked for 30 seconds.", "error");
+            }
+        }
+
+        function resetFailedAttempts() {
+            failedAttempts = 0;
+            rateLimitUntil = 0;
+            localStorage.removeItem("failedAttempts");
+            localStorage.removeItem("rateLimitUntil");
+        }
+
+        // ── Validation ──
+        function validateField(field, value, errorEl, rules) {
+            errorEl.textContent = "";
+            if (rules.required && !value.trim()) {
+                errorEl.textContent = rules.requiredMsg || "This field is required.";
+                return false;
+            }
+            if (rules.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                errorEl.textContent = "Enter a valid email.";
+                return false;
+            }
+            if (rules.minLength && value.length < rules.minLength) {
+                errorEl.textContent = `Must be at least ${rules.minLength} characters.`;
+                return false;
+            }
+            if (rules.match && value !== rules.match.value) {
+                errorEl.textContent = rules.match.msg || "Passwords don't match.";
+                return false;
+            }
+            return true;
+        }
+
+        function validateForm() {
+            let valid = true;
+            const isSignup = mode === "signup";
+            if (isSignup) {
+                valid = validateField(nameInput, nameInput.value, nameError, { required: true, requiredMsg: "Name can't be empty." }) && valid;
+            }
+            valid = validateField(emailInput, emailInput.value, emailError, { required: true, email: true }) && valid;
+            valid = validateField(passwordInput, passwordInput.value, passwordError, { required: true, minLength: 6 }) && valid;
+            if (isSignup) {
+                valid = validateField(confirmInput, confirmInput.value, confirmError, { required: true, match: { value: passwordInput.value, msg: "Passwords don't match." } }) && valid;
+            }
+            return valid;
+        }
+
+        function updatePasswordStrength() {
+            if (mode !== "signup") {
+                strengthMeter.classList.add("hidden");
+                return;
+            }
+            strengthMeter.classList.remove("hidden");
+            const val = passwordInput.value;
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+            if (/\d/.test(val)) score++;
+            if (/[^a-zA-Z0-9]/.test(val)) score++;
+            const percent = (score / 4) * 100;
+            strengthFill.style.width = percent + "%";
+            const labels = ["Weak", "Fair", "Good", "Strong"];
+            const colors = ["#ff4d6a", "#ffb347", "#b8d64b", "#4caf50"];
+            strengthLabel.textContent = labels[score - 1] || "Weak";
+            strengthFill.style.background = colors[score - 1] || colors[0];
+        }
+
+        // ── Persistence ──
+        async function applyPersistence() {
+            const remember = document.getElementById("remember").checked;
+            try {
+                await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+            } catch (error) {
+                console.warn("Persistence error:", error);
+            }
+        }
+
+        // ── Email Verification ──
+        function showVerificationScreen(email) {
+            authFormContainer.style.display = "none";
+            verificationScreen.classList.add("active");
+            verifyEmailDisplay.textContent = email;
+        }
+
+        function hideVerificationScreen() {
+            verificationScreen.classList.remove("active");
+            authFormContainer.style.display = "";
+        }
+
+        async function checkEmailVerification() {
+            try {
+                await auth.currentUser.reload();
+                return auth.currentUser.emailVerified;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // ── Redirect ──
+        function redirectToApp() {
+            document.body.classList.add("fade-out");
+            setTimeout(() => { location.replace("app.html"); }, 200);
+        }
+
+        // ── Auto‑switch after signup ──
+        async function handleEmailSignup(email, password, name) {
+            const result = await createUserWithEmailAndPassword(auth, email, password);
+            if (name) await updateProfile(result.user, { displayName: name });
+            await sendEmailVerification(result.user, { url: "https://horizon-llm.vercel.app/verify.html" });
+            await saveUser(result.user, "email");
+            track("sign_up", { method: "email" });
+            showToast("Account created. Verify your email to continue.");
+            showVerificationScreen(email);
+            pollVerification(result.user);
+        }
+
+        function pollVerification(user) {
+            const interval = setInterval(async () => {
+                try {
+                    await user.reload();
+                    if (user.emailVerified) {
+                        clearInterval(interval);
+                        showToast("Email verified! Signing you in...");
+                        setTimeout(redirectToApp, 600);
+                    }
+                } catch (e) { /* ignore */ }
+            }, 3000);
+        }
+
+        // ── Save user ──
+        async function saveUser(user, provider) {
+            if (!user) return;
+            try {
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    name: user.displayName || nameInput.value.trim() || "Horizon User",
+                    email: user.email || null,
+                    photoURL: user.photoURL || null,
+                    provider,
+                    isGuest: user.isAnonymous,
+                    lastLoginAt: serverTimestamp()
+                }, { merge: true });
+            } catch (error) { console.error("Failed to save user:", error); }
+        }
+
+        // ── Social / Guest handlers ──
+        async function handleSocialLogin(provider, providerName) {
+            if (loading || offlineMode || rateLimited()) return;
+            setLoadingState(providerName, true, `Connecting ${providerName}...`);
+            try {
+                const result = await signInWithPopup(auth, provider);
+                await saveUser(result.user, providerName);
+                resetFailedAttempts();
+                track("login", { method: providerName });
+                showToast(`👋 Welcome, ${result.user.displayName || ''}`);
+                redirectToApp();
+            } catch (error) {
+                incrementFailedAttempt();
+                showToast(getErrorMessage(error), "error");
+                setLoadingState(providerName, false);
+            }
+        }
+
+        googleButton.addEventListener("click", () => {
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: "select_account" });
+            handleSocialLogin(provider, "google");
+        });
+
+        githubButton.addEventListener("click", () => {
+            const provider = new GithubAuthProvider();
+            provider.addScope("read:user");
+            provider.addScope("user:email");
+            handleSocialLogin(provider, "github");
+        });
+
+        guestButton.addEventListener("click", async () => {
+            if (loading || offlineMode || rateLimited()) return;
+            setLoadingState("guest", true, "Entering as guest...");
+            try {
+                const result = await signInAnonymously(auth);
+                await saveUser(result.user, "guest");
+                resetFailedAttempts();
+                track("login", { method: "guest" });
+                showToast("Entering as guest. You can link an account later.");
+                redirectToApp();
+            } catch (error) {
+                incrementFailedAttempt();
+                showToast(getErrorMessage(error), "error");
+                setLoadingState("guest", false);
+            }
+        });
+
+        // ── Email/Password handler ──
+        authForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            if (loading || offlineMode || rateLimited()) return;
+            clearAllErrors();
+            if (!validateForm()) return;
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            setLoadingState("submit", true, mode === "signup" ? "Creating account..." : "Signing in...");
+            try {
+                await applyPersistence();
+                if (mode === "signup") {
+                    const name = nameInput.value.trim();
+                    await handleEmailSignup(email, password, name);
+                    setLoadingState("submit", false); // verification screen shown
+                } else {
+                    const result = await signInWithEmailAndPassword(auth, email, password);
+                    await saveUser(result.user, "email");
+                    resetFailedAttempts();
+                    track("login", { method: "email" });
+                    showToast(`👋 Welcome back, ${result.user.displayName || ''}`);
+                    redirectToApp();
+                }
+            } catch (error) {
+                incrementFailedAttempt();
+                showToast(getErrorMessage(error), "error");
+                setLoadingState("submit", false);
+            }
+        });
+
+        // Manual email verification check
+        checkVerificationBtn.addEventListener("click", async () => {
+            if (!auth.currentUser) return;
+            const verified = await checkEmailVerification();
+            if (verified) {
+                showToast("Email verified! Redirecting...");
+                redirectToApp();
+            } else {
+                verificationError.textContent = "Email not verified yet. Check spam folder or resend.";
+            }
+        });
+
+        resendVerificationBtn.addEventListener("click", async () => {
+            if (!auth.currentUser) return;
+            try {
+                await sendEmailVerification(auth.currentUser, { url: "https://horizon-llm.vercel.app/verify.html" });
+                showToast("Verification email resent.");
+            } catch (error) {
+                verificationError.textContent = getErrorMessage(error);
+            }
+        });
+
+        changeEmailLink.addEventListener("click", () => {
+            hideVerificationScreen();
+            auth.signOut().then(() => {
+                emailInput.value = "";
+                passwordInput.value = "";
+            });
+        });
+
+        // ── Network detection ──
+        window.addEventListener("offline", () => {
+            offlineMode = true;
+            showToast("You're offline. Check your connection.", "error");
+            submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = true;
+        });
+        window.addEventListener("online", () => {
+            offlineMode = false;
+            if (!rateLimited()) {
+                submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
+            }
+            showToast("Back online.");
+        });
+
+        // ── Forgot Password Modal (improved resend/change) ──
+        const modalOverlay = document.getElementById("forgotPasswordModal");
+        const modalClose = document.getElementById("modalClose");
+        const forgotLink = document.getElementById("forgotLink");
+        const stepEmail = document.getElementById("stepEmail");
+        const stepSuccess = document.getElementById("stepSuccess");
+        const resetEmail = document.getElementById("resetEmail");
+        const resetEmailError = document.getElementById("resetEmailError");
+        const sendResetLinkBtn = document.getElementById("sendResetLinkBtn");
+        const resendInModal = document.getElementById("resendInModal");
+        const changeEmailInModal = document.getElementById("changeEmailInModal");
+        const modalSuccessError = document.getElementById("modalSuccessError");
+
+        function openModal() {
+            modalOverlay.classList.add("active");
+            stepEmail.classList.add("active");
+            stepSuccess.classList.remove("active");
+            resetEmail.value = "";
+            resetEmailError.textContent = modalSuccessError.textContent = "";
+        }
+        function closeModal() { modalOverlay.classList.remove("active"); }
+
+        forgotLink.addEventListener("click", e => { e.preventDefault(); openModal(); });
+        modalClose.addEventListener("click", closeModal);
+        modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) closeModal(); });
+
+        async function sendReset() {
+            const email = resetEmail.value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                resetEmailError.textContent = "Enter a valid email.";
+                return;
+            }
+            sendResetLinkBtn.disabled = true;
+            sendResetLinkBtn.innerHTML = '<span class="spinner"></span> Sending...';
+            resetEmailError.textContent = "";
+            try {
+                await sendPasswordResetEmail(auth, email, { url: "https://horizon-llm.vercel.app/reset.html", handleCodeInApp: true });
+                stepEmail.classList.remove("active");
+                stepSuccess.classList.add("active");
+            } catch (error) {
+                resetEmailError.textContent = getErrorMessage(error);
+            } finally {
+                sendResetLinkBtn.disabled = false;
+                sendResetLinkBtn.textContent = "Send Reset Link";
+            }
+        }
+
+        sendResetLinkBtn.addEventListener("click", sendReset);
+        resendInModal.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const email = resetEmail.value.trim();
+            if (!email) {
+                modalSuccessError.textContent = "No email to resend.";
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email, { url: "https://horizon-llm.vercel.app/reset.html", handleCodeInApp: true });
+                showToast("Reset link resent.");
+            } catch (error) {
+                modalSuccessError.textContent = getErrorMessage(error);
+            }
+        });
+        changeEmailInModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            stepSuccess.classList.remove("active");
+            stepEmail.classList.add("active");
+        });
+
+        // ── Mode switching ──
+        function setMode(nextMode) {
+            if (loading) return;
+            mode = nextMode;
+            const isSignup = mode === "signup";
+            loginTab.classList.toggle("active", !isSignup);
+            signupTab.classList.toggle("active", isSignup);
+            tabContainer.classList.toggle("signup-active", isSignup);
+            nameField.classList.toggle("hidden", !isSignup);
+            confirmField.classList.toggle("hidden", !isSignup);
+            loginMeta.classList.toggle("hidden", isSignup);
+            nameInput.required = isSignup;
+            passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
+            confirmInput.required = isSignup;
+            authTitle.textContent = isSignup ? "Create your account." : "Welcome back.";
+            authSubtitle.textContent = isSignup ? "One account, every model." : "Pick up where you left off.";
+            submitButton.textContent = isSignup ? "Create account →" : "Enter Horizon →";
+            clearAllErrors();
+            updatePasswordStrength();
+        }
+
+        loginTab.addEventListener("click", () => setMode("login"));
+        signupTab.addEventListener("click", () => setMode("signup"));
+
+        passwordToggle.addEventListener("click", () => {
+            const hidden = passwordInput.type === "password";
+            passwordInput.type = hidden ? "text" : "password";
+            passwordToggle.textContent = hidden ? "◎" : "◉";
+        });
+
+        // Inline validation on blur
+        [nameInput, emailInput, passwordInput, confirmInput].forEach(input => {
+            input.addEventListener("blur", () => {
+                if (input === nameInput && mode === "signup") validateField(nameInput, nameInput.value, nameError, { required: true, requiredMsg: "Name can't be empty." });
+                if (input === emailInput) validateField(emailInput, emailInput.value, emailError, { required: true, email: true });
+                if (input === passwordInput) {
+                    validateField(passwordInput, passwordInput.value, passwordError, { required: true, minLength: 6 });
+                    updatePasswordStrength();
+                }
+                if (input === confirmInput && mode === "signup") validateField(confirmInput, confirmInput.value, confirmError, { required: true, match: { value: passwordInput.value, msg: "Passwords don't match." } });
+            });
+        });
+
+        passwordInput.addEventListener("input", updatePasswordStrength);
+
+        // ── Initial Auth State ──
+        let initialAuthCheck = true;
+        onAuthStateChanged(auth, user => {
+            skeletonLoader.style.display = "none";
+            if (initialAuthCheck && user) {
+                if (user.isAnonymous || (user.emailVerified !== false)) {
+                    initialAuthCheck = false;
+                    redirectToApp();
+                    return;
+                } else if (user.email && !user.emailVerified) {
+                    initialAuthCheck = false;
+                    showVerificationScreen(user.email);
+                    pollVerification(user);
+                    return;
+                }
+            }
+            initialAuthCheck = false;
+        });
+
+        // ── Error message mapping ──
         function getErrorMessage(error) {
             const messages = {
                 "auth/invalid-credential": "Incorrect email or password.",
@@ -648,203 +1169,7 @@
             return messages[error.code] || error.message || "Authentication failed.";
         }
 
-        async function saveUser(user, provider) {
-            if (!user) return;
-            try {
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    name: user.displayName || nameInput.value.trim() || "Horizon User",
-                    email: user.email || null,
-                    photoURL: user.photoURL || null,
-                    provider,
-                    isGuest: user.isAnonymous,
-                    lastLoginAt: serverTimestamp()
-                }, { merge: true });
-            } catch (error) { console.error("Failed to save user:", error); }
-        }
-
-        function redirectToApp() {
-            document.body.style.opacity = "0";
-            document.body.style.transition = "opacity 0.2s ease";
-            setTimeout(() => { window.location.href = "app.html"; }, 180);
-        }
-
-        function setMode(nextMode) {
-            if (loading) return;
-            mode = nextMode;
-            const isSignup = mode === "signup";
-            loginTab.classList.toggle("active", !isSignup);
-            signupTab.classList.toggle("active", isSignup);
-            tabContainer.classList.toggle("signup-active", isSignup);
-            nameField.classList.toggle("hidden", !isSignup);
-            loginMeta.classList.toggle("hidden", isSignup);
-            nameInput.required = isSignup;
-            passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
-            authTitle.textContent = isSignup ? "Create your account." : "Welcome back.";
-            authSubtitle.textContent = isSignup ? "One account, every model." : "Pick up where you left off.";
-            submitButton.textContent = isSignup ? "Create account →" : "Enter Horizon →";
-        }
-
-        loginTab.addEventListener("click", () => setMode("login"));
-        signupTab.addEventListener("click", () => setMode("signup"));
-
-        passwordToggle.addEventListener("click", () => {
-            const hidden = passwordInput.type === "password";
-            passwordInput.type = hidden ? "text" : "password";
-            passwordToggle.textContent = hidden ? "◎" : "◉";
-        });
-
-        async function handleSocialLogin(provider, providerName) {
-            if (loading) return;
-            setLoading(true, providerName);
-            try {
-                const result = await signInWithPopup(auth, provider);
-                await saveUser(result.user, providerName);
-                track("login", { method: providerName });
-                showToast("Welcome to Horizon.");
-                setTimeout(redirectToApp, 400);
-            } catch (error) {
-                showToast(getErrorMessage(error), "error");
-                setLoading(false, providerName);
-            }
-        }
-
-        googleButton.addEventListener("click", () => {
-            const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: "select_account" });
-            handleSocialLogin(provider, "google");
-        });
-
-        githubButton.addEventListener("click", () => {
-            const provider = new GithubAuthProvider();
-            provider.addScope("read:user");
-            provider.addScope("user:email");
-            handleSocialLogin(provider, "github");
-        });
-
-        guestButton.addEventListener("click", async () => {
-            if (loading) return;
-            setLoading(true, "guest");
-            try {
-                const result = await signInAnonymously(auth);
-                await saveUser(result.user, "guest");
-                track("login", { method: "guest" });
-                showToast("Entering as guest.");
-                setTimeout(redirectToApp, 400);
-            } catch (error) {
-                showToast(getErrorMessage(error), "error");
-                setLoading(false, "guest");
-            }
-        });
-
-        authForm.addEventListener("submit", async event => {
-            event.preventDefault();
-            if (loading || !authForm.checkValidity()) { authForm.reportValidity(); return; }
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            setLoading(true, "email");
-            try {
-                let result;
-                if (mode === "signup") {
-                    result = await createUserWithEmailAndPassword(auth, email, password);
-                    const name = nameInput.value.trim();
-                    if (name) await updateProfile(result.user, { displayName: name });
-                    await saveUser(result.user, "email");
-                    track("sign_up", { method: "email" });
-                    showToast("Account created.");
-                } else {
-                    result = await signInWithEmailAndPassword(auth, email, password);
-                    await saveUser(result.user, "email");
-                    track("login", { method: "email" });
-                    showToast("Welcome back.");
-                }
-                setTimeout(redirectToApp, 400);
-            } catch (error) {
-                showToast(getErrorMessage(error), "error");
-                setLoading(false, "email");
-            }
-        });
-
-        // Focus handling for mobile
-        [emailInput, passwordInput, nameInput].forEach(input => {
-            input.addEventListener("focus", () => {
-                if (window.innerWidth < 820) {
-                    setTimeout(() => {
-                        const rect = input.getBoundingClientRect();
-                        if (rect.bottom > window.innerHeight * 0.6) input.scrollIntoView({ behavior: "smooth", block: "center" });
-                    }, 350);
-                }
-            });
-        });
-
-        let initialAuthCheck = true;
-        onAuthStateChanged(auth, user => {
-            if (initialAuthCheck && user) { initialAuthCheck = false; redirectToApp(); return; }
-            initialAuthCheck = false;
-        });
-
-        // ── Forgot Password (real link, no mock) ──
-        const modalOverlay = document.getElementById("forgotPasswordModal");
-        const modalClose = document.getElementById("modalClose");
-        const forgotLink = document.getElementById("forgotLink");
-        const stepEmail = document.getElementById("stepEmail");
-        const stepSuccess = document.getElementById("stepSuccess");
-        const resetEmail = document.getElementById("resetEmail");
-        const resetEmailError = document.getElementById("resetEmailError");
-        const sendResetLinkBtn = document.getElementById("sendResetLinkBtn");
-
-        function openModal() {
-            modalOverlay.classList.add("active");
-            stepEmail.classList.add("active");
-            stepSuccess.classList.remove("active");
-            resetEmail.value = "";
-            resetEmailError.textContent = "";
-        }
-
-        function closeModal() {
-            modalOverlay.classList.remove("active");
-        }
-
-        forgotLink.addEventListener("click", e => { e.preventDefault(); openModal(); });
-        modalClose.addEventListener("click", closeModal);
-        modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) closeModal(); });
-
-        sendResetLinkBtn.addEventListener("click", async () => {
-            const email = resetEmail.value.trim();
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                resetEmailError.textContent = "Enter a valid email.";
-                return;
-            }
-            sendResetLinkBtn.disabled = true;
-            sendResetLinkBtn.innerHTML = '<span class="spinner"></span>';
-            resetEmailError.textContent = "";
-            try {
-                await sendPasswordResetEmail(auth, email, {
-  url: "https://horizon-llm.vercel.app/reset.html",
-  handleCodeInApp: true
-});
-                stepEmail.classList.remove("active");
-                stepSuccess.classList.add("active");
-            } catch (error) {
-                resetEmailError.textContent = getErrorMessage(error);
-            } finally {
-                sendResetLinkBtn.disabled = false;
-                sendResetLinkBtn.textContent = "Send Reset Link";
-            }
-        });
-
-        // ── Canvas & glow ──
-        let orbTimeout;
-        function moveGlowOrb(x, y) {
-            glowOrb.style.left = x + "px";
-            glowOrb.style.top = y + "px";
-            glowOrb.classList.add("visible");
-            clearTimeout(orbTimeout);
-            orbTimeout = setTimeout(() => glowOrb.classList.remove("visible"), 1800);
-        }
-        document.addEventListener("pointermove", e => moveGlowOrb(e.clientX, e.clientY));
-        document.addEventListener("pointerdown", e => moveGlowOrb(e.clientX, e.clientY));
-
+        // ── Canvas animation ──
         const canvas = document.getElementById("bendCanvas");
         const ctx = canvas.getContext("2d");
         let width, height, dpr = 1;
@@ -921,7 +1246,18 @@
 
         resizeCanvas();
         animate(0);
-        document.addEventListener("touchmove", e => { if (e.target.closest("input, textarea")) return; }, { passive: true });
+
+        // Glow orb
+        let orbTimeout;
+        function moveGlowOrb(x, y) {
+            glowOrb.style.left = x + "px";
+            glowOrb.style.top = y + "px";
+            glowOrb.classList.add("visible");
+            clearTimeout(orbTimeout);
+            orbTimeout = setTimeout(() => glowOrb.classList.remove("visible"), 1800);
+        }
+        document.addEventListener("pointermove", e => moveGlowOrb(e.clientX, e.clientY));
+        document.addEventListener("pointerdown", e => moveGlowOrb(e.clientX, e.clientY));
     </script>
 </body>
 </html>
