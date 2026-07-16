@@ -4,12 +4,18 @@
 
 <img src="saturn.png" width="120" alt="Horizon.AI Logo">
 
-### Beautiful. Fast. Open. AI Chat for the Web.
+# Horizon.AI
 
-*A modern web AI client supporting multiple providers, multimodal models, image generation, voice input, markdown, syntax highlighting, chat history, and a polished UI.*
+### Beautiful. Fast. Bring Your Own AI.
 
-![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+A modern, mobile-first AI workspace that lets you chat with hundreds of AI models using **your own API keys**.
+
+**No subscriptions. No vendor lock-in. Just your providers, your models, your control.**
+
+<br>
+
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 
@@ -17,20 +23,53 @@
 
 ---
 
-# ✨ Features
+# ✨ Why Horizon.AI?
 
-## 🤖 Multiple AI Providers
+Instead of locking you into one AI provider, Horizon.AI lets **you choose**.
+
+Bring your own API keys and instantly switch between hundreds of language, vision, reasoning, and image generation models from multiple providers.
+
+No backend required for AI requests.
+
+No monthly subscription.
+
+No unnecessary complexity.
+
+---
+
+# 🔑 Bring Your Own Key (BYOK)
+
+**Horizon.AI is a BYOK application.**
+
+That means **you use your own API keys**, so you stay in control of your data, costs, and providers.
+
+Supported providers include:
+
+| Provider | Supported |
+|-----------|-----------|
+| ✅ OpenRouter | ✔ |
+| ✅ Google AI Studio | ✔ |
+| ✅ Groq | ✔ |
+| ✅ Hugging Face | ✔ |
+
+Simply paste your API key into Horizon.AI and you're ready to chat.
+
+---
+
+# 🤖 AI Providers
+
+Connect to multiple AI platforms from one interface.
 
 - OpenRouter
-- Groq
 - Google AI Studio
+- Groq
 - Hugging Face
 
 ---
 
-## 🧠 Hundreds of Models
+# 🧠 Supported Models
 
-Supports nearly every popular LLM including
+Access hundreds of modern AI models including
 
 - GPT OSS
 - Gemini
@@ -40,42 +79,46 @@ Supports nearly every popular LLM including
 - Qwen
 - Mistral
 - Grok
-- Flux
+- FLUX
 - Stable Diffusion
-- and hundreds more
+- Imagen
+- Seedream
+
+...and hundreds more available through supported providers.
 
 ---
 
-## 💬 Beautiful Chat Experience
+# 💬 Chat Features
 
-- Glassmorphism UI
-- Animated messages
+- Beautiful glassmorphism interface
 - Streaming responses
-- Syntax highlighting
 - Markdown rendering
-- Code block actions
-- Copy messages
+- Syntax highlighting
+- Code blocks
+- Copy responses
 - Export chats
 - Chat history
-- Conversation rename
-- Pin conversations
+- Rename conversations
+- Pin chats
+- Responsive sidebar
+- Smooth animations
 
 ---
 
-## 🎨 Image AI
+# 🎨 Image AI
 
-Supports image generation models such as
+Generate and understand images directly inside chat.
+
+Supports models such as
 
 - FLUX
 - Imagen
 - Stable Diffusion
 - Seedream
 
-Supports image understanding with Vision models.
-
 ---
 
-## 🎤 Voice Features
+# 🎤 Voice
 
 - Speech-to-text
 - Text-to-speech
@@ -84,50 +127,54 @@ Supports image understanding with Vision models.
 
 ---
 
-## 📱 Mobile Optimized
-
-Designed for phones first.
-
-- Responsive UI
-- Smooth scrolling
-- Safe-area support
-- Touch animations
-- Keyboard-aware layout
-
-Works great on Android browsers including older devices.
-
----
-
-## 🔐 Authentication
+# 🔐 Authentication
 
 Powered by Firebase Authentication.
 
+Supports
+
 - Google Sign-In
-- Anonymous Guest Mode
-- Secure sessions
+- GitHub Sign-In
+- Email & Password
+- Guest Mode
+- Password Reset
+- Secure Sessions
 
 ---
 
-## 🎛 Personalization
+# 👤 Personalization
 
 - Light Mode
 - Dark Mode
-- Custom instructions
-- Personality presets
-- DiceBear avatars
-- Display name customization
+- Custom Instructions
+- Personality Presets
+- DiceBear Avatars
+- Display Name
 
 ---
 
-## ⚡ Performance
+# 📱 Mobile First
 
-Optimized for fast interaction.
+Built for phones before desktops.
 
-- Streaming generation
-- Canvas background
-- Lazy rendering
+- Responsive layout
+- Keyboard-aware UI
+- Safe-area support
+- Smooth scrolling
+- Touch animations
+- Optimized for older Android devices
+
+---
+
+# ⚡ Performance
+
+- Vanilla JavaScript
+- No frameworks
+- No build tools
 - Hardware accelerated animations
-- Responsive UI
+- Lightweight
+- Fast startup
+- Canvas-powered background
 
 ---
 
@@ -147,11 +194,11 @@ git clone https://github.com/aceyash-dev/Horizon.AI.git
 
 Open
 
-```
+```text
 index.html
 ```
 
-or deploy using
+or deploy with
 
 - GitHub Pages
 - Firebase Hosting
@@ -160,34 +207,16 @@ or deploy using
 
 ---
 
-# 🔑 API Keys
-
-Horizon.AI requires your own API key.
-
-Supported providers include
-
-| Provider | Supported |
-|----------|-----------|
-| OpenRouter | ✅ |
-| Groq | ✅ |
-| Google AI Studio | ✅ |
-| Hugging Face | ✅ |
-
-Simply paste your key inside the API Key menu.
-
----
-
 # 📂 Project Structure
 
-```
+```text
 Horizon.AI/
-
+│
 ├── index.html
 ├── auth.html
-├── assets/
-│   ├── logo.png
-│   ├── icons/
-│   └── images/
+├── app.html
+├── reset.html
+├── saturn.png
 ├── README.md
 └── LICENSE
 ```
@@ -200,32 +229,10 @@ Horizon.AI/
 - CSS3
 - Vanilla JavaScript
 - Firebase Authentication
+- Cloud Firestore
 - Highlight.js
 - Chart.js
 - DiceBear Avatars
-
-No frameworks.
-
-No build tools.
-
-No npm.
-
-Just open and run.
-
----
-
-# 🌟 Why Horizon.AI?
-
-Unlike many AI clients, Horizon.AI focuses on speed, elegance, and openness.
-
-- Beautiful interface
-- Bring your own API key
-- Multiple providers
-- Works entirely in the browser
-- Lightweight
-- Mobile-first
-- Easy to modify
-- No backend required (except authentication)
 
 ---
 
@@ -233,39 +240,12 @@ Unlike many AI clients, Horizon.AI focuses on speed, elegance, and openness.
 
 - [ ] File uploads
 - [ ] PDF chat
-- [ ] Memory system
-- [ ] Plugin support
+- [x] Memory (Making it better)
+- [ ] Plugins
 - [ ] Local models
 - [ ] Offline mode
 - [ ] Workspace folders
 - [ ] Better image editing
-- [ ] PWA support
+- [x] PWA support
 - [ ] Voice conversations
-- [ ] Multi-chat tabs
 - [ ] Cloud sync
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-If you find a bug or have an idea, open an issue or submit a pull request.
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-<div align="center">
-
-### 🌌 Horizon.AI
-
-**Beyond the horizon of intelligence.**
-
-Made with ☕, curiosity, and an unreasonable amount of CSS.
-
-</div>

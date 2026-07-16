@@ -66,10 +66,7 @@
             -webkit-overflow-scrolling: touch;
             transition: opacity 0.2s, transform 0.2s;
         }
-        body.fade-out {
-            opacity: 0;
-            transform: translateY(-8px);
-        }
+        body.fade-out { opacity: 0; transform: translateY(-8px); }
 
         input, textarea {
             -webkit-user-select: text;
@@ -328,9 +325,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ── New additions: validation, strength, skeleton, verification ── */
-        .field .error-message {
-            font-size: 10px; color: #ff8a9a; min-height: 16px; margin-top: 2px;
-        }
+        .field .error-message { font-size: 10px; color: #ff8a9a; min-height: 16px; margin-top: 2px; }
         .password-strength { margin-top: 4px; }
         .strength-bar {
             width: 100%; height: 4px; background: rgba(255,255,255,0.1);
@@ -488,7 +483,6 @@
 
             <!-- AUTH PANEL -->
             <div class="auth-panel" id="authPanel">
-                <!-- Normal auth UI -->
                 <div class="auth-inner" id="authFormContainer">
                     <div class="auth-heading">
                         <h2 id="authTitle">Welcome back.</h2>
@@ -501,7 +495,7 @@
                         <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Create account</button>
                     </div>
 
-                    <!-- SOCIAL + GUEST (3 columns) -->
+                    <!-- SOCIAL + GUEST -->
                     <div class="social-grid">
                         <button class="oauth" id="googleButton" type="button">
                             <span class="provider-icon">
@@ -576,7 +570,7 @@
                 <!-- Email Verification Screen -->
                 <div class="verification-screen" id="verificationScreen">
                     <h2>Verify your email</h2>
-                    <p>We’ve sent a verification link to <strong id="verifyEmailDisplay"></strong>.<br>Check your inbox and click the link, then continue.</p>
+                    <p>We've sent a verification link to <strong id="verifyEmailDisplay"></strong>.<br>Check your inbox and click the link, then continue.</p>
                     <button class="submit" id="checkVerificationBtn" style="width:fit-content;padding:10px 24px;">I've verified</button>
                     <span class="inline-resend" id="resendVerificationBtn">Resend email</span>
                     <p style="color:var(--muted);font-size:11px;">Wrong email? <a href="#" id="changeEmailLink" style="color:#a99cff;">Change it</a></p>
@@ -588,7 +582,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <!-- FORGOT PASSWORD MODAL (improved) -->
+    <!-- FORGOT PASSWORD MODAL -->
     <div class="modal-overlay" id="forgotPasswordModal" role="dialog" aria-modal="true">
         <div class="modal-card">
             <div class="modal-header">
@@ -630,7 +624,8 @@
             sendEmailVerification,
             browserLocalPersistence,
             browserSessionPersistence,
-            setPersistence
+            setPersistence,
+            signOut
         } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
@@ -691,8 +686,9 @@
         let mode = "login";
         let loading = false;
         let toastTimer;
-        let failedAttempts = parseInt(localStorage.getItem("failedAttempts") || "0");
-        let rateLimitUntil = parseInt(localStorage.getItem("rateLimitUntil") || "0");
+        let failedAttempts = 0;
+        let lockTimer = null;
+        let lockedUntil = 0;
         let offlineMode = false;
 
         // ── Utility ──
@@ -719,10 +715,10 @@
             loading = isLoading;
             const buttons = { submit: submitButton, google: googleButton, github: githubButton, guest: guestButton };
             if (source === "submit") {
-                submitButton.disabled = isLoading || offlineMode || rateLimited();
+                submitButton.disabled = isLoading || offlineMode || isLocked();
                 submitButton.innerHTML = isLoading ? `<span class="spinner"></span> ${message}` : (mode === "signup" ? "Create account →" : "Enter Horizon →");
             } else if (buttons[source]) {
-                buttons[source].disabled = isLoading || offlineMode || rateLimited();
+                buttons[source].disabled = isLoading || offlineMode || isLocked();
                 if (isLoading) {
                     buttons[source].querySelector('.btn-text').textContent = message;
                 } else {
@@ -735,31 +731,35 @@
         githubButton.dataset.original = "GitHub";
         guestButton.dataset.original = "Guest";
 
-        function rateLimited() {
-            const now = Date.now();
-            if (now < rateLimitUntil) {
-                showToast(`Too many attempts. Try again in ${Math.ceil((rateLimitUntil - now)/1000)}s`, "error");
-                return true;
-            }
-            return false;
+        function isLocked() {
+            return Date.now() < lockedUntil;
+        }
+
+        function startRateLimitLock() {
+            lockedUntil = Date.now() + 30000;
+            submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = true;
+            if (lockTimer) clearTimeout(lockTimer);
+            lockTimer = setTimeout(() => {
+                failedAttempts = 0;
+                lockedUntil = 0;
+                submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
+                showToast("You can try again now.");
+            }, 30000);
         }
 
         function incrementFailedAttempt() {
             failedAttempts++;
-            localStorage.setItem("failedAttempts", failedAttempts);
             if (failedAttempts >= 5) {
-                const lockout = Date.now() + 30000;
-                localStorage.setItem("rateLimitUntil", lockout);
-                rateLimitUntil = lockout;
+                startRateLimitLock();
                 showToast("Too many failed attempts. Locked for 30 seconds.", "error");
             }
         }
 
         function resetFailedAttempts() {
             failedAttempts = 0;
-            rateLimitUntil = 0;
-            localStorage.removeItem("failedAttempts");
-            localStorage.removeItem("rateLimitUntil");
+            lockedUntil = 0;
+            if (lockTimer) clearTimeout(lockTimer);
+            submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
         }
 
         // ── Validation ──
@@ -898,7 +898,7 @@
 
         // ── Social / Guest handlers ──
         async function handleSocialLogin(provider, providerName) {
-            if (loading || offlineMode || rateLimited()) return;
+            if (loading || offlineMode || isLocked()) return;
             setLoadingState(providerName, true, `Connecting ${providerName}...`);
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -928,7 +928,7 @@
         });
 
         guestButton.addEventListener("click", async () => {
-            if (loading || offlineMode || rateLimited()) return;
+            if (loading || offlineMode || isLocked()) return;
             setLoadingState("guest", true, "Entering as guest...");
             try {
                 const result = await signInAnonymously(auth);
@@ -944,10 +944,10 @@
             }
         });
 
-        // ── Email/Password handler ──
+        // ── Email/Password handler (with verification enforcement) ──
         authForm.addEventListener("submit", async event => {
             event.preventDefault();
-            if (loading || offlineMode || rateLimited()) return;
+            if (loading || offlineMode || isLocked()) return;
             clearAllErrors();
             if (!validateForm()) return;
             const email = emailInput.value.trim();
@@ -958,9 +958,18 @@
                 if (mode === "signup") {
                     const name = nameInput.value.trim();
                     await handleEmailSignup(email, password, name);
-                    setLoadingState("submit", false); // verification screen shown
+                    setLoadingState("submit", false);
                 } else {
                     const result = await signInWithEmailAndPassword(auth, email, password);
+                    // 🔐 Enforce email verification on login
+                    await result.user.reload();
+                    if (!result.user.emailVerified) {
+                        await signOut(auth);
+                        incrementFailedAttempt();
+                        showToast("Please verify your email first.", "error");
+                        setLoadingState("submit", false);
+                        return;
+                    }
                     await saveUser(result.user, "email");
                     resetFailedAttempts();
                     track("login", { method: "email" });
@@ -1012,13 +1021,13 @@
         });
         window.addEventListener("online", () => {
             offlineMode = false;
-            if (!rateLimited()) {
+            if (!isLocked()) {
                 submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
             }
             showToast("Back online.");
         });
 
-        // ── Forgot Password Modal (improved resend/change) ──
+        // ── Forgot Password Modal ──
         const modalOverlay = document.getElementById("forgotPasswordModal");
         const modalClose = document.getElementById("modalClose");
         const forgotLink = document.getElementById("forgotLink");
@@ -1169,7 +1178,7 @@
             return messages[error.code] || error.message || "Authentication failed.";
         }
 
-        // ── Canvas animation ──
+        // ── Canvas animation (unchanged) ──
         const canvas = document.getElementById("bendCanvas");
         const ctx = canvas.getContext("2d");
         let width, height, dpr = 1;
