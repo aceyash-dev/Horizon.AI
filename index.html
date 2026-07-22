@@ -1,1842 +1,597 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#07070c" />
-
-  <title>Horizon | Home</title>
-
-  <meta
-    name="description"
-    content="Horizon.AI gives you access to powerful AI models through one fast, beautiful workspace."
-  />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap"
-    rel="stylesheet"
-  />
-  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg: #060609;
-      --surface: rgba(15, 15, 23, 0.72);
-      --surface-strong: #12121b;
-      --text: #f7f7fb;
-      --muted: #a5a5b5;
-      --line: rgba(255, 255, 255, 0.09);
-
-      --purple: #7868ff;
-      --violet: #a76cff;
-      --blue: #548cff;
-      --cyan: #64d8ff;
-
-      --radius-lg: 32px;
-      --radius-md: 22px;
-      --radius-sm: 15px;
-
-      --nav-width: min(1180px, calc(100% - 32px));
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      overflow-x: hidden;
-      color: var(--text);
-      background: var(--bg);
-      font-family: "Lexend", sans-serif;
-  -webkit-tap-highlight-color: transparent;
-    }
-
-    button,
-    a {
-      font: inherit;
-    }
-
-    button {
-      color: inherit;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    ::selection {
-      color: white;
-      background: rgba(120, 104, 255, 0.65);
-    }
-
-    /* ==============================
-       BACKGROUND
-    ============================== */
-
-    #bendCanvas {
-      position: fixed;
-      inset: 0;
-      z-index: -5;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-
-    .background-vignette {
-      position: fixed;
-      inset: 0;
-      z-index: -4;
-      pointer-events: none;
-      background:
-        radial-gradient(
-          circle at center,
-          transparent 10%,
-          rgba(6, 6, 9, 0.18) 52%,
-          rgba(6, 6, 9, 0.92) 100%
-        );
-    }
-
-    .noise {
-      position: fixed;
-      inset: 0;
-      z-index: -3;
-      opacity: 0.035;
-      pointer-events: none;
-
-      background-image:
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
-    }
-
-    /* ==============================
-       CARD NAV
-    ============================== */
-
-    .nav-wrap {
-      position: fixed;
-      top: 18px;
-      left: 50%;
-      z-index: 100;
-      width: var(--nav-width);
-      transform: translateX(-50%);
-    }
-
-    .card-nav {
-      position: relative;
-      height: 74px;
-      overflow: hidden;
-
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-
-      background: rgba(13, 13, 20, 0.78);
-
-      box-shadow:
-        0 18px 60px rgba(0, 0, 0, 0.35),
-        inset 0 1px rgba(255, 255, 255, 0.06);
-
-      backdrop-filter: blur(22px) saturate(140%);
-      -webkit-backdrop-filter: blur(22px) saturate(140%);
-
-      transition:
-        height 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-        border-radius 0.4s ease;
-    }
-
-    .card-nav.open {
-      height: 350px;
-      border-radius: 28px;
-    }
-
-    .nav-top {
-      position: relative;
-      z-index: 3;
-
-      height: 74px;
-      padding: 0 18px;
-
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-    }
-
-    .menu-button {
-      width: 46px;
-      height: 46px;
-
-      display: grid;
-      place-items: center;
-
-      border: 1px solid var(--line);
-      border-radius: 15px;
-
-      background: rgba(255, 255, 255, 0.04);
-      cursor: pointer;
-
-      transition:
-        transform 0.25s ease,
-        background 0.25s ease;
-    }
-
-    .menu-button:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: scale(1.04);
-    }
-
-    .menu-icon {
-      width: 19px;
-      height: 14px;
-      position: relative;
-    }
-
-    .menu-icon span {
-      position: absolute;
-      left: 0;
-
-      width: 100%;
-      height: 1.5px;
-
-      border-radius: 10px;
-      background: white;
-
-      transition:
-        top 0.3s ease,
-        transform 0.3s ease;
-    }
-
-    .menu-icon span:first-child {
-      top: 3px;
-    }
-
-    .menu-icon span:last-child {
-      top: 10px;
-    }
-
-    .card-nav.open .menu-icon span:first-child {
-      top: 6px;
-      transform: rotate(45deg);
-    }
-
-    .card-nav.open .menu-icon span:last-child {
-      top: 6px;
-      transform: rotate(-45deg);
-    }
-
-    .logo {
-  grid-column: 2;
-  justify-self: center;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-
-  font-family: "Lexend", sans-serif;
-  font-size: 20px;
-  font-weight: 500;
-  color: #5539CC;
-  letter-spacing: -0.8px;
-}
-
-    
-
-    .nav-action {
-      justify-self: end;
-
-      padding: 12px 18px;
-
-      border: 0;
-      border-radius: 14px;
-
-      color: #09090d;
-      background: white;
-
-      font-size: 13px;
-      font-weight: 700;
-
-      cursor: pointer;
-
-      transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-    }
-
-    .nav-action:hover {
-      transform: translateY(-2px);
-
-      box-shadow:
-        0 12px 35px rgba(255, 255, 255, 0.14);
-    }
-
-    .nav-cards {
-      height: 276px;
-      padding: 8px 14px 14px;
-
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-
-      opacity: 0;
-      transform: translateY(-16px);
-
-      transition:
-        opacity 0.3s ease 0.05s,
-        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .card-nav.open .nav-cards {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .nav-card {
-      position: relative;
-      overflow: hidden;
-
-      min-height: 210px;
-      padding: 22px;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-
-      border-radius: 20px;
-
-      transition:
-        transform 0.3s ease,
-        filter 0.3s ease;
-    }
-
-    .nav-card:hover {
-      transform: translateY(-4px);
-      filter: brightness(1.08);
-    }
-
-    .nav-card:nth-child(1) {
-      color: #101015;
-      background: #d9ff7d;
-    }
-
-    .nav-card:nth-child(2) {
-      background:
-        linear-gradient(145deg, #725cff, #9c65ff);
-    }
-
-    .nav-card:nth-child(3) {
-      color: #101015;
-      background: #f1f1f5;
-    }
-
-    .nav-card-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-
-      opacity: 0.6;
-    }
-
-    .nav-links {
-      display: grid;
-      gap: 8px;
-    }
-
-    .nav-links a {
-      width: fit-content;
-
-      font-family: "Lexend", sans-serif;
-      font-size: clamp(20px, 2vw, 29px);
-      font-weight: 600;
-      letter-spacing: -1px;
-
-      transition: transform 0.2s ease;
-    }
-
-    .nav-links a:hover {
-      transform: translateX(5px);
-    }
-
-    /* ==============================
-       HERO
-    ============================== */
-
-    .hero {
-      position: relative;
-
-      min-height: 100svh;
-      padding: 155px 24px 80px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      text-align: center;
-    }
-
-    .hero-inner {
-      width: min(1050px, 100%);
-    }
-
-    .eyebrow {
-      width: fit-content;
-      margin: 0 auto 28px;
-      padding: 8px 13px;
-
-      display: flex;
-      align-items: center;
-      gap: 9px;
-
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 999px;
-
-      color: #c9c8d3;
-      background: rgba(12, 12, 18, 0.58);
-
-      font-size: 12px;
-      font-weight: 600;
-
-      backdrop-filter: blur(14px);
-
-      animation: rise 0.8s both;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-
-      border-radius: 50%;
-
-      background: #a6ff6d;
-
-      box-shadow:
-        0 0 16px rgba(166, 255, 109, 0.9);
-    }
-
-    .hero h1 {
-      max-width: 980px;
-      margin: 0 auto;
-
-      font-family: "Lexend", sans-serif;
-      font-size: clamp(58px, 9.5vw, 132px);
-      line-height: 0.88;
-      letter-spacing: clamp(-7px, -0.55vw, -2px);
-      font-weight: 600;
-
-      animation: rise 0.9s 0.08s both;
-    }
-
-    .gradient-text {
-  display: inline-block;
-  font-family: "Permanent Marker", sans-serif;
-  font-weight: 400;
-
-  color: transparent;
-  background: linear-gradient(
-    90deg,
-    #ccb3e5 0%,
-    #8ea7ff 33%,
-    #c7c0ff 66%,
-    #d8b9ff 100%
-  );
-
-  background-clip: text;
-  -webkit-background-clip: text;
-    }
-
-    .hero-copy {
-      max-width: 620px;
-      margin: 30px auto 0;
-
-      color: var(--muted);
-
-      font-size: clamp(16px, 2vw, 19px);
-      line-height: 1.65;
-
-      animation: rise 0.9s 0.16s both;
-    }
-
-    .hero-actions {
-      margin-top: 34px;
-
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-
-      animation: rise 0.9s 0.24s both;
-    }
-
-    .button {
-      min-height: 52px;
-      padding: 0 22px;
-
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-
-      border-radius: 16px;
-
-      font-size: 14px;
-      font-weight: 700;
-
-      transition:
-        transform 0.25s ease,
-        background 0.25s ease,
-        box-shadow 0.25s ease;
-    }
-
-    .button:hover {
-      transform: translateY(-3px);
-    }
-
-    .button-primary {
-      color: #0a0910;
-
-      background:
-        linear-gradient(
-          135deg,
-          #ffffff,
-          #ddd9ff
-        );
-
-      box-shadow:
-        0 15px 50px rgba(130, 105, 255, 0.22);
-    }
-
-    .button-secondary {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.045);
-      backdrop-filter: blur(12px);
-    }
-
-    .arrow {
-      font-size: 18px;
-      transition: transform 0.25s ease;
-    }
-
-    .button:hover .arrow {
-      transform: translateX(4px);
-    }
-
-    /* ==============================
-       CHAT PREVIEW
-    ============================== */
-
-    .preview-wrap {
-      position: relative;
-
-      width: min(920px, 100%);
-      margin: 75px auto 0;
-
-      animation: rise 1s 0.32s both;
-    }
-
-    .preview-glow {
-      position: absolute;
-      inset: -60px 10%;
-
-      z-index: -1;
-
-      background:
-        radial-gradient(
-          ellipse,
-          rgba(114, 92, 255, 0.28),
-          transparent 65%
-        );
-
-      filter: blur(40px);
-    }
-
-    .chat-window {
-      overflow: hidden;
-
-      border: 1px solid rgba(255, 255, 255, 0.11);
-      border-radius: 28px;
-
-      background: rgba(10, 10, 16, 0.72);
-
-      box-shadow:
-        0 40px 120px rgba(0, 0, 0, 0.55),
-        inset 0 1px rgba(255, 255, 255, 0.06);
-
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-    }
-
-    .window-bar {
-      height: 58px;
-      padding: 0 18px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      border-bottom: 1px solid var(--line);
-    }
-
-    .window-dots {
-      display: flex;
-      gap: 7px;
-    }
-
-    .window-dots span {
-      width: 8px;
-      height: 8px;
-
-      border-radius: 50%;
-
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .model-pill {
-      padding: 7px 11px;
-
-      border: 1px solid var(--line);
-      border-radius: 10px;
-
-      color: #c6c5d0;
-      background: rgba(255, 255, 255, 0.035);
-
-      font-size: 11px;
-    }
-
-    .chat-content {
-      min-height: 350px;
-      padding: 34px;
-
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-
-      text-align: left;
-    }
-
-    .message {
-      max-width: 78%;
-      padding: 15px 17px;
-
-      border-radius: 18px;
-
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .message.user {
-      align-self: flex-end;
-
-      color: #f3f1ff;
-
-      background:
-        linear-gradient(
-          135deg,
-          rgba(110, 88, 255, 0.92),
-          rgba(145, 91, 255, 0.92)
-        );
-
-      border-bottom-right-radius: 5px;
-    }
-
-    .message.ai {
-      border: 1px solid var(--line);
-      border-bottom-left-radius: 5px;
-
-      color: #ccb3e5;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .typing {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-    }
-
-    .typing span {
-      width: 6px;
-      height: 6px;
-
-      border-radius: 50%;
-
-      background: #aaa8b5;
-
-      animation: typing 1.2s infinite ease-in-out;
-    }
-
-    .typing span:nth-child(2) {
-      animation-delay: 0.15s;
-    }
-
-    .typing span:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    .composer {
-      margin: 0 20px 20px;
-      padding: 10px 10px 10px 17px;
-
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      border: 1px solid var(--line);
-      border-radius: 18px;
-
-      background: rgba(255, 255, 255, 0.045);
-    }
-
-    .composer span {
-      flex: 1;
-
-      color: #6f6e7a;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .send {
-      width: 40px;
-      height: 40px;
-
-      display: grid;
-      place-items: center;
-
-      border: 0;
-      border-radius: 12px;
-
-      color: #0a0910;
-      background: white;
-    }
-
-    /* ==============================
-       SECTIONS
-    ============================== */
-
-    .section {
-      position: relative;
-
-      width: min(1180px, calc(100% - 40px));
-      margin: 0 auto;
-      padding: 110px 0;
-    }
-
-    .section-label {
-      margin-bottom: 18px;
-
-      color: #9d91ff;
-
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1.7px;
-      text-transform: uppercase;
-    }
-
-    .section-title {
-      max-width: 760px;
-
-      font-family: "Lexend", sans-serif;
-      font-size: clamp(42px, 6vw, 76px);
-      line-height: 0.98;
-      letter-spacing: -3px;
-    }
-
-    .features {
-      margin-top: 55px;
-
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-    }
-
-    .feature {
-      position: relative;
-      overflow: hidden;
-
-      min-height: 320px;
-      padding: 28px;
-
-      border: 1px solid var(--line);
-      border-radius: 28px;
-
-      background: rgba(255, 255, 255, 0.035);
-
-      backdrop-filter: blur(18px);
-
-      transition:
-        transform 0.35s ease,
-        border-color 0.35s ease;
-    }
-
-    .feature:hover {
-      transform: translateY(-6px);
-
-      border-color:
-        rgba(255, 255, 255, 0.18);
-    }
-
-    .feature.large {
-      grid-column: span 7;
-    }
-
-    .feature.small {
-      grid-column: span 5;
-    }
-
-    .feature-icon {
-      width: 48px;
-      height: 48px;
-
-      display: grid;
-      place-items: center;
-
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-
-      background: rgba(255, 255, 255, 0.06);
-
-      font-size: 20px;
-    }
-
-    .feature-content {
-      position: absolute;
-      left: 28px;
-      right: 28px;
-      bottom: 28px;
-    }
-
-    .feature h3 {
-      margin-bottom: 9px;
-
-      font-family: "Lexend", sans-serif;
-      font-size: 26px;
-      letter-spacing: -1px;
-    }
-
-    .feature p {
-      max-width: 470px;
-
-      color: var(--muted);
-
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .orb {
-      position: absolute;
-      top: -90px;
-      right: -70px;
-
-      width: 270px;
-      height: 270px;
-
-      border-radius: 50%;
-
-      background:
-        radial-gradient(
-          circle at 35% 35%,
-          #b9aeff,
-          #725cff 38%,
-          rgba(114, 92, 255, 0.06) 70%
-        );
-
-      filter: blur(4px);
-
-      opacity: 0.75;
-    }
-
-    .model-stack {
-      position: absolute;
-      top: 35px;
-      right: 25px;
-
-      width: 170px;
-
-      display: grid;
-      gap: 8px;
-
-      transform: rotate(5deg);
-    }
-
-    .model-item {
-      padding: 12px 14px;
-
-      border: 1px solid var(--line);
-      border-radius: 13px;
-
-      background: rgba(12, 12, 18, 0.7);
-
-      font-size: 12px;
-
-      backdrop-filter: blur(12px);
-    }
-
-    /* ==============================
-       STATS
-    ============================== */
-
-    .stats {
-      padding: 45px 0;
-
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .stat {
-      padding: 20px;
-
-      text-align: center;
-
-      border-right: 1px solid var(--line);
-    }
-
-    .stat:last-child {
-      border-right: 0;
-    }
-
-    .stat strong {
-      display: block;
-
-      font-family: "Lexend", sans-serif;
-      font-size: clamp(42px, 6vw, 72px);
-      letter-spacing: -3px;
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    /* ==============================
-       CTA
-    ============================== */
-
-    .cta {
-      position: relative;
-      overflow: hidden;
-
-      padding: 90px 25px;
-
-      border: 1px solid var(--line);
-      border-radius: 38px;
-
-      text-align: center;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(116, 92, 255, 0.13),
-          rgba(255, 255, 255, 0.03)
-        );
-    }
-
-    .cta::before {
-      content: "";
-
-      position: absolute;
-      top: -180px;
-      left: 50%;
-
-      width: 600px;
-      height: 350px;
-
-      transform: translateX(-50%);
-
-      border-radius: 50%;
-
-      background:
-        rgba(126, 102, 255, 0.3);
-
-      filter: blur(90px);
-    }
-
-    .cta h2 {
-      position: relative;
-
-      max-width: 750px;
-      margin: auto;
-
-      font-family: "Lexend", sans-serif;
-      font-size: clamp(48px, 7vw, 90px);
-      line-height: 0.94;
-      letter-spacing: -4px;
-    }
-
-    .cta p {
-      position: relative;
-
-      max-width: 500px;
-      margin: 22px auto 30px;
-
-      color: var(--muted);
-
-      line-height: 1.6;
-    }
-
-    .cta .button {
-      position: relative;
-    }
-
-    footer {
-      width: min(1180px, calc(100% - 40px));
-      margin: auto;
-      padding: 35px 0 45px;
-
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-
-      color: #73727d;
-
-      font-size: 12px;
-    }
-
-    /* ==============================
-       ANIMATIONS
-    ============================== */
-
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(25px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes typing {
-      0%,
-      60%,
-      100% {
-        opacity: 0.3;
-        transform: translateY(0);
-      }
-
-      30% {
-        opacity: 1;
-        transform: translateY(-4px);
-      }
-    }
-
-    /* ==============================
-       MOBILE
-    ============================== */
-
-    @media (max-width: 760px) {
-      :root {
-        --nav-width: calc(100% - 20px);
-      }
-
-      .nav-wrap {
-        top: 10px;
-      }
-
-      .card-nav {
-        height: 66px;
-        border-radius: 20px;
-      }
-
-      .card-nav.open {
-        height: min(590px, calc(100svh - 20px));
-      }
-
-      .nav-top {
-        height: 66px;
-        padding: 0 10px;
-      }
-
-      .menu-button {
-        width: 42px;
-        height: 42px;
-      }
-
-      
-
-      .brand-icon {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-  display: block;
-  filter: invert(1);
-}
-
-      .nav-action {
-        padding: 10px 12px;
-        font-size: 11px;
-      }
-
-      .nav-cards {
-        height: auto;
-        padding: 8px 10px 10px;
-
-        grid-template-columns: 1fr;
-      }
-
-      .nav-card {
-        min-height: 150px;
-        padding: 18px;
-      }
-
-      .nav-links {
-        gap: 3px;
-      }
-
-      .nav-links a {
-        font-size: 22px;
-      }
-
-      .hero {
-        padding-top: 130px;
-      }
-
-      .hero h1 {
-        font-size: clamp(55px, 17vw, 84px);
-        letter-spacing: -4px;
-      }
-
-      .hero-copy {
-        font-size: 15px;
-      }
-
-      .preview-wrap {
-        margin-top: 55px;
-      }
-
-      .chat-content {
-        min-height: 300px;
-        padding: 20px;
-      }
-
-      .message {
-        max-width: 90%;
-        font-size: 12px;
-      }
-
-      .features {
-        grid-template-columns: 1fr;
-      }
-
-      .feature.large,
-      .feature.small {
-        grid-column: auto;
-      }
-
-      .stats {
-        grid-template-columns: 1fr;
-      }
-
-      .stat {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .stat:last-child {
-        border-bottom: 0;
-      }
-
-      footer {
-        flex-direction: column;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-      }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07070c" />
+    <title>Horizon | Home</title>
+    <meta name="description" content="Horizon.AI gives you access to powerful AI models through one fast, beautiful workspace." />
+
+    <!-- Google Fonts: Inter, Instrument Serif, & Permanent Marker -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Permanent+Marker&display=swap" rel="stylesheet" />
+
+    <!-- UnoCSS Runtime -->
+    <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+
+    <!-- Alpine.js Plugins & Core (Fixed CDN versions) -->
+    <script defer src="https://unpkg.com/@alpinejs/intersect@3.14.9/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* ============ GLOBAL RESET & LINK STYLING ============ */
+        a, a:visited, a:hover, a:active {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* ============ THEME VARIABLES & CUSTOM UTILITIES ============ */
+        :root {
+            --bg-dark: #060609;
+            --surface: rgba(15, 15, 23, 0.72);
+            --surface-strong: #12121b;
+            --text-primary: #f7f7fb;
+            --muted: #a5a5b5;
+            --line: rgba(255, 255, 255, 0.09);
+            --purple-brand: #7868ff;
+            --violet-brand: #a76cff;
+            --blue-brand: #548cff;
+            --cyan-brand: #64d8ff;
+        }
+
+        /* Fonts */
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-instrument { font-family: 'Instrument Serif', serif; }
+        .font-marker { font-family: 'Permanent Marker', cursive; }
+
+        /* Color classes */
+        .bg-bg-dark { background-color: var(--bg-dark); }
+        .text-text-primary { color: var(--text-primary); }
+        .text-muted { color: var(--muted); }
+        .border-line { border-color: var(--line); }
+
+        /* Keyframes & Animation Utilities */
+        @keyframes rise {
+            0% { opacity: 0; transform: translateY(25px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-4px); }
+        }
+
+        .animate-rise { animation: rise 0.8s both; }
+        .animate-rise-delay-1 { animation: rise 0.9s 0.08s both; }
+        .animate-rise-delay-2 { animation: rise 0.9s 0.16s both; }
+        .animate-rise-delay-3 { animation: rise 0.9s 0.24s both; }
+        .animate-rise-delay-4 { animation: rise 1s 0.32s both; }
+        .animate-typing { animation: typing 1.2s infinite ease-in-out; }
+
+        /* Background layers */
+        .bg-vignette {
+            background: radial-gradient(circle at center,
+                    transparent 10%,
+                    rgba(6, 6, 9, 0.18) 52%,
+                    rgba(6, 6, 9, 0.92) 100%);
+        }
+
+        .bg-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+        }
+
+        /* Gradient text with Permanent Marker */
+        .gradient-text-marker {
+            font-family: "Permanent Marker", cursive;
+            font-weight: 400;
+            color: transparent;
+            background: linear-gradient( 90deg, #ccb3e5 0%, #8ea7ff 33%, #c7c0ff 66%, #d8b9ff 100% );
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: inline-block;
+            text-shadow: none;
+            outline: none;
+        }
+
+        /* Orb glow */
+        .orb-glow {
+            background: radial-gradient(circle at 35% 35%,
+                    #b9aeff,
+                    #725cff 38%,
+                    rgba(114, 92, 255, 0.06) 70%);
+            filter: blur(4px);
+            opacity: 0.75;
+        }
+
+        /* Preview glow */
+        .preview-glow {
+            background: radial-gradient(ellipse,
+                    rgba(114, 92, 255, 0.28),
+                    transparent 65%);
+            filter: blur(40px);
+        }
+
+        /* CTA blur */
+        .cta-blur::before {
+            content: "";
+            position: absolute;
+            top: -180px;
+            left: 50%;
+            width: 600px;
+            height: 350px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: rgba(126, 102, 255, 0.3);
+            filter: blur(90px);
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Selection */
+        ::selection {
+            color: white;
+            background: rgba(120, 104, 255, 0.65);
+        }
+    </style>
 </head>
 
-<body>
+<body class="min-h-screen overflow-x-hidden text-text-primary bg-bg-dark font-inter antialiased [-webkit-tap-highlight-color:transparent]">
 
-  <canvas id="bendCanvas"></canvas>
-  <div class="background-vignette"></div>
-  <div class="noise"></div>
+    <!-- ========== BACKGROUND LAYERS ========== -->
+    <canvas id="dotMatrix" class="fixed inset-0 -z-10 w-full h-full pointer-events-none"></canvas>
+    <div class="fixed inset-0 z-[-4] pointer-events-none bg-vignette"></div>
+    <div class="fixed inset-0 z-[-3] opacity-[0.035] pointer-events-none bg-noise"></div>
 
-  <!-- CARD NAV -->
+    <!-- ========== SHARED ALPINE ROOT WRAPPER ========== -->
+    <div x-data="{ open: false }" class="relative overflow-hidden">
 
-  <div class="nav-wrap">
-    <nav class="card-nav" id="cardNav">
+        <!-- ========== ANIMATED BACKDROP ========== -->
+        <div
+        x-show="open"
+        x-transition.opacity.duration.400ms
+        @click="open = false"
+        class="fixed inset-0 z-[900] bg-black/45 backdrop-blur-sm cursor-pointer"
+        ></div>
 
-      <div class="nav-top">
+        <!-- ========== GLASS DRAWER NAVIGATION ========== -->
+        <div class="fixed top-[18px] max-sm:top-[10px] left-1/2 z-[999] max-w-[1180px] w-[calc(100%-32px)] max-sm:w-[calc(100%-20px)] -translate-x-1/2">
+            <nav
+            @click.outside="open = false"
+            :aria-expanded="open"
+            x-transition:enter="transition ease-out duration-400"
+            x-transition:enter-start="opacity-0 scale-y-95"
+            x-transition:enter-end="opacity-100 scale-y-100"
+            x-transition:leave="transition ease-in duration-250"
+            x-transition:leave-start="opacity-100 scale-y-100"
+            x-transition:leave-end="opacity-0 scale-y-95"
+            :class="open
+            ? 'max-h-[95vh] rounded-[32px] bg-[rgba(8,8,16,0.72)] border-white/20 overflow-y-auto'
+            : 'max-h-[74px] max-sm:max-h-[66px] rounded-full bg-[rgba(10,10,18,0.55)] border-white/10 overflow-hidden'"
+            class="relative border shadow-[0_18px_60px_rgba(0,0,0,0.45),inset_0_1px_rgba(255,255,255,0.08)] backdrop-blur-[30px] backdrop-saturate-[140%]"
+            >
+            <!-- Animated inner glass gradient overlay -->
+            <div
+            x-show="open"
+            x-transition.opacity.duration.400ms
+            class="absolute inset-0 bg-gradient-to-b from-white/[.03] to-transparent pointer-events-none"
+            ></div>
 
-        <button
-          class="menu-button"
-          id="menuButton"
-          aria-label="Toggle navigation"
-          aria-expanded="false"
-        >
-          <span class="menu-icon">
-            <span></span>
-            <span></span>
-          </span>
-        </button>
+            <!-- Nav top bar -->
+            <div class="sticky top-0 z-[10] h-[74px] max-sm:h-[66px] px-[18px] max-sm:px-[12px] grid grid-cols-[48px_1fr_auto] items-center bg-[rgba(8,8,16,0.55)] backdrop-blur-xl">
+                <!-- 3-Line Morphing Hamburger Button -->
+                <button
+                @click="open = !open"
+                :aria-expanded="open"
+                aria-label="Toggle navigation"
+                class="w-[44px] h-[44px] max-sm:w-[40px] max-sm:h-[40px] grid place-items-center border border-line rounded-full bg-white/5 cursor-pointer hover:bg-white/10 hover:scale-[1.04] transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+                >
+                <span class="relative w-[18px] h-[12px] flex flex-col justify-between">
+                    <span
+                    :class="open ? 'top-[5px] rotate-45' : 'top-0'"
+                    class="absolute left-0 w-full h-[1.5px] rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+                    ></span>
+                    <span
+                    :class="open ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'"
+                    class="absolute left-0 top-[5px] w-full h-[1.5px] rounded-full bg-white transition-all duration-300 ease-in-out"
+                    ></span>
+                    <span
+                    :class="open ? 'top-[5px] -rotate-45' : 'top-[10px]'"
+                    class="absolute left-0 w-full h-[1.5px] rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+                    ></span>
+                </span>
+                </button>
 
-        <a href="auth.html" class="logo" aria-label="Horizon.AI">
-  <img src="saturn.png" class="brand-icon">
-  <span class="gradient-text">Horizon.AI</span>
-</a>
+                <!-- Logo -->
+                <a href="auth.html" class="justify-self-start ml-2 flex items-center gap-[10px] font-instrument text-2xl max-sm:text-xl font-normal tracking-[-0.5px]" aria-label="Horizon.AI">
+                    <img src="./saturn.png" class="w-[32px] h-[32px] object-contain max-sm:w-[26px] max-sm:h-[26px] invert brightness-0" alt="Horizon icon" />
+                    <span class="gradient-text-marker text-[#5539CC]">Horizon.AI</span>
+                </a>
 
-        <a href="app.html" class="nav-action">
-          Launch App
-        </a>
-
-      </div>
-
-      <div class="nav-cards">
-
-        <article class="nav-card">
-          <span class="nav-card-label">Explore</span>
-
-          <div class="nav-links">
-            <a href="#features">Features ↗</a>
-            <a href="https://openrouter.ai/models">Models ↗</a>
-            <a href="https://aceyash.vercel.app">About ↗</a>
-          </div>
-        </article>
-
-        <article class="nav-card">
-          <span class="nav-card-label">Product</span>
-
-          <div class="nav-links">
-            <a href="app.html">Chat ↗</a>
-            <a href="https://openrouter.ai/models">All Models ↗</a>
-          </div>
-        </article>
-
-        <article class="nav-card">
-          <span class="nav-card-label">Connect</span>
-
-          <div class="nav-links">
-            <a href="https://github.com/aceyash-dev">GitHub ↗</a>
-            <a href="https://aceyash.vercel.app">Contact ↗</a>
-          </div>
-        </article>
-
-      </div>
-
-    </nav>
-  </div>
-
-  <!-- HERO -->
-
-  <main>
-
-    <section class="hero" id="start">
-
-      <div class="hero-inner">
-
-        <div class="eyebrow">
-          <span class="status-dot"></span>
-          Intelligence is online
-        </div>
-
-        <h1>
-          Beyond the
-          <span class="gradient-text">horizon</span>...
-        </h1>
-
-        <p class="hero-copy">
-          One beautiful workspace for the world's most capable AI models.
-          Think, build, explore and create without switching between a dozen tabs.
-        </p>
-
-        <div class="hero-actions">
-
-          <a href="auth.html" class="button button-primary">
-            Start creating
-            <span class="arrow">→</span>
-          </a>
-
-          <a href="#features" class="button button-secondary">
-            Explore Horizon
-          </a>
-
-        </div>
-
-        <!-- APP PREVIEW -->
-
-        <div class="preview-wrap">
-
-          <div class="preview-glow"></div>
-
-          <div class="chat-window">
-
-            <div class="window-bar">
-
-              <div class="window-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-
-              <span class="model-pill">
-                Auto · Best model
-              </span>
-
+                <!-- Launch app -->
+                <a href="app.html" class="justify-self-end px-4 py-2 rounded-full text-[#09090d] !text-[#09090d] bg-white text-xs max-sm:text-[11px] font-bold max-sm:scale-95 origin-right hover:-translate-y-[2px] hover:shadow-[0_12px_35px_rgba(255,255,255,0.2)] transition-all duration-300 font-inter">
+                    Launch App
+                </a>
             </div>
 
-            <div class="chat-content" id="chatContent">
-
-              <div class="message user">
-                Build a futuristic landing page that doesn't look AI-generated.
-              </div>
-
-              <div class="message ai">
-                For sure. The internet has suffered enough identical purple gradients.
-                I'll create something better, faster and actually memorable.
-              </div>
-
-              <div class="message ai typing">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-
-            </div>
-
-            <div class="composer">
-              <span>Ask Horizon anything...</span>
-
-              <button class="send" aria-label="Send">
-                ↑
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- FEATURES -->
-
-    <section class="section" id="features">
-
-      <p class="section-label">
-        Built differently
-      </p>
-
-      <h2 class="section-title">
-        One interface.
-        Serious intelligence.
-      </h2>
-
-      <div class="features">
-
-        <article class="feature large">
-
-          <div class="orb"></div>
-
-          <div class="feature-icon">
-            ✦
-          </div>
-
-          <div class="feature-content">
-            <h3>Adaptive intelligence</h3>
-
-            <p>
-              Horizon can route each task to the model best suited for it,
-              so you spend less time comparing benchmarks like a person
-              shopping for processors at 3 AM.
-            </p>
-          </div>
-
-        </article>
-
-        <article class="feature small" id="models">
-
-          <div class="model-stack">
-            <div class="model-item">◈ Gemini</div>
-            <div class="model-item">◇ Claude</div>
-            <div class="model-item">○ GPT</div>
-            <div class="model-item">△ Open models</div>
-          </div>
-
-          <div class="feature-icon">
-            ⌘
-          </div>
-
-          <div class="feature-content">
-            <h3>Every model</h3>
-
-            <p>
-              Switch between leading models without rebuilding your workflow.
-            </p>
-          </div>
-
-        </article>
-
-        <article class="feature small">
-
-          <div class="feature-icon">
-            ⚡
-          </div>
-
-          <div class="feature-content">
-            <h3>Built for speed</h3>
-
-            <p>
-              Lightweight interactions, responsive design and no decorative
-              loading screen pretending the app is doing quantum physics.
-            </p>
-          </div>
-
-        </article>
-
-        <article class="feature large">
-
-          <div class="feature-icon">
-            ◌
-          </div>
-
-          <div class="feature-content">
-            <h3>Your workspace, remembered</h3>
-
-            <p>
-              Keep conversations, ideas and projects together in one focused
-              environment designed for long sessions and real work.
-            </p>
-          </div>
-
-        </article>
-
-      </div>
-
-    </section>
-
-    <!-- STATS -->
-
-    <section class="section">
-
-      <div class="stats">
-
-        <div class="stat">
-          <strong>1</strong>
-          <span>Unified workspace</span>
-        </div>
-
-        <div class="stat">
-          <strong>∞</strong>
-          <span>Ways to create</span>
-        </div>
-
-        <div class="stat">
-          <strong>0</strong>
-          <span>Unnecessary complexity</span>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- CTA -->
-
-    <section class="section" id="about">
-
-      <div class="cta">
-
-        <h2>
-          See what lies beyond.
-        </h2>
-
-        <p>
-          A faster, cleaner way to work with artificial intelligence.
-          Built for people who would rather create than configure.
-        </p>
-
-        <a href="auth.html" class="button button-primary">
-          Enter Horizon
-          <span class="arrow">→</span>
-        </a>
-
-      </div>
-
-    </section>
-
-  </main>
-
-  <footer>
-    <span>© 2026 Horizon.AI</span>
-    <span>Intelligence without the clutter.</span>
-  </footer>
-
-  <script>
-    /* =========================================
-       CARD NAV
-    ========================================= */
-
-    const cardNav = document.getElementById("cardNav");
-    const menuButton = document.getElementById("menuButton");
-
-    function toggleNav() {
-      const isOpen = cardNav.classList.toggle("open");
-
-      menuButton.setAttribute(
-        "aria-expanded",
-        String(isOpen)
-      );
-    }
-
-    menuButton.addEventListener("click", toggleNav);
-
-    document.querySelectorAll(".nav-card a").forEach(link => {
-      link.addEventListener("click", () => {
-        cardNav.classList.remove("open");
-        menuButton.setAttribute("aria-expanded", "false");
-      });
-    });
-
-    document.addEventListener("click", event => {
-      if (
-        cardNav.classList.contains("open") &&
-        !cardNav.contains(event.target)
-      ) {
-        cardNav.classList.remove("open");
-        menuButton.setAttribute("aria-expanded", "false");
-      }
-    });
-
-
-    /* =========================================
-       LINE / COLOR BENDS BACKGROUND
-       Pure Canvas 2D implementation
-    ========================================= */
-
-    const canvas = document.getElementById("bendCanvas");
-    const ctx = canvas.getContext("2d");
-
-    let width = 0;
-    let height = 0;
-    let dpr = 1;
-    let animationFrame;
-
-    const mouse = {
-      x: 0.5,
-      y: 0.5,
-      targetX: 0.5,
-      targetY: 0.5
-    };
-
-    const bends = [
-      {
-        y: 0.17,
-        amplitude: 85,
-        frequency: 0.0018,
-        speed: 0.00032,
-        width: 150,
-        colorA: "104, 91, 255",
-        colorB: "91, 180, 255"
-      },
-      {
-        y: 0.44,
-        amplitude: 130,
-        frequency: 0.00135,
-        speed: -0.00022,
-        width: 180,
-        colorA: "157, 91, 255",
-        colorB: "78, 116, 255"
-      },
-      {
-        y: 0.72,
-        amplitude: 105,
-        frequency: 0.00155,
-        speed: 0.00018,
-        width: 170,
-        colorA: "82, 127, 255",
-        colorB: "174, 93, 255"
-      }
-    ];
-
-    function resizeCanvas() {
-      dpr = Math.min(window.devicePixelRatio || 1, 1.7);
-
-      width = window.innerWidth;
-      height = window.innerHeight;
-
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-
-      canvas.style.width = width + "px";
-      canvas.style.height = height + "px";
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function drawBend(bend, time, index) {
-      const baseY = height * bend.y;
-
-      const mouseShift =
-        (mouse.y - 0.5) * 100 * (index + 1) * 0.35;
-
-      const horizontalShift =
-        (mouse.x - 0.5) * 130;
-
-      const points = [];
-
-      for (let x = -200; x <= width + 200; x += 16) {
-        const wave1 =
-          Math.sin(
-            (x + horizontalShift) * bend.frequency +
-            time * bend.speed
-          ) * bend.amplitude;
-
-        const wave2 =
-          Math.sin(
-            x * bend.frequency * 0.47 -
-            time * bend.speed * 0.8 +
-            index
-          ) * bend.amplitude * 0.45;
-
-        points.push({
-          x,
-          y: baseY + wave1 + wave2 + mouseShift
-        });
-      }
-
-      ctx.save();
-
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      /* Wide blurred glow */
-
-      ctx.beginPath();
-
-      points.forEach((point, i) => {
-        if (i === 0) {
-          ctx.moveTo(point.x, point.y);
-        } else {
-          ctx.lineTo(point.x, point.y);
-        }
-      });
-
-      const gradient = ctx.createLinearGradient(
-        0,
-        0,
-        width,
-        height
-      );
-
-      gradient.addColorStop(
-        0,
-        `rgba(${bend.colorA}, 0)`
-      );
-
-      gradient.addColorStop(
-        0.25,
-        `rgba(${bend.colorA}, 0.25)`
-      );
-
-      gradient.addColorStop(
-        0.62,
-        `rgba(${bend.colorB}, 0.3)`
-      );
-
-      gradient.addColorStop(
-        1,
-        `rgba(${bend.colorB}, 0)`
-      );
-
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = bend.width;
-      ctx.filter = "blur(45px)";
-      ctx.globalCompositeOperation = "screen";
-      ctx.stroke();
-
-      /* Inner luminous bend */
-
-      ctx.filter = "blur(14px)";
-      ctx.lineWidth = bend.width * 0.28;
-
-      const innerGradient = ctx.createLinearGradient(
-        0,
-        0,
-        width,
-        0
-      );
-
-      innerGradient.addColorStop(
-        0,
-        `rgba(${bend.colorA}, 0)`
-      );
-
-      innerGradient.addColorStop(
-        0.3,
-        `rgba(${bend.colorA}, 0.25)`
-      );
-
-      innerGradient.addColorStop(
-        0.65,
-        `rgba(${bend.colorB}, 0.22)`
-      );
-
-      innerGradient.addColorStop(
-        1,
-        `rgba(${bend.colorB}, 0)`
-      );
-
-      ctx.strokeStyle = innerGradient;
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function animate(time) {
-      mouse.x += (mouse.targetX - mouse.x) * 0.035;
-      mouse.y += (mouse.targetY - mouse.y) * 0.035;
-
-      ctx.clearRect(0, 0, width, height);
-
-      const background = ctx.createRadialGradient(
-        width * mouse.x,
-        height * mouse.y,
-        0,
-        width * 0.5,
-        height * 0.5,
-        Math.max(width, height)
-      );
-
-      background.addColorStop(
-        0,
-        "rgba(32, 25, 72, 0.3)"
-      );
-
-      background.addColorStop(
-        0.5,
-        "rgba(12, 10, 25, 0.15)"
-      );
-
-      background.addColorStop(
-        1,
-        "rgba(6, 6, 9, 0)"
-      );
-
-      ctx.fillStyle = background;
-      ctx.fillRect(0, 0, width, height);
-
-      bends.forEach((bend, index) => {
-        drawBend(bend, time, index);
-      });
-
-      animationFrame = requestAnimationFrame(animate);
-    }
-
-    window.addEventListener("pointermove", event => {
-      mouse.targetX = event.clientX / window.innerWidth;
-      mouse.targetY = event.clientY / window.innerHeight;
-    });
-
-    window.addEventListener("resize", resizeCanvas);
-
-    resizeCanvas();
-    animate(0);
-
-
-    /* =========================================
-       CHAT PREVIEW LOOP
-    ========================================= */
-
-    const typingMessage =
-      document.querySelector(".message.typing");
-
-    const aiMessages = [
-      "Planning the structure, libraries to rely and typography styles.",
-      "The UI is ready. Writing logic...",
-      "Optimizing the User Experience for mobile and desktop."
-    ];
-
-    let messageIndex = 0;
-
-    setInterval(() => {
-      typingMessage.classList.remove("typing");
-
-      typingMessage.textContent =
-        aiMessages[messageIndex];
-
-      messageIndex =
-        (messageIndex + 1) % aiMessages.length;
-
-      setTimeout(() => {
-        typingMessage.textContent = "";
-
-        typingMessage.classList.add("typing");
-
-        typingMessage.innerHTML = `
-          <span></span>
-          <span></span>
-          <span></span>
-        `;
-      }, 2500);
-
-    }, 4300);
-
-
-    /* =========================================
-       SCROLL REVEAL
-    ========================================= */
-
-    const revealElements =
-      document.querySelectorAll(
-        ".feature, .stat, .cta"
-      );
-
-    const observer =
-      new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-
-            entry.target.animate(
-              [
+            <!-- Nav cards (Persistent DOM mounting via x-cloak & visibility toggles) -->
+            <div
+            x-cloak
+            :class="open ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'"
+            class="grid grid-cols-3 max-sm:grid-cols-1 gap-3 p-3 pb-4 transition-all duration-300 ease-in-out"
+            >
+                <template x-for="(card, i) in [
                 {
-                  opacity: 0,
-                  transform: "translateY(28px)"
+                    label: 'Explore',
+                    bg: 'bg-[#d9ff7d]',
+                    text: 'text-[#101015]',
+                    links: [
+                        { href: '#features', text: 'Features ↗' },
+                        { href: 'https://openrouter.ai/models', text: 'Models ↗' },
+                        { href: 'https://tab.html-5.me' , text: 'About ↗' }
+                    ]
                 },
                 {
-                  opacity: 1,
-                  transform: "translateY(0)"
+                    label: 'Product',
+                    bg: 'bg-gradient-to-br from-[#725cff] to-[#9b65ff]',
+                    text: 'text-white',
+                    links: [
+                        { href: 'app.html', text: 'Chat ↗' }
+                    ]
+                },
+                {
+                    label: 'Connect',
+                    bg: 'bg-[#f4f4f8]',
+                    text: 'text-[#101015]',
+                    links: [
+                        { href: 'https://github.com/aceyash-dev', text: 'GitHub ↗' },
+                        { href: 'https://aceyash.vercel.app', text: 'Portfolio ↗' }
+                    ]
                 }
-              ],
-              {
-                duration: 700,
-                easing:
-                  "cubic-bezier(0.22, 1, 0.36, 1)",
-                fill: "both"
-              }
-            );
+                ]" :key="i">
+                <article
+                :class="card.bg + ' ' + card.text"
+                :style="'transition-delay:' + (i * 70) + 'ms'"
+                class="group relative overflow-hidden rounded-[28px] min-h-[180px] h-auto p-6 transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-2 hover:scale-[1.02]"
+                >
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none" style="background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.18), transparent 45%);"></div>
+                    <span class="text-xs uppercase tracking-[2px] opacity-60 font-bold font-inter" x-text="card.label"></span>
+                    <div class="mt-6 grid gap-3">
+                        <template x-for="link in card.links" :key="link.text">
+                            <a :href="link.href" class="w-fit font-instrument text-3xl hover:translate-x-2 transition-transform duration-200" x-text="link.text"></a>
+                        </template>
+                    </div>
+                </article>
+                </template>
+            </div>
+            </nav>
+        </div>
 
-            observer.unobserve(entry.target);
-          });
-        },
-        {
-          threshold: 0.12
+        <!-- ========== MAIN CONTENT WRAPPER WITH FOCUS DEPTH SCALE & FADE ========== -->
+        <main
+        :class="open ? 'scale-[0.985] opacity-60 pointer-events-none' : ''"
+        class="transition-all duration-500 ease-[cubic-bezier(.22,1,.36,1)]"
+        >
+            <section class="relative min-h-[100svh] pt-[170px] max-sm:pt-[145px] pb-20 px-6 flex items-center justify-center text-center" id="start">
+                <div class="max-w-[1050px] w-full">
+                    <!-- Eyebrow -->
+                    <div class="w-fit mx-auto mb-7 px-[13px] py-2 flex items-center gap-[9px] border border-white/10 rounded-full text-[#c9c8d3] bg-[rgba(12,12,18,0.58)] text-xs font-semibold backdrop-blur-[14px] animate-rise font-inter">
+                        <span class="w-[7px] h-[7px] rounded-full bg-[#a6ff6d] shadow-[0_0_16px_rgba(166,255,109,0.9)]"></span>
+                        Intelligence is online
+                    </div>
+
+                    <!-- Headline -->
+                    <h1 class="max-w-[1000px] mx-auto font-instrument text-[clamp(64px,10.5vw,144px)] max-sm:text-[clamp(54px,15vw,82px)] leading-[0.88] tracking-[-0.02em] font-normal animate-rise-delay-1">
+                        Beyond the
+                        <span class="gradient-text-marker">horizon</span>...
+                    </h1>
+
+                    <!-- Copy -->
+                    <p class="max-w-[620px] mx-auto mt-[30px] text-muted text-[clamp(16px,2vw,19px)] max-sm:text-[15px] leading-relaxed animate-rise-delay-2 font-inter">
+                        One beautiful workspace for the world's most capable AI models.
+                        Think, build, explore and create without switching between a dozen tabs.
+                    </p>
+
+                    <!-- Actions -->
+                    <div class="mt-[34px] flex justify-center gap-3 flex-wrap animate-rise-delay-3 font-inter">
+                        <a href="auth.html" class="group min-h-[52px] px-[22px] inline-flex items-center gap-[9px] rounded-[16px] text-sm font-bold text-[#060609] !text-[#060609] bg-white hover:bg-[#eef0ff] shadow-[0_15px_50px_rgba(130,105,255,0.3)] hover:-translate-y-[3px] transition-all duration-300">
+                            <span class="text-[#060609]">Start creating</span>
+                            <span class="text-lg text-[#060609] group-hover:translate-x-1 transition-transform duration-300">→</span>
+                        </a>
+                        <a href="#features" class="min-h-[52px] px-[22px] inline-flex items-center gap-[9px] rounded-[16px] text-sm font-bold text-white border border-line bg-white/5 backdrop-blur-[12px] hover:bg-white/10 hover:-translate-y-[3px] transition-all duration-300">
+                            Explore Horizon
+                        </a>
+                    </div>
+
+                    <!-- Chat preview -->
+                    <div class="relative max-w-[920px] w-full mt-[75px] max-sm:mt-[55px] mx-auto animate-rise-delay-4 font-inter"
+                    x-data="chatPreview()"
+                    x-init="init()">
+                    <div class="absolute -inset-[60px_10%] z-[-1] preview-glow"></div>
+
+                    <div class="overflow-hidden border border-white/10 rounded-[28px] bg-[rgba(10,10,16,0.72)] shadow-[0_40px_120px_rgba(0,0,0,0.55),inset_0_1px_rgba(255,255,255,0.06)] backdrop-blur-[25px]">
+                        <!-- Window bar -->
+                        <div class="h-[58px] px-[18px] flex items-center justify-between border-b border-line">
+                            <div class="flex gap-[7px]">
+                                <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                                <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                                <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                            </div>
+                            <span class="px-[11px] py-[7px] border border-line rounded-[10px] text-[#c6c5d0] bg-white/5 text-[11px]">Auto · Best model</span>
+                        </div>
+
+                        <!-- Chat content -->
+                        <div class="min-h-[350px] max-sm:min-h-[300px] p-[34px] max-sm:p-5 flex flex-col gap-[18px] text-left">
+                            <div class="max-w-[78%] max-sm:max-w-[90%] self-end px-[17px] py-[15px] rounded-[18px] rounded-br-[5px] text-[#f3f1ff] bg-gradient-to-br from-[rgba(110,88,255,0.92)] to-[rgba(145,91,255,0.92)] text-sm max-sm:text-xs leading-relaxed">
+                                Build a futuristic landing page that doesn't look AI-generated.
+                            </div>
+                            <div class="max-w-[78%] max-sm:max-w-[90%] px-[17px] py-[15px] rounded-[18px] rounded-bl-[5px] border border-line bg-white/5 text-[#ccb3e5] text-sm max-sm:text-xs leading-relaxed">
+                                For sure. The internet has suffered enough identical purple gradients.
+                                I'll create something better, faster and actually memorable.
+                            </div>
+                            <!-- Typing indicator / message -->
+                            <div class="max-w-[78%] max-sm:max-w-[90%] px-[17px] py-[15px] rounded-[18px] rounded-bl-[5px] border border-line bg-white/5 text-[#ccb3e5] text-sm max-sm:text-xs leading-relaxed">
+                                <template x-if="isTyping">
+                                    <div class="flex gap-[5px] items-center">
+                                        <span class="w-[6px] h-[6px] rounded-full bg-[#aaa8b5] animate-typing"></span>
+                                        <span class="w-[6px] h-[6px] rounded-full bg-[#aaa8b5] animate-typing [animation-delay:0.15s]"></span>
+                                        <span class="w-[6px] h-[6px] rounded-full bg-[#aaa8b5] animate-typing [animation-delay:0.3s]"></span>
+                                    </div>
+                                </template>
+                                <template x-if="!isTyping">
+                                    <span x-text="displayText"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Composer -->
+                        <div class="mx-5 mb-5 px-[17px] py-[10px] flex items-center gap-[10px] border border-line rounded-[18px] bg-white/5">
+                            <span class="flex-1 text-[#6f6e7a] text-left text-[13px]">Ask Horizon anything...</span>
+                            <button aria-label="Send" class="group relative w-11 h-11 grid place-items-center rounded-2xl bg-gradient-to-br from-[#7c6cff] to-[#5c8dff] shadow-[0_8px_30px_rgba(114,92,255,.45)] transition-all duration-300 hover:scale-110 hover:rotate-6 active:scale-95 cursor-pointer">
+                                <svg class="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"/>
+                                    <path d="M12 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== FEATURES ========== -->
+        <section class="relative max-w-[1180px] w-[calc(100%-40px)] mx-auto py-[110px]" id="features">
+            <p class="mb-[18px] text-[#9d91ff] text-xs font-bold tracking-[1.7px] uppercase font-inter">Built differently</p>
+            <h2 class="max-w-[780px] font-instrument text-[clamp(46px,6.8vw,86px)] leading-[0.94] tracking-[-0.02em] font-normal">One interface. Serious intelligence.</h2>
+
+            <div class="mt-[55px] grid grid-cols-1 lg:grid-cols-12 gap-[14px]"
+            x-data="{
+            features: [
+            { id:1, large:true,  icon:'✦', title:'Adaptive intelligence', desc:'Horizon can route each task to the model best suited for it, so you spend less time comparing benchmarks like a person shopping for processors at 3 AM.', hasOrb:true,  hasStack:false, models:[] },
+            { id:2, large:false, icon:'⌘', title:'Every model',          desc:'Switch between leading models without rebuilding your workflow.', hasOrb:false, hasStack:true,  models:['◈ Gemini','◇ Claude','○ GPT','△ Open models'] },
+            { id:3, large:false, icon:'⚡', title:'Built for speed',      desc:'Lightweight interactions, responsive design and no decorative loading screen pretending the app is doing quantum physics.', hasOrb:false, hasStack:false, models:[] },
+            { id:4, large:true,  icon:'◌', title:'Your workspace, remembered', desc:'Keep conversations, ideas and projects together in one focused environment designed for long sessions and real work.', hasOrb:false, hasStack:false, models:[] }
+            ]
+            }"
+            >
+                <template x-for="feature in features" :key="feature.id">
+                    <article
+                    x-data="{ shown: false }"
+                    x-intersect="shown = true"
+                    :class="[
+                    feature.large ? 'lg:col-span-7' : 'lg:col-span-5',
+                    shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'
+                    ]"
+                    class="group relative overflow-hidden min-h-[320px] p-7 border border-line rounded-[28px] bg-white/5 backdrop-blur-[18px] hover:-translate-y-[6px] hover:border-white/20 transition-all duration-[0.35s] ease-out"
+                    >
+                    <!-- Mouse Spotlight Overlay -->
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none" style="background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.12), transparent 45%);"></div>
+
+                    <!-- Orb -->
+                    <div x-show="feature.hasOrb" class="absolute -top-[90px] -right-[70px] w-[270px] h-[270px] rounded-full orb-glow"></div>
+
+                    <!-- Model stack -->
+                    <div x-show="feature.hasStack" class="absolute top-[35px] right-[25px] w-[170px] grid gap-2 rotate-[5deg] font-inter">
+                        <template x-for="model in feature.models" :key="model">
+                            <div class="px-[14px] py-3 border border-line rounded-[13px] bg-[rgba(12,12,18,0.7)] text-xs backdrop-blur-[12px]" x-text="model"></div>
+                        </template>
+                    </div>
+
+                    <!-- Icon -->
+                    <div class="w-12 h-12 grid place-items-center border border-white/10 rounded-[15px] bg-white/5 text-xl font-inter" x-text="feature.icon"></div>
+
+                    <!-- Content -->
+                    <div class="absolute left-7 right-7 bottom-7">
+                        <h3 class="mb-[9px] font-instrument text-[30px] leading-tight tracking-[-0.01em] font-normal" x-text="feature.title"></h3>
+                        <p class="max-w-[470px] text-muted text-sm leading-relaxed font-inter" x-text="feature.desc"></p>
+                    </div>
+                </article>
+                </template>
+            </div>
+        </section>
+
+        <!-- ========== STATS ========== -->
+        <section class="max-w-[1180px] w-[calc(100%-40px)] mx-auto"
+        x-data="{
+        stats: [
+        { number:'1', label:'Unified workspace' },
+        { number:'∞', label:'Ways to create' },
+        { number:'0', label:'Unnecessary complexity' }
+        ]
+        }">
+            <div class="py-[45px] grid grid-cols-1 sm:grid-cols-3 border-y border-line">
+                <template x-for="(stat, i) in stats" :key="i">
+                    <div
+                    x-data="{ shown: false }"
+                    x-intersect="shown = true"
+                    :class="[
+                    shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7',
+                    i < 2 ? 'sm:border-r border-line' : '',
+                    i < 2 ? 'border-b sm:border-b-0 border-line' : ''
+                    ]"
+                    class="p-5 text-center transition-all duration-700 ease-out"
+                    >
+                        <strong class="block font-instrument text-[clamp(52px,7.5vw,84px)] leading-none tracking-[-0.02em] font-normal" x-text="stat.number"></strong>
+                        <span class="text-muted text-[13px] font-inter" x-text="stat.label"></span>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <!-- ========== CTA ========== -->
+        <section class="max-w-[1180px] w-[calc(100%-40px)] mx-auto py-[110px]" id="about">
+            <div
+            x-data="{ shown: false }"
+            x-intersect="shown = true"
+            :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'"
+            class="cta-blur relative overflow-hidden p-[90px] max-sm:p-10 border border-line rounded-[38px] text-center bg-gradient-to-br from-[rgba(116,92,255,0.13)] to-[rgba(255,255,255,0.03)] transition-all duration-700 ease-out"
+            >
+                <h2 class="relative max-w-[780px] mx-auto font-instrument text-[clamp(52px,7.5vw,98px)] leading-[0.92] tracking-[-0.02em] font-normal">
+                    See what lies <span class="gradient-text-marker">beyond</span>.
+                </h2>
+                <p class="relative max-w-[500px] mx-auto mt-[22px] mb-[30px] text-muted leading-relaxed font-inter">
+                    A faster, cleaner way to work with artificial intelligence.
+                    Built for people who would rather create than configure.
+                </p>
+                <a href="auth.html" class="group relative min-h-[52px] px-[22px] inline-flex items-center gap-[9px] rounded-[16px] text-sm font-bold text-[#060609] !text-[#060609] bg-white hover:bg-[#eef0ff] shadow-[0_15px_50px_rgba(130,105,255,0.3)] hover:-translate-y-[3px] transition-all duration-300 font-inter">
+                    <span class="text-[#060609]">Enter Horizon</span>
+                    <span class="text-lg text-[#060609] group-hover:translate-x-1 transition-transform duration-300">→</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- ========== FOOTER ========== -->
+        <footer class="max-w-[1180px] w-[calc(100%-40px)] mx-auto py-[35px] flex max-sm:flex-col justify-between gap-5 text-[#73727d] text-xs font-inter">
+            <span>© 2026 Horizon.AI</span>
+            <span>Intelligence without the clutter.</span>
+        </footer>
+        </main>
+    </div>
+
+    <!-- ========== CHAT PREVIEW COMPONENT ========== -->
+    <script>
+        function chatPreview() {
+            return {
+                messages: [
+                    "Planning the structure, libraries to rely and typography styles.",
+                    "The UI is ready. Writing logic...",
+                    "Optimizing the User Experience for mobile and desktop."
+                ],
+                currentIndex: 0,
+                displayText: '',
+                isTyping: true,
+
+                init() {
+                    const showMessage = () => {
+                        this.isTyping = false;
+                        this.displayText = this.messages[this.currentIndex];
+                        this.currentIndex = (this.currentIndex + 1) % this.messages.length;
+
+                        setTimeout(() => {
+                            this.isTyping = true;
+                            this.displayText = '';
+                        }, 2500);
+                    };
+
+                    // Initial delay then start cycle
+                    setTimeout(() => {
+                        showMessage();
+                        setInterval(showMessage, 4300);
+                    }, 1800);
+                }
+            };
         }
-      );
+    </script>
 
-    revealElements.forEach(element => {
-      observer.observe(element);
-    });
-  </script>
+    <!-- ========== REACTIVE HUE-SHIFTING DOT MATRIX CANVAS ========== -->
+    <script>
+        (() => {
+            const canvas = document.getElementById("dotMatrix");
+            const ctx = canvas.getContext("2d");
+            let w, h, dpr;
+            let dots = [];
+            const spacing = 24;
+            const radius = 1.35;
+            const influence = 150;
+            const mouse = { x: -9999, y: -9999 };
 
+            function resize() {
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w * dpr;
+                canvas.height = h * dpr;
+                canvas.style.width = w + "px";
+                canvas.style.height = h + "px";
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                dots = [];
+                for (let y = 0; y < h + spacing; y += spacing) {
+                    for (let x = 0; x < w + spacing; x += spacing) {
+                        dots.push({ x, y, seed: Math.random() * 1000 });
+                    }
+                }
+            }
+
+            window.addEventListener("resize", resize);
+            window.addEventListener("pointermove", e => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+            window.addEventListener("pointerleave", () => {
+                mouse.x = -9999;
+                mouse.y = -9999;
+            });
+
+            function draw(t) {
+                ctx.clearRect(0, 0, w, h);
+                for (const d of dots) {
+                    const dx = mouse.x - d.x;
+                    const dy = mouse.y - d.y;
+                    const dist = Math.hypot(dx, dy);
+                    let strength = Math.max(0, 1 - dist / influence);
+
+                    const offsetX = dx * 0.07 * strength;
+                    const offsetY = dy * 0.07 * strength;
+                    const breathe = Math.sin(t * 0.001 + d.seed) * 0.18;
+                    const r = radius + breathe + strength * 2.2;
+
+                    const hue = 245 + strength * 18;
+
+                    ctx.beginPath();
+                    ctx.fillStyle = `hsla(${hue}, 100%, 72%, ${0.16 + strength * 0.84})`;
+                    ctx.arc(d.x + offsetX, d.y + offsetY, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+
+            resize();
+            requestAnimationFrame(draw);
+        })();
+    </script>
+
+    <!-- ========== EVENT DELEGATION MOUSE SPOTLIGHT TRACKER ========== -->
+    <script>
+        document.addEventListener("pointermove", e => {
+            const card = e.target.closest("article");
+            if (!card) return;
+            const r = card.getBoundingClientRect();
+            card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+            card.style.setProperty("--my", `${e.clientY - r.top}px`);
+        });
+    </script>
 </body>
 </html>
