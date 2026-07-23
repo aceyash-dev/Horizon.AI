@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
-<meta name="robots" content="noindex,nofollow">
+    <meta name="robots" content="noindex,nofollow" />
     <title>Horizon.AI — Sign In</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,7 +36,6 @@
             --transition-smooth: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
             --transition-spring: 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
         * {
             box-sizing: border-box;
             margin: 0;
@@ -45,7 +44,6 @@
             -webkit-user-select: none;
             user-select: none;
         }
-
         html {
             color-scheme: dark;
             -webkit-font-smoothing: antialiased;
@@ -55,7 +53,6 @@
             overscroll-behavior: none;
             height: 100%;
         }
-
         body {
             min-height: 100svh;
             min-height: 100dvh;
@@ -67,13 +64,20 @@
             -webkit-overflow-scrolling: touch;
             transition: opacity 0.2s, transform 0.2s;
         }
-        body.fade-out { opacity: 0; transform: translateY(-8px); }
-
-        input, textarea {
+        body.fade-out {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        input,
+        textarea {
             -webkit-user-select: text;
             user-select: text;
         }
-        button, input, a { font: inherit; }
+        button,
+        input,
+        a {
+            font: inherit;
+        }
         button {
             color: inherit;
             cursor: pointer;
@@ -84,353 +88,931 @@
             opacity: 0.55;
             pointer-events: none;
         }
-        a { color: inherit; text-decoration: none; }
-        ::selection { color: #fff; background: rgba(120, 104, 255, 0.6); }
-
-        /* ── Canvas ── */
-        #bendCanvas { position: fixed; inset: 0; z-index: -5; width: 100%; height: 100%; pointer-events: none; }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        ::selection {
+            color: #fff;
+            background: rgba(120, 104, 255, 0.6);
+        }
+        #bendCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: -5;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
         .background-vignette {
-            position: fixed; inset: 0; z-index: -4; pointer-events: none;
-            background: radial-gradient(circle at center, transparent 8%, rgba(6,6,9,0.2) 48%, rgba(6,6,9,0.92) 100%);
+            position: fixed;
+            inset: 0;
+            z-index: -4;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 8%, rgba(6, 6, 9, 0.2) 48%, rgba(6, 6, 9, 0.92) 100%);
         }
         .noise {
-            position: fixed; inset: 0; z-index: -3; opacity: 0.025; pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            opacity: 0.025;
+            pointer-events: none;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
         }
         .glow-orb {
-            position: fixed; z-index: -2; pointer-events: none; width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(120,104,255,0.18) 0%, rgba(120,104,255,0.05) 35%, transparent 70%);
-            transform: translate(-50%, -50%); transition: opacity 0.6s ease; opacity: 0; will-change: left, top, opacity;
+            position: fixed;
+            z-index: -2;
+            pointer-events: none;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(120, 104, 255, 0.18) 0%, rgba(120, 104, 255, 0.05) 35%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: opacity 0.6s ease;
+            opacity: 0;
+            will-change: left, top, opacity;
         }
-        .glow-orb.visible { opacity: 1; }
-
-        /* ── Topbar ── */
+        .glow-orb.visible {
+            opacity: 1;
+        }
         .topbar {
-            position: fixed; top: calc(18px + var(--safe-top)); left: 50%; z-index: 100;
-            width: min(1180px, calc(100% - 32px - var(--safe-left) - var(--safe-right))); height: 70px;
-            padding: 0 16px; transform: translateX(-50%); display: grid; grid-template-columns: 1fr auto 1fr;
-            align-items: center; border: 1px solid rgba(255,255,255,0.11); border-radius: 22px;
-            background: rgba(13,13,20,0.8); box-shadow: 0 12px 48px rgba(0,0,0,0.4), inset 0 1px rgba(255,255,255,0.05);
-            backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+            position: fixed;
+            top: calc(18px + var(--safe-top));
+            left: 50%;
+            z-index: 100;
+            width: min(1180px, calc(100% - 32px - var(--safe-left) - var(--safe-right)));
+            height: 70px;
+            padding: 0 16px;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 22px;
+            background: rgba(13, 13, 20, 0.8);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
             transition: box-shadow var(--transition-smooth);
         }
-        .topbar.scrolled { box-shadow: 0 8px 36px rgba(0,0,0,0.55), inset 0 1px rgba(255,255,255,0.05); }
+        .topbar.scrolled {
+            box-shadow: 0 8px 36px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.05);
+        }
         .back-button {
-            justify-self: start; width: 44px; height: 44px; display: grid; place-items: center;
-            border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,0.04);
-            font-size: 18px; transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+            justify-self: start;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 18px;
+            transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .back-button:active { transform: scale(0.93); background: rgba(255,255,255,0.1); box-shadow: 0 0 0 6px rgba(120,104,255,0.08); }
-        @media (hover: hover) { .back-button:hover { transform: translateX(-3px); background: rgba(255,255,255,0.08); } }
+        .back-button:active {
+            transform: scale(0.93);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 6px rgba(120, 104, 255, 0.08);
+        }
+        @media (hover: hover) {
+            .back-button:hover {
+                transform: translateX(-3px);
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
         .logo {
-            grid-column: 2; justify-self: center; display: flex; align-items: center; gap: 10px;
-            font-size: 19px; font-weight: 500; letter-spacing: -0.8px;
+            grid-column: 2;
+            justify-self: center;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 19px;
+            font-weight: 500;
+            letter-spacing: -0.8px;
         }
-        .brand-icon { width: 32px; height: 32px; display: block; object-fit: contain; filter: invert(1); }
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            display: block;
+            object-fit: contain;
+            filter: invert(1);
+        }
         .gradient-text {
-            display: inline-block; font-family: "Permanent Marker", sans-serif; font-weight: 400;
-            color: transparent; background: linear-gradient(90deg, #f5f5f5 0%, #c7c0ff 30%, #8ea7ff 60%, #d8b9ff 100%);
-            background-clip: text; -webkit-background-clip: text;
+            display: inline-block;
+            font-family: "Permanent Marker", sans-serif;
+            font-weight: 400;
+            color: transparent;
+            background: linear-gradient(90deg, #f5f5f5 0%, #c7c0ff 30%, #8ea7ff 60%, #d8b9ff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
         }
-        .top-status { justify-self: end; display: flex; align-items: center; gap: 8px; color: #c9c8d3; font-size: 11px; }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #a6ff6d; box-shadow: 0 0 14px rgba(166,255,109,0.85); animation: statusPulse 2.5s ease-in-out infinite; }
-        @keyframes statusPulse { 0%,100% { box-shadow: 0 0 10px rgba(166,255,109,0.7); } 50% { box-shadow: 0 0 22px rgba(166,255,109,1); } }
-
-        /* ── Main ── */
+        .top-status {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #c9c8d3;
+            font-size: 11px;
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #a6ff6d;
+            box-shadow: 0 0 14px rgba(166, 255, 109, 0.85);
+            animation: statusPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes statusPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(166, 255, 109, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 22px rgba(166, 255, 109, 1);
+            }
+        }
         main {
-            min-height: 100svh; min-height: 100dvh;
+            min-height: 100svh;
+            min-height: 100dvh;
             padding: calc(110px + var(--safe-top)) 20px calc(24px + var(--safe-bottom));
-            display: grid; place-items: center;
+            display: grid;
+            place-items: center;
         }
-
-        /* ── Card ── */
         .auth-shell {
-            position: relative; width: min(1000px, 100%); display: grid; grid-template-columns: 1fr 0.95fr;
-            overflow: hidden; border: 1px solid rgba(255,255,255,0.11); border-radius: var(--radius-xl);
-            background: rgba(10,10,16,0.74); box-shadow: 0 40px 120px rgba(0,0,0,0.55), inset 0 1px rgba(255,255,255,0.06);
-            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-            animation: cardRise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+            position: relative;
+            width: min(1000px, 100%);
+            display: grid;
+            grid-template-columns: 1fr 0.95fr;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: var(--radius-xl);
+            background: rgba(10, 10, 16, 0.74);
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            animation: cardRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
         .auth-shell::before {
-            content: ""; position: absolute; left: -180px; bottom: -200px; width: 400px; height: 400px;
-            border-radius: 50%; background: rgba(126,102,255,0.2); filter: blur(80px); pointer-events: none;
+            content: "";
+            position: absolute;
+            left: -180px;
+            bottom: -200px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: rgba(126, 102, 255, 0.2);
+            filter: blur(80px);
+            pointer-events: none;
             animation: orbDrift 10s ease-in-out infinite;
         }
         .auth-shell::after {
-            content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-            background: linear-gradient(135deg, rgba(120,104,255,0.06) 0%, transparent 40%, transparent 60%, rgba(84,140,255,0.04) 100%);
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(120, 104, 255, 0.06) 0%, transparent 40%, transparent 60%, rgba(84, 140, 255, 0.04) 100%);
             z-index: 0;
         }
-        @keyframes orbDrift { 0%,100% { transform: translate(0,0); } 33% { transform: translate(40px,-25px); } 66% { transform: translate(-20px,20px); } }
-        @keyframes cardRise { from { opacity: 0; transform: translateY(36px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-        /* ── Intro Panel ── */
-        .intro {
-            position: relative; z-index: 1; min-height: 620px; padding: 52px 44px;
-            display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--line);
+        @keyframes orbDrift {
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+            33% {
+                transform: translate(40px, -25px);
+            }
+            66% {
+                transform: translate(-20px, 20px);
+            }
         }
-        .intro-top { display: flex; flex-direction: column; gap: 8px; }
+        @keyframes cardRise {
+            from {
+                opacity: 0;
+                transform: translateY(36px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .intro {
+            position: relative;
+            z-index: 1;
+            min-height: 620px;
+            padding: 52px 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid var(--line);
+        }
+        .intro-top {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         .eyebrow {
-            width: fit-content; padding: 8px 14px; display: flex; align-items: center; gap: 9px;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; color: #c9c8d3;
-            background: rgba(12,12,18,0.58); font-size: 12px; font-weight: 600; backdrop-filter: blur(14px);
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.08s both;
+            width: fit-content;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            color: #c9c8d3;
+            background: rgba(12, 12, 18, 0.58);
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(14px);
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
         }
         .intro h1 {
-            margin-top: 20px; font-size: clamp(50px, 6vw, 72px); line-height: 0.94; letter-spacing: -3.5px; font-weight: 600;
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.16s both;
+            margin-top: 20px;
+            font-size: clamp(50px, 6vw, 72px);
+            line-height: 0.94;
+            letter-spacing: -3.5px;
+            font-weight: 600;
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
         }
         .marker {
-            display: inline-block; font-family: "Permanent Marker", sans-serif; font-weight: 400;
-            color: transparent; background: linear-gradient(90deg, #f5f5f5, #c7c0ff 35%, #8ea7ff 65%, #d8b9ff);
-            background-clip: text; -webkit-background-clip: text; animation: shimmer 3s ease-in-out infinite; background-size: 200% 100%;
+            display: inline-block;
+            font-family: "Permanent Marker", sans-serif;
+            font-weight: 400;
+            color: transparent;
+            background: linear-gradient(90deg, #f5f5f5, #c7c0ff 35%, #8ea7ff 65%, #d8b9ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+            background-size: 200% 100%;
         }
-        @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shimmer {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         .intro p {
-            max-width: 440px; margin-top: 18px; color: var(--muted); font-size: 14px; line-height: 1.7;
-            animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.24s both;
+            max-width: 440px;
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
         }
-        .trust-row { display: flex; flex-wrap: wrap; gap: 8px; animation: fadeSlideIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.32s both; }
+        .trust-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            animation: fadeSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
+        }
         .trust-pill {
-            padding: 9px 13px; border: 1px solid var(--line); border-radius: 11px; color: #b8b7c4;
-            background: rgba(255,255,255,0.035); font-size: 11px; font-weight: 500;
+            padding: 9px 13px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            color: #b8b7c4;
+            background: rgba(255, 255, 255, 0.035);
+            font-size: 11px;
+            font-weight: 500;
             transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
         }
-        @media (hover: hover) { .trust-pill:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.18); transform: translateY(-1px); } }
-
-        /* ── Auth Panel ── */
-        .auth-panel {
-            position: relative; z-index: 1; min-height: 620px; padding: 42px 38px;
-            display: flex; align-items: center; background: linear-gradient(145deg, rgba(116,92,255,0.05), rgba(255,255,255,0.01));
+        @media (hover: hover) {
+            .trust-pill:hover {
+                background: rgba(255, 255, 255, 0.06);
+                border-color: rgba(255, 255, 255, 0.18);
+                transform: translateY(-1px);
+            }
         }
-        .auth-inner { width: 100%; max-width: 400px; margin: 0 auto; }
-
-        .auth-heading h2 { font-size: 28px; letter-spacing: -1.1px; transition: all var(--transition-smooth); }
-        .auth-heading p { margin-top: 6px; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
-
-        /* ── Tabs ── */
+        .auth-panel {
+            position: relative;
+            z-index: 1;
+            min-height: 620px;
+            padding: 42px 38px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(145deg, rgba(116, 92, 255, 0.05), rgba(255, 255, 255, 0.01));
+        }
+        .auth-inner {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .auth-heading h2 {
+            font-size: 28px;
+            letter-spacing: -1.1px;
+        }
+        .auth-heading p {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 12.5px;
+            line-height: 1.6;
+        }
         .tabs {
-            margin: 22px 0 14px; padding: 4px; display: grid; grid-template-columns: 1fr 1fr;
-            border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(255,255,255,0.025);
+            margin: 22px 0 14px;
+            padding: 4px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.025);
             position: relative;
         }
         .tabs::after {
-            content: ""; position: absolute; inset: 4px; width: calc(50% - 4px); border-radius: 12px;
-            background: linear-gradient(135deg, #ffffff, #ddd9ff); transition: transform var(--transition-spring);
-            z-index: 0; pointer-events: none; box-shadow: 0 8px 28px rgba(130,105,255,0.18);
+            content: "";
+            position: absolute;
+            inset: 4px;
+            width: calc(50% - 4px);
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            transition: transform var(--transition-spring);
+            z-index: 0;
+            pointer-events: none;
+            box-shadow: 0 8px 28px rgba(130, 105, 255, 0.18);
         }
-        .tabs.signup-active::after { transform: translateX(100%); }
+        .tabs.signup-active::after {
+            transform: translateX(100%);
+        }
         .tab {
-            position: relative; z-index: 1; min-height: 42px; border: 0; border-radius: 12px;
-            color: #8f8e9b; background: transparent; font-size: 12px; font-weight: 700;
-            cursor: pointer; transition: color var(--transition-smooth);
+            position: relative;
+            z-index: 1;
+            min-height: 42px;
+            border: 0;
+            border-radius: 12px;
+            color: #8f8e9b;
+            background: transparent;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: color var(--transition-smooth);
         }
-        .tab.active { color: #0a0910; }
-        .tab:active { transform: scale(0.96); }
-
-        /* ── Social Grid (3 cols) ── */
+        .tab.active {
+            color: #0a0910;
+        }
+        .tab:active {
+            transform: scale(0.96);
+        }
         .social-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
         }
         .oauth {
-            min-width: 0; min-height: 50px; padding: 0 8px; display: flex; align-items: center;
-            justify-content: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--radius-md);
-            background: rgba(255,255,255,0.04); font-size: 12px; font-weight: 700; cursor: pointer;
+            min-width: 0;
+            min-height: 50px;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
             transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .oauth:active { transform: scale(0.94); background: rgba(255,255,255,0.09); box-shadow: 0 0 0 8px rgba(120,104,255,0.06); }
-        @media (hover: hover) { .oauth:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.17); background: rgba(255,255,255,0.07); box-shadow: 0 8px 28px rgba(0,0,0,0.28); } }
-        .provider-icon { width: 20px; height: 20px; flex: 0 0 auto; display: grid; place-items: center; }
-        .provider-icon svg { width: 18px; height: 18px; display: block; }
-
-        /* ── Divider ── */
-        .divider {
-            margin: 12px 0; display: flex; align-items: center; gap: 12px;
-            color: #6f6e7a; font-size: 10px; text-transform: uppercase; letter-spacing: 1.3px;
+        .oauth:active {
+            transform: scale(0.94);
+            background: rgba(255, 255, 255, 0.09);
+            box-shadow: 0 0 0 8px rgba(120, 104, 255, 0.06);
         }
-        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-
-        /* ── Form ── */
-        form { display: grid; gap: 12px; }
-        .field { display: grid; gap: 6px; }
-        label { color: #c8c7d1; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
-        .input-wrap { position: relative; }
+        @media (hover: hover) {
+            .oauth:hover {
+                transform: translateY(-2px);
+                border-color: rgba(255, 255, 255, 0.17);
+                background: rgba(255, 255, 255, 0.07);
+                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+            }
+        }
+        .provider-icon {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+        }
+        .provider-icon svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+        .divider {
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #6f6e7a;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.3px;
+        }
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--line);
+        }
+        form {
+            display: grid;
+            gap: 12px;
+        }
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+        label {
+            color: #c8c7d1;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .input-wrap {
+            position: relative;
+        }
         input {
-            width: 100%; min-height: 50px; padding: 0 46px 0 15px; border: 1px solid var(--line);
-            outline: 0; border-radius: var(--radius-md); color: var(--text);
-            background: rgba(255,255,255,0.035); font-size: 13.5px;
+            width: 100%;
+            min-height: 50px;
+            padding: 0 46px 0 15px;
+            border: 1px solid var(--line);
+            outline: 0;
+            border-radius: var(--radius-md);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.035);
+            font-size: 13.5px;
             transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
         }
-        input::placeholder { color: #686774; }
-        input:focus { border-color: rgba(142,126,255,0.7); background: rgba(255,255,255,0.05); box-shadow: 0 0 0 5px rgba(120,104,255,0.09); }
-        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 50px #0f0f17 inset; -webkit-text-fill-color: #f7f7fb; caret-color: #f7f7fb; }
+        input::placeholder {
+            color: #686774;
+        }
+        input:focus {
+            border-color: rgba(142, 126, 255, 0.7);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 5px rgba(120, 104, 255, 0.09);
+        }
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 50px #0f0f17 inset;
+            -webkit-text-fill-color: #f7f7fb;
+            caret-color: #f7f7fb;
+        }
         .input-icon {
-            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-            color: #777684; pointer-events: none; font-size: 13px; transition: color var(--transition-fast);
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777684;
+            pointer-events: none;
+            font-size: 13px;
+            transition: color var(--transition-fast);
         }
-        input:focus~.input-icon { color: #a99cff; }
+        input:focus~.input-icon {
+            color: #a99cff;
+        }
         .password-toggle {
-            position: absolute; right: 6px; top: 50%; width: 36px; height: 36px;
-            transform: translateY(-50%); border: 0; border-radius: 10px; color: #8c8b98;
-            background: transparent; cursor: pointer; font-size: 13px;
-            transition: background var(--transition-fast), color var(--transition-fast); z-index: 2;
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            width: 36px;
+            height: 36px;
+            transform: translateY(-50%);
+            border: 0;
+            border-radius: 10px;
+            color: #8c8b98;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background var(--transition-fast), color var(--transition-fast);
+            z-index: 2;
         }
-        .password-toggle:active { background: rgba(255,255,255,0.08); color: #c7c0ff; }
-        @media (hover: hover) { .password-toggle:hover { background: rgba(255,255,255,0.05); } }
-        .form-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 11px; }
-        .remember { display: flex; align-items: center; gap: 8px; color: #aaa9b6; cursor: pointer; }
-        .remember input { width: 16px; min-height: 16px; accent-color: var(--purple); cursor: pointer; border-radius: 4px; padding: 0; }
-        .forgot { color: #a99cff; font-weight: 500; transition: color var(--transition-fast); }
-        .forgot:active { color: #c7c0ff; }
-        @media (hover: hover) { .forgot:hover { color: #c7c0ff; text-decoration: underline; } }
+        .password-toggle:active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #c7c0ff;
+        }
+        @media (hover: hover) {
+            .password-toggle:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+        }
+        .form-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            font-size: 11px;
+        }
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa9b6;
+            cursor: pointer;
+        }
+        .remember input {
+            width: 16px;
+            min-height: 16px;
+            accent-color: var(--purple);
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 0;
+        }
+        .forgot {
+            color: #a99cff;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+        }
+        .forgot:active {
+            color: #c7c0ff;
+        }
+        @media (hover: hover) {
+            .forgot:hover {
+                color: #c7c0ff;
+                text-decoration: underline;
+            }
+        }
         .submit {
-            width: 100%; min-height: 50px; border: 0; border-radius: var(--radius-md);
-            color: #0a0910; background: linear-gradient(135deg, #ffffff, #ddd9ff);
-            box-shadow: 0 12px 40px rgba(130,105,255,0.2); font-size: 13px; font-weight: 800;
-            letter-spacing: 0.2px; cursor: pointer;
+            width: 100%;
+            min-height: 50px;
+            border: 0;
+            border-radius: var(--radius-md);
+            color: #0a0910;
+            background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            box-shadow: 0 12px 40px rgba(130, 105, 255, 0.2);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            cursor: pointer;
             transition: transform var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .submit:active { transform: scale(0.95); box-shadow: 0 8px 28px rgba(130,105,255,0.35); }
-        @media (hover: hover) { .submit:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 18px 48px rgba(130,105,255,0.3); } }
-
-        /* ── Terms ── */
-        .terms {
-            margin-top: 12px; color: #73727d; font-size: 10px; line-height: 1.6; text-align: center;
+        .submit:active {
+            transform: scale(0.95);
+            box-shadow: 0 8px 28px rgba(130, 105, 255, 0.35);
         }
-        .terms a { color: #a99cff; font-weight: 500; }
-        .terms a:active { color: #c7c0ff; }
-
-        .hidden { display: none !important; }
-
-        /* ── Toast ── */
+        @media (hover: hover) {
+            .submit:hover:not(:disabled) {
+                transform: translateY(-3px);
+                box-shadow: 0 18px 48px rgba(130, 105, 255, 0.3);
+            }
+        }
+        .terms {
+            margin-top: 12px;
+            color: #73727d;
+            font-size: 10px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .terms a {
+            color: #a99cff;
+            font-weight: 500;
+        }
+        .terms a:active {
+            color: #c7c0ff;
+        }
+        .hidden {
+            display: none !important;
+        }
         .toast {
-            position: fixed; left: 50%; bottom: calc(28px + var(--safe-bottom)); z-index: 300;
-            width: fit-content; max-width: calc(100% - 28px); padding: 12px 18px;
-            transform: translate(-50%, 30px); border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 14px; color: #d9d8e2; background: rgba(14,14,22,0.94);
-            box-shadow: 0 16px 48px rgba(0,0,0,0.45); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px); font-size: 12px; text-align: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            position: fixed;
+            left: 50%;
+            bottom: calc(28px + var(--safe-bottom));
+            z-index: 300;
+            width: fit-content;
+            max-width: calc(100% - 28px);
+            padding: 12px 18px;
+            transform: translate(-50%, 30px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            color: #d9d8e2;
+            background: rgba(14, 14, 22, 0.94);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            font-size: 12px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             touch-action: pan-y;
         }
-        .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
-        .toast.error { color: #ffd7dd; border-color: rgba(255,123,139,0.25); background: rgba(45,14,22,0.94); }
-        .toast.swiping { transition: none; }
-
-        .spinner {
-            width: 16px; height: 16px; display: inline-block; border: 2px solid rgba(0,0,0,0.18);
-            border-top-color: #09090d; border-radius: 50%; animation: spin 0.65s linear infinite;
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+            pointer-events: auto;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── New additions: validation, strength, skeleton, verification ── */
-        .field .error-message { font-size: 10px; color: #ff8a9a; min-height: 16px; margin-top: 2px; }
-        .password-strength { margin-top: 4px; }
+        .toast.error {
+            color: #ffd7dd;
+            border-color: rgba(255, 123, 139, 0.25);
+            background: rgba(45, 14, 22, 0.94);
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            border: 2px solid rgba(0, 0, 0, 0.18);
+            border-top-color: #09090d;
+            border-radius: 50%;
+            animation: spin 0.65s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .field .error-message {
+            font-size: 10px;
+            color: #ff8a9a;
+            min-height: 16px;
+            margin-top: 2px;
+        }
+        .password-strength {
+            margin-top: 4px;
+        }
         .strength-bar {
-            width: 100%; height: 4px; background: rgba(255,255,255,0.1);
-            border-radius: 4px; overflow: hidden; margin-bottom: 3px;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 3px;
         }
         .strength-fill {
-            height: 100%; width: 0%; border-radius: 4px;
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
             transition: width 0.25s, background 0.25s;
         }
-        .strength-label { font-size: 10px; color: #a5a5b5; }
-
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.05) 75%);
-            background-size: 200% 100%; animation: shimmerSkel 1.5s infinite; border-radius: 8px;
+        .strength-label {
+            font-size: 10px;
+            color: #a5a5b5;
         }
-        @keyframes shimmerSkel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmerSkel 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmerSkel {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
         .verification-screen {
-            display: none; flex-direction: column; align-items: center; gap: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
             padding: 30px 20px;
         }
-        .verification-screen.active { display: flex; }
-        .verification-screen h2 { font-size: 24px; }
-        .verification-screen p { color: var(--muted); font-size: 13px; text-align: center; }
-
+        .verification-screen h2 {
+            font-size: 24px;
+        }
+        .verification-screen p {
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
         .inline-resend {
-            margin-top: 6px; color: #a99cff; font-size: 11px; cursor: pointer;
+            margin-top: 6px;
+            color: #a99cff;
+            font-size: 11px;
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
         }
-
-        /* ── Modal ── */
+        .inline-resend.cooldown {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .inline-resend:active {
+            color: #c7c0ff;
+        }
+        .verify-btn {
+            width: fit-content;
+            padding: 10px 24px;
+        }
         .modal-overlay {
-            position: fixed; inset: 0; z-index: 200; display: flex; align-items: center;
-            justify-content: center; padding: 20px; background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
         }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
         .modal-card {
-            width: 100%; max-width: 420px; padding: 32px 28px 28px; border-radius: var(--radius-xl);
-            background: rgba(16,16,26,0.85); border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.5); transform: translateY(20px) scale(0.97);
-            transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+            width: 100%;
+            max-width: 420px;
+            padding: 32px 28px 28px;
+            border-radius: var(--radius-xl);
+            background: rgba(16, 16, 26, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px) scale(0.97);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .modal-overlay.active .modal-card { transform: translateY(0) scale(1); }
-        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .modal-header h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+        .modal-overlay.active .modal-card {
+            transform: translateY(0) scale(1);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
         .modal-close {
-            width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line);
-            border-radius: 12px; background: rgba(255,255,255,0.04); font-size: 18px;
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 18px;
             transition: background var(--transition-fast);
         }
-        .modal-close:active { background: rgba(255,255,255,0.1); }
-        .step-container { display: none; flex-direction: column; gap: 16px; }
-        .step-container.active { display: flex; }
-        .step-desc { color: var(--muted); font-size: 13px; line-height: 1.5; }
-        .modal-error { color: #ff8a9a; font-size: 12px; min-height: 18px; }
+        .modal-close:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .step-container {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .step-container.active {
+            display: flex;
+        }
+        .step-desc {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .modal-error {
+            color: #ff8a9a;
+            font-size: 12px;
+            min-height: 18px;
+        }
         .modal-btn {
-            width: 100%; min-height: 48px; border: 0; border-radius: var(--radius-md);
-            font-weight: 700; font-size: 13px; cursor: pointer;
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
             transition: transform var(--transition-fast), box-shadow var(--transition-fast);
         }
-        .modal-btn:active { transform: scale(0.96); }
-        .modal-btn.primary {
-            background: linear-gradient(135deg, #ffffff, #ddd9ff); color: #0a0910;
-            box-shadow: 0 10px 30px rgba(130,105,255,0.25);
+        .modal-btn:active {
+            transform: scale(0.96);
         }
-        .modal-btn.primary:disabled { opacity: 0.5; pointer-events: none; }
-
-        /* ── Responsive ── */
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #ffffff, #ddd9ff);
+            color: #0a0910;
+            box-shadow: 0 10px 30px rgba(130, 105, 255, 0.25);
+        }
+        .modal-btn.primary:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-muted {
+            color: var(--muted);
+        }
         @media (max-width: 820px) {
             .topbar {
                 top: calc(10px + var(--safe-top));
                 width: calc(100% - 18px - var(--safe-left) - var(--safe-right));
-                height: 60px; padding: 0 10px; border-radius: 18px;
+                height: 60px;
+                padding: 0 10px;
+                border-radius: 18px;
             }
-            .back-button { width: 40px; height: 40px; border-radius: 12px; font-size: 16px; }
-            .top-status span:last-child { display: none; }
-            .logo { font-size: 17px; gap: 7px; }
-            .brand-icon { width: 28px; height: 28px; }
-            main { padding: calc(88px + var(--safe-top)) 8px calc(16px + var(--safe-bottom)); align-items: start; }
+            .back-button {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                font-size: 16px;
+            }
+            .top-status span:last-child {
+                display: none;
+            }
+            .logo {
+                font-size: 17px;
+                gap: 7px;
+            }
+            .brand-icon {
+                width: 28px;
+                height: 28px;
+            }
+            main {
+                padding: calc(88px + var(--safe-top)) 8px calc(16px + var(--safe-bottom));
+                align-items: start;
+            }
             .auth-shell {
-                width: min(540px, 100%); grid-template-columns: 1fr; border-radius: 26px;
-                animation: cardRiseMobile 0.55s cubic-bezier(0.22,1,0.36,1) both;
+                width: min(540px, 100%);
+                grid-template-columns: 1fr;
+                border-radius: 26px;
+                animation: cardRiseMobile 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
             }
-            @keyframes cardRiseMobile { from { opacity: 0; transform: translateY(40px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            @keyframes cardRiseMobile {
+                from {
+                    opacity: 0;
+                    transform: translateY(40px) scale(0.96);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
             .intro {
-                min-height: auto; padding: 28px 22px 20px; border-right: 0;
-                border-bottom: 1px solid var(--line); gap: 14px;
+                min-height: auto;
+                padding: 28px 22px 20px;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+                gap: 14px;
             }
-            .intro h1 { margin-top: 14px; font-size: clamp(40px, 13vw, 58px); letter-spacing: -2.5px; }
-            .intro p { font-size: 12px; margin-top: 10px; max-width: 100%; }
-            .trust-row { margin-top: 12px; gap: 6px; }
-            .trust-pill { font-size: 10px; padding: 7px 10px; border-radius: 9px; }
-            .auth-panel { min-height: auto; padding: 26px 22px 30px; }
-            .auth-inner { max-width: 100%; }
-            .social-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-            .oauth { min-height: 46px; font-size: 11px; border-radius: 14px; }
+            .intro h1 {
+                margin-top: 14px;
+                font-size: clamp(40px, 13vw, 58px);
+                letter-spacing: -2.5px;
+            }
+            .intro p {
+                font-size: 12px;
+                margin-top: 10px;
+                max-width: 100%;
+            }
+            .trust-row {
+                margin-top: 12px;
+                gap: 6px;
+            }
+            .trust-pill {
+                font-size: 10px;
+                padding: 7px 10px;
+                border-radius: 9px;
+            }
+            .auth-panel {
+                min-height: auto;
+                padding: 26px 22px 30px;
+            }
+            .auth-inner {
+                max-width: 100%;
+            }
+            .social-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 8px;
+            }
+            .oauth {
+                min-height: 46px;
+                font-size: 11px;
+                border-radius: 14px;
+            }
         }
-
         @media (max-width: 480px) {
-            .social-grid { grid-template-columns: 1fr 1fr; }
-            .oauth:nth-child(3) { grid-column: span 2; }
+            .social-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .oauth:nth-child(3) {
+                grid-column: span 2;
+            }
         }
     </style>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
 </head>
 <body>
     <canvas id="bendCanvas"></canvas>
@@ -438,7 +1020,6 @@
     <div class="noise"></div>
     <div class="glow-orb" id="glowOrb" aria-hidden="true"></div>
 
-    <!-- SKELETON LOADER -->
     <div id="skeletonLoader" style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:#060609;">
         <div style="display:flex;flex-direction:column;gap:16px;width:320px;">
             <div class="skeleton" style="height:20px;width:70%"></div>
@@ -449,7 +1030,6 @@
         </div>
     </div>
 
-    <!-- NAV -->
     <header class="topbar" id="topbar">
         <a class="back-button" href="index.html" aria-label="Back to Horizon">←</a>
         <a class="logo" href="index.html" aria-label="Horizon.AI home">
@@ -462,10 +1042,8 @@
         </div>
     </header>
 
-    <!-- AUTH -->
-    <main>
+    <main x-data="authPage()" x-init="init()">
         <section class="auth-shell">
-            <!-- INTRO -->
             <div class="intro">
                 <div class="intro-top">
                     <div class="eyebrow">
@@ -482,704 +1060,552 @@
                 </div>
             </div>
 
-            <!-- AUTH PANEL -->
-            <div class="auth-panel" id="authPanel">
-                <div class="auth-inner" id="authFormContainer">
+            <div class="auth-panel">
+                <div class="auth-inner" x-show="!verificationScreen">
                     <div class="auth-heading">
-                        <h2 id="authTitle">Welcome back.</h2>
-                        <p id="authSubtitle">Pick up where you left off.</p>
+                        <h2 x-text="mode === 'login' ? 'Welcome back.' : 'Create your account.'"></h2>
+                        <p x-text="mode === 'login' ? 'Pick up where you left off.' : 'One account, every model.'"></p>
                     </div>
 
-                    <!-- TABS -->
-                    <div class="tabs" id="tabContainer" role="tablist">
-                        <button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true">Sign in</button>
-                        <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Create account</button>
+                    <div class="tabs" :class="{ 'signup-active': mode === 'signup' }">
+                        <button class="tab" :class="{ active: mode === 'login' }" @click="setMode('login')" type="button">Sign in</button>
+                        <button class="tab" :class="{ active: mode === 'signup' }" @click="setMode('signup')" type="button">Create account</button>
                     </div>
 
-                    <!-- SOCIAL + GUEST -->
                     <div class="social-grid">
-                        <button class="oauth" id="googleButton" type="button">
+                        <button class="oauth" @click="auth.google()" :disabled="loading.any" type="button">
                             <span class="provider-icon">
                                 <svg viewBox="0 0 24 24"><path fill="#fff" d="M21.35 12.2c0-.71-.06-1.4-.18-2.07H12v3.91h5.24a4.48 4.48 0 0 1-1.94 2.94v2.54h3.14c1.84-1.69 2.91-4.19 2.91-7.32Z"/><path fill="#fff" opacity=".8" d="M12 21.72c2.63 0 4.84-.87 6.45-2.36l-3.14-2.54c-.87.58-1.99.93-3.31.93-2.54 0-4.69-1.71-5.46-4.01H3.29v2.62A9.74 9.74 0 0 0 12 21.72Z"/><path fill="#fff" opacity=".65" d="M6.54 13.74A5.85 5.85 0 0 1 6.23 12c0-.61.11-1.2.31-1.74V7.64H3.29A9.73 9.73 0 0 0 2.28 12c0 1.57.38 3.06 1.01 4.36l3.25-2.62Z"/><path fill="#fff" opacity=".5" d="M12 6.25c1.43 0 2.71.49 3.72 1.45l2.79-2.79A9.35 9.35 0 0 0 12 2.28a9.74 9.74 0 0 0-8.71 5.36l3.25 2.62C7.31 7.96 9.46 6.25 12 6.25Z"/></svg>
                             </span>
-                            <span class="btn-text">Google</span>
+                            <span class="btn-text" x-text="loading.google ? 'Google...' : 'Google'"></span>
                         </button>
-                        <button class="oauth" id="githubButton" type="button">
+                        <button class="oauth" @click="auth.github()" :disabled="loading.any" type="button">
                             <span class="provider-icon">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.75 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
                             </span>
-                            <span class="btn-text">GitHub</span>
+                            <span class="btn-text" x-text="loading.github ? 'GitHub...' : 'GitHub'"></span>
                         </button>
-                        <button class="oauth" id="guestButton" type="button">
-                            <span class="provider-icon">◌</span>
-                            <span class="btn-text">Guest</span>
+                        <!-- Guest button now uses the component method -->
+                        <button class="oauth" @click="handleGuest()" :disabled="loading.any" type="button">
+                            <span class="provider-icon">
+                                <!-- Clean guest icon (SVG silhouette) -->
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            </span>
+                            <span class="btn-text" x-text="loading.guest ? 'Guest...' : 'Guest'"></span>
                         </button>
                     </div>
 
                     <div class="divider">or use email</div>
 
-                    <!-- FORM -->
-                    <form id="authForm" novalidate>
-                        <div class="field hidden" id="nameField">
+                    <form @submit.prevent="handleEmailAuth">
+                        <div class="field" x-show="mode === 'signup'">
                             <label for="name">Name</label>
                             <div class="input-wrap">
-                                <input id="name" type="text" autocomplete="name" placeholder="Ace Yash" />
+                                <input id="name" type="text" autocomplete="name" placeholder="Ace Yash" x-model="name" @blur="validate('name')" @input="name = name.replace(/\s{2,}/g, ' ')" />
                                 <span class="input-icon">✦</span>
                             </div>
-                            <div class="error-message" id="nameError"></div>
+                            <div class="error-message" x-text="errors.name" x-show="errors.name"></div>
                         </div>
                         <div class="field">
                             <label for="email">Email</label>
                             <div class="input-wrap">
-                                <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                                <input id="email" type="email" autocomplete="email" placeholder="you@example.com" x-model="email" @blur="validate('email')" @input="email = email.trim()" required />
                                 <span class="input-icon">↗</span>
                             </div>
-                            <div class="error-message" id="emailError"></div>
+                            <div class="error-message" x-text="errors.email" x-show="errors.email"></div>
                         </div>
                         <div class="field">
                             <label for="password">Password</label>
                             <div class="input-wrap">
-                                <input id="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="6" required />
-                                <button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password">◉</button>
+                                <input :type="showPassword ? 'text' : 'password'" autocomplete="current-password" placeholder="Enter your password" minlength="6" x-model="password" @blur="validate('password')" required />
+                                <button class="password-toggle" type="button" @click="showPassword = !showPassword" x-text="showPassword ? '◎' : '◉'"></button>
                             </div>
-                            <div class="password-strength hidden" id="passwordStrengthMeter">
-                                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-                                <span class="strength-label" id="strengthLabel"></span>
+                            <div class="password-strength" x-show="mode === 'signup'">
+                                <div class="strength-bar"><div class="strength-fill" :style="`width:${strength.percent}%; background:${strength.color}`"></div></div>
+                                <span class="strength-label" x-text="strength.label"></span>
                             </div>
-                            <div class="error-message" id="passwordError"></div>
+                            <div class="error-message" x-text="errors.password" x-show="errors.password"></div>
                         </div>
-                        <div class="field hidden" id="confirmField">
+                        <div class="field" x-show="mode === 'signup'">
                             <label for="confirmPassword">Confirm Password</label>
                             <div class="input-wrap">
-                                <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat password" minlength="6" />
+                                <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat password" x-model="confirmPassword" @blur="validate('confirm')" />
                                 <span class="input-icon">✓</span>
                             </div>
-                            <div class="error-message" id="confirmError"></div>
+                            <div class="error-message" x-text="errors.confirm" x-show="errors.confirm"></div>
                         </div>
-                        <div class="form-meta" id="loginMeta">
+                        <div class="form-meta" x-show="mode === 'login'">
                             <label class="remember">
-                                <input type="checkbox" id="remember" />Remember me
+                                <input type="checkbox" x-model="rememberMe" /> Remember me
                             </label>
-                            <a class="forgot" href="#" id="forgotLink">Forgot password?</a>
+                            <a class="forgot" href="#" @click.prevent="forgotOpen = true">Forgot password?</a>
                         </div>
-                        <button class="submit" id="submitButton" type="submit">Enter Horizon →</button>
+                        <button class="submit" type="submit" :disabled="loading.email">
+                            <span x-show="!loading.email" x-text="mode === 'signup' ? 'Create account →' : 'Enter Horizon →'"></span>
+                            <span x-show="loading.email"><span class="spinner"></span> <span x-text="mode === 'signup' ? 'Creating account...' : 'Signing in...'"></span></span>
+                        </button>
                     </form>
 
-                    <p class="terms">By continuing, you agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+                    <p class="terms">By continuing, you agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>.</p>
                 </div>
 
-                <!-- Email Verification Screen -->
-                <div class="verification-screen" id="verificationScreen">
+                <div class="verification-screen" x-show="verificationScreen">
                     <h2>Verify your email</h2>
-                    <p>We've sent a verification link to <strong id="verifyEmailDisplay"></strong>.<br>Check your inbox and click the link, then continue.</p>
-                    <button class="submit" id="checkVerificationBtn" style="width:fit-content;padding:10px 24px;">I've verified</button>
-                    <span class="inline-resend" id="resendVerificationBtn">Resend email</span>
-                    <p style="color:var(--muted);font-size:11px;">Wrong email? <a href="#" id="changeEmailLink" style="color:#a99cff;">Change it</a></p>
-                    <div class="error-message" id="verificationError"></div>
+                    <p>We've sent a verification link to <strong x-text="email"></strong>.<br>Check your inbox and click the link, then continue.</p>
+                    <button class="submit verify-btn" @click="checkVerification()">I've verified</button>
+                    <span class="inline-resend" :class="{ cooldown: resendCooldown > 0 }" @click="resendVerification()">
+                        <span x-show="resendCooldown === 0">Resend email</span>
+                        <span x-show="resendCooldown > 0" x-text="`Resend in ${resendCooldown}s`"></span>
+                    </span>
+                    <p class="text-muted" style="font-size:11px;">Wrong email? <a href="#" @click.prevent="changeEmailFromVerification()" style="color:#a99cff;">Change it</a></p>
+                    <div class="error-message" x-text="verificationError" x-show="verificationError"></div>
                 </div>
             </div>
         </section>
-    </main>
 
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <div class="toast" :class="{ show: toast.show, error: toast.error }" x-text="toast.message" x-show="toast.show"></div>
 
-    <!-- FORGOT PASSWORD MODAL -->
-    <div class="modal-overlay" id="forgotPasswordModal" role="dialog" aria-modal="true">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="modalTitle">Reset password</h3>
-                <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
-            </div>
-            <div class="step-container active" id="stepEmail">
-                <p class="step-desc">Enter your email and we'll send a secure reset link.</p>
-                <div class="field">
-                    <label for="resetEmail">Email</label>
-                    <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email" />
-                    <div class="error-message" id="resetEmailError"></div>
+        <div class="modal-overlay" :class="{ active: forgotOpen }" @click.self="forgotOpen = false">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Reset password</h3>
+                    <button class="modal-close" @click="forgotOpen = false">✕</button>
                 </div>
-                <button class="modal-btn primary" id="sendResetLinkBtn">Send Reset Link</button>
-            </div>
-            <div class="step-container" id="stepSuccess">
-                <p style="text-align:center; font-size:15px;">📨 Check your inbox</p>
-                <p style="text-align:center; color:var(--muted); font-size:12px;">Didn't receive it? <a href="#" id="resendInModal" style="color:#a99cff;">Resend</a> or <a href="#" id="changeEmailInModal" style="color:#a99cff;">change email</a></p>
-                <div class="error-message" id="modalSuccessError" style="text-align:center;"></div>
+                <div class="step-container" :class="{ active: !forgotSent }">
+                    <p class="step-desc">Enter your email and we'll send a secure reset link.</p>
+                    <div class="field">
+                        <label for="resetEmail">Email</label>
+                        <input type="email" id="resetEmail" placeholder="you@example.com" x-model="resetEmail" @blur="validateResetEmail()" @input="resetEmail = resetEmail.trim()" />
+                        <div class="error-message" x-text="resetEmailError" x-show="resetEmailError"></div>
+                    </div>
+                    <button class="modal-btn primary" @click="sendResetLink()" :disabled="sendingReset">
+                        <span x-show="!sendingReset">Send Reset Link</span>
+                        <span x-show="sendingReset"><span class="spinner"></span> Sending...</span>
+                    </button>
+                </div>
+                <div class="step-container" :class="{ active: forgotSent }">
+                    <p class="text-center" style="font-size:15px;">📨 Check your inbox</p>
+                    <p class="text-center text-muted" style="font-size:12px;">Didn't receive it? <a href="#" @click.prevent="sendResetLink()" style="color:#a99cff;">Resend</a> or <a href="#" @click.prevent="forgotSent = false" style="color:#a99cff;">change email</a></p>
+                    <div class="error-message text-center" x-text="resetEmailError" x-show="resetEmailError"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- FIREBASE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
-        import {
-            getAuth,
-            signInWithPopup,
-            GoogleAuthProvider,
-            GithubAuthProvider,
-            onAuthStateChanged,
-            signInWithEmailAndPassword,
-            createUserWithEmailAndPassword,
-            signInAnonymously,
-            updateProfile,
-            sendPasswordResetEmail,
-            sendEmailVerification,
-            browserLocalPersistence,
-            browserSessionPersistence,
-            setPersistence,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    <script>
+        (function() {
+            const supabaseUrl = 'https://ytrxzjknmfyrifcdupbc.supabase.co';
+            const supabaseAnonKey = 'sb_publishable_MhUiaPay9WMQyGNKSVZb5Q_kucCQGnk';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAvg0MRndHXMLjhrJIukBRjzZ4ztRcEhfQ",
-            authDomain: "ace-horizon.firebaseapp.com",
-            projectId: "ace-horizon",
-            storageBucket: "ace-horizon.firebasestorage.app",
-            messagingSenderId: "1017523773217",
-            appId: "1:1017523773217:web:dbd7f5aa31f234d32aa860",
-            measurementId: "G-8TF3HYRPK6"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        let analytics = null;
-        try { analytics = getAnalytics(app); } catch (_) {}
-
-        // ── DOM Elements ──
-        const loginTab = document.getElementById("loginTab");
-        const signupTab = document.getElementById("signupTab");
-        const tabContainer = document.getElementById("tabContainer");
-        const nameField = document.getElementById("nameField");
-        const nameInput = document.getElementById("name");
-        const emailInput = document.getElementById("email");
-        const passwordInput = document.getElementById("password");
-        const confirmField = document.getElementById("confirmField");
-        const confirmInput = document.getElementById("confirmPassword");
-        const passwordToggle = document.getElementById("passwordToggle");
-        const loginMeta = document.getElementById("loginMeta");
-        const authTitle = document.getElementById("authTitle");
-        const authSubtitle = document.getElementById("authSubtitle");
-        const submitButton = document.getElementById("submitButton");
-        const authForm = document.getElementById("authForm");
-        const googleButton = document.getElementById("googleButton");
-        const githubButton = document.getElementById("githubButton");
-        const guestButton = document.getElementById("guestButton");
-        const toast = document.getElementById("toast");
-        const glowOrb = document.getElementById("glowOrb");
-        const topbar = document.getElementById("topbar");
-        const authFormContainer = document.getElementById("authFormContainer");
-        const verificationScreen = document.getElementById("verificationScreen");
-        const verifyEmailDisplay = document.getElementById("verifyEmailDisplay");
-        const checkVerificationBtn = document.getElementById("checkVerificationBtn");
-        const resendVerificationBtn = document.getElementById("resendVerificationBtn");
-        const changeEmailLink = document.getElementById("changeEmailLink");
-        const verificationError = document.getElementById("verificationError");
-        const skeletonLoader = document.getElementById("skeletonLoader");
-        const strengthMeter = document.getElementById("passwordStrengthMeter");
-        const strengthFill = document.getElementById("strengthFill");
-        const strengthLabel = document.getElementById("strengthLabel");
-        const nameError = document.getElementById("nameError");
-        const emailError = document.getElementById("emailError");
-        const passwordError = document.getElementById("passwordError");
-        const confirmError = document.getElementById("confirmError");
-
-        let mode = "login";
-        let loading = false;
-        let toastTimer;
-        let failedAttempts = 0;
-        let lockTimer = null;
-        let lockedUntil = 0;
-        let offlineMode = false;
-
-        // ── Utility ──
-        function showToast(message, type = "normal") {
-            clearTimeout(toastTimer);
-            toast.textContent = message;
-            toast.classList.toggle("error", type === "error");
-            toast.classList.add("show");
-            toast.style.transform = "translate(-50%, 0)";
-            toast.style.opacity = "1";
-            toastTimer = setTimeout(() => toast.classList.remove("show"), 3500);
-        }
-
-        function track(eventName, params = {}) {
-            if (!analytics) return;
-            try { logEvent(analytics, eventName, params); } catch (error) { console.warn("Analytics event failed:", error); }
-        }
-
-        function clearAllErrors() {
-            nameError.textContent = emailError.textContent = passwordError.textContent = confirmError.textContent = "";
-        }
-
-        function setLoadingState(source, isLoading, message = "") {
-            loading = isLoading;
-            const buttons = { submit: submitButton, google: googleButton, github: githubButton, guest: guestButton };
-            if (source === "submit") {
-                submitButton.disabled = isLoading || offlineMode || isLocked();
-                submitButton.innerHTML = isLoading ? `<span class="spinner"></span> ${message}` : (mode === "signup" ? "Create account →" : "Enter Horizon →");
-            } else if (buttons[source]) {
-                buttons[source].disabled = isLoading || offlineMode || isLocked();
-                if (isLoading) {
-                    buttons[source].querySelector('.btn-text').textContent = message;
-                } else {
-                    buttons[source].querySelector('.btn-text').textContent = buttons[source].dataset.original;
-                }
-            }
-        }
-
-        googleButton.dataset.original = "Google";
-        githubButton.dataset.original = "GitHub";
-        guestButton.dataset.original = "Guest";
-
-        function isLocked() {
-            return Date.now() < lockedUntil;
-        }
-
-        function startRateLimitLock() {
-            lockedUntil = Date.now() + 30000;
-            submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = true;
-            if (lockTimer) clearTimeout(lockTimer);
-            lockTimer = setTimeout(() => {
-                failedAttempts = 0;
-                lockedUntil = 0;
-                submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
-                showToast("You can try again now.");
-            }, 30000);
-        }
-
-        function incrementFailedAttempt() {
-            failedAttempts++;
-            if (failedAttempts >= 5) {
-                startRateLimitLock();
-                showToast("Too many failed attempts. Locked for 30 seconds.", "error");
-            }
-        }
-
-        function resetFailedAttempts() {
-            failedAttempts = 0;
-            lockedUntil = 0;
-            if (lockTimer) clearTimeout(lockTimer);
-            submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
-        }
-
-        // ── Validation ──
-        function validateField(field, value, errorEl, rules) {
-            errorEl.textContent = "";
-            if (rules.required && !value.trim()) {
-                errorEl.textContent = rules.requiredMsg || "This field is required.";
-                return false;
-            }
-            if (rules.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                errorEl.textContent = "Enter a valid email.";
-                return false;
-            }
-            if (rules.minLength && value.length < rules.minLength) {
-                errorEl.textContent = `Must be at least ${rules.minLength} characters.`;
-                return false;
-            }
-            if (rules.match && value !== rules.match.value) {
-                errorEl.textContent = rules.match.msg || "Passwords don't match.";
-                return false;
-            }
-            return true;
-        }
-
-        function validateForm() {
-            let valid = true;
-            const isSignup = mode === "signup";
-            if (isSignup) {
-                valid = validateField(nameInput, nameInput.value, nameError, { required: true, requiredMsg: "Name can't be empty." }) && valid;
-            }
-            valid = validateField(emailInput, emailInput.value, emailError, { required: true, email: true }) && valid;
-            valid = validateField(passwordInput, passwordInput.value, passwordError, { required: true, minLength: 6 }) && valid;
-            if (isSignup) {
-                valid = validateField(confirmInput, confirmInput.value, confirmError, { required: true, match: { value: passwordInput.value, msg: "Passwords don't match." } }) && valid;
-            }
-            return valid;
-        }
-
-        function updatePasswordStrength() {
-            if (mode !== "signup") {
-                strengthMeter.classList.add("hidden");
-                return;
-            }
-            strengthMeter.classList.remove("hidden");
-            const val = passwordInput.value;
-            let score = 0;
-            if (val.length >= 6) score++;
-            if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
-            if (/\d/.test(val)) score++;
-            if (/[^a-zA-Z0-9]/.test(val)) score++;
-            const percent = (score / 4) * 100;
-            strengthFill.style.width = percent + "%";
-            const labels = ["Weak", "Fair", "Good", "Strong"];
-            const colors = ["#ff4d6a", "#ffb347", "#b8d64b", "#4caf50"];
-            strengthLabel.textContent = labels[score - 1] || "Weak";
-            strengthFill.style.background = colors[score - 1] || colors[0];
-        }
-
-        // ── Persistence ──
-        async function applyPersistence() {
-            const remember = document.getElementById("remember").checked;
-            try {
-                await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
-            } catch (error) {
-                console.warn("Persistence error:", error);
-            }
-        }
-
-        // ── Email Verification ──
-        function showVerificationScreen(email) {
-            authFormContainer.style.display = "none";
-            verificationScreen.classList.add("active");
-            verifyEmailDisplay.textContent = email;
-        }
-
-        function hideVerificationScreen() {
-            verificationScreen.classList.remove("active");
-            authFormContainer.style.display = "";
-        }
-
-        async function checkEmailVerification() {
-            try {
-                await auth.currentUser.reload();
-                return auth.currentUser.emailVerified;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        // ── Redirect ──
-        function redirectToApp() {
-            document.body.classList.add("fade-out");
-            setTimeout(() => { location.replace("app.html"); }, 200);
-        }
-
-        // ── Auto‑switch after signup ──
-        async function handleEmailSignup(email, password, name) {
-            const result = await createUserWithEmailAndPassword(auth, email, password);
-            if (name) await updateProfile(result.user, { displayName: name });
-            await sendEmailVerification(result.user, { url: "https://horizon-llm.vercel.app/verify.html" });
-            await saveUser(result.user, "email");
-            track("sign_up", { method: "email" });
-            showToast("Account created. Verify your email to continue.");
-            showVerificationScreen(email);
-            pollVerification(result.user);
-        }
-
-        function pollVerification(user) {
-            const interval = setInterval(async () => {
-                try {
-                    await user.reload();
-                    if (user.emailVerified) {
-                        clearInterval(interval);
-                        showToast("Email verified! Signing you in...");
-                        setTimeout(redirectToApp, 600);
-                    }
-                } catch (e) { /* ignore */ }
-            }, 3000);
-        }
-
-        // ── Save user ──
-        async function saveUser(user, provider) {
-            if (!user) return;
-            try {
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    name: user.displayName || nameInput.value.trim() || "Horizon User",
-                    email: user.email || null,
-                    photoURL: user.photoURL || null,
+            async function saveUserProfile(userId, { name, email, avatar_url, provider, is_guest } = {}) {
+                const { error } = await supabase.from('profiles').upsert({
+                    id: userId,
+                    name: name || email || 'Horizon User',
+                    email,
+                    avatar_url,
                     provider,
-                    isGuest: user.isAnonymous,
-                    lastLoginAt: serverTimestamp()
-                }, { merge: true });
-            } catch (error) { console.error("Failed to save user:", error); }
-        }
-
-        // ── Social / Guest handlers ──
-        async function handleSocialLogin(provider, providerName) {
-            if (loading || offlineMode || isLocked()) return;
-            setLoadingState(providerName, true, `Connecting ${providerName}...`);
-            try {
-                const result = await signInWithPopup(auth, provider);
-                await saveUser(result.user, providerName);
-                resetFailedAttempts();
-                track("login", { method: providerName });
-                showToast(`👋 Welcome, ${result.user.displayName || ''}`);
-                redirectToApp();
-            } catch (error) {
-                incrementFailedAttempt();
-                showToast(getErrorMessage(error), "error");
-                setLoadingState(providerName, false);
+                    is_guest: is_guest || false,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+                if (error) console.error('Failed to save user profile:', error);
             }
-        }
 
-        googleButton.addEventListener("click", () => {
-            const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: "select_account" });
-            handleSocialLogin(provider, "google");
-        });
-
-        githubButton.addEventListener("click", () => {
-            const provider = new GithubAuthProvider();
-            provider.addScope("read:user");
-            provider.addScope("user:email");
-            handleSocialLogin(provider, "github");
-        });
-
-        guestButton.addEventListener("click", async () => {
-            if (loading || offlineMode || isLocked()) return;
-            setLoadingState("guest", true, "Entering as guest...");
-            try {
-                const result = await signInAnonymously(auth);
-                await saveUser(result.user, "guest");
-                resetFailedAttempts();
-                track("login", { method: "guest" });
-                showToast("Entering as guest. You can link an account later.");
-                redirectToApp();
-            } catch (error) {
-                incrementFailedAttempt();
-                showToast(getErrorMessage(error), "error");
-                setLoadingState("guest", false);
+            function translateError(error) {
+                const msg = error?.message || error?.error_description || String(error);
+                const map = {
+                    'Invalid login credentials': 'Incorrect email or password.',
+                    'User already registered': 'An account with this email already exists.',
+                    'Password should be at least 6 characters': 'Password must be at least 6 characters.',
+                    'Email not confirmed': 'Please verify your email before signing in.',
+                    'Email rate limit exceeded': 'Too many attempts. Please wait a moment.',
+                    'User not found': 'No account found with this email.',
+                };
+                for (const [key, val] of Object.entries(map)) {
+                    if (msg.includes(key)) return val;
+                }
+                return msg || 'Something went wrong. Please try again.';
             }
-        });
 
-        // ── Email/Password handler (with verification enforcement) ──
-        authForm.addEventListener("submit", async event => {
-            event.preventDefault();
-            if (loading || offlineMode || isLocked()) return;
-            clearAllErrors();
-            if (!validateForm()) return;
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            setLoadingState("submit", true, mode === "signup" ? "Creating account..." : "Signing in...");
-            try {
-                await applyPersistence();
-                if (mode === "signup") {
-                    const name = nameInput.value.trim();
-                    await handleEmailSignup(email, password, name);
-                    setLoadingState("submit", false);
-                } else {
-                    const result = await signInWithEmailAndPassword(auth, email, password);
-                    // 🔐 Enforce email verification on login
-                    await result.user.reload();
-                    if (!result.user.emailVerified) {
-                        await signOut(auth);
-                        incrementFailedAttempt();
-                        showToast("Please verify your email first.", "error");
-                        setLoadingState("submit", false);
-                        return;
+            const auth = {
+                async google() {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                        provider: 'google',
+                        options: {
+                            queryParams: { access_type: 'offline', prompt: 'consent' },
+                            redirectTo: window.location.origin + '/auth.html'   // ← FIXED
+                        }
+                    });
+                    if (error) throw new Error(translateError(error));
+                },
+                async github() {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                        provider: 'github',
+                        options: { redirectTo: window.location.origin + '/auth.html' }
+                    });
+                    if (error) throw new Error(translateError(error));
+                },
+                async guest() {
+                    const { data, error } = await supabase.auth.signInAnonymously();
+                    if (error) throw error;
+                    return data;
+                },
+                async signup(email, password, name) {
+                    const { data, error } = await supabase.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            data: { full_name: name || '' },
+                            emailRedirectTo: window.location.origin + '/auth.html'
+                        }
+                    });
+                    if (error) throw new Error(translateError(error));
+                    if (data.user) {
+                        await saveUserProfile(data.user.id, { name, email, provider: 'email', is_guest: false });
                     }
-                    await saveUser(result.user, "email");
-                    resetFailedAttempts();
-                    track("login", { method: "email" });
-                    showToast(`👋 Welcome back, ${result.user.displayName || ''}`);
-                    redirectToApp();
+                    return data;
+                },
+                async login(email, password) {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw new Error(translateError(error));
+                    if (data.user) {
+                        await saveUserProfile(data.user.id, {
+                            name: data.user.user_metadata?.full_name,
+                            email,
+                            provider: 'email',
+                            is_guest: false
+                        });
+                    }
+                    return data;
+                },
+                async sendPasswordReset(email) {
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: window.location.origin + '/reset-password.html'
+                    });
+                    if (error) throw new Error(translateError(error));
+                },
+                async resendVerification() {
+                    const { data: { user }, error } = await supabase.auth.getUser();
+                    if (error || !user) throw new Error('No user session found. Please sign up again.');
+                    const { error: resendError } = await supabase.auth.resend({
+                        type: 'signup',
+                        email: user.email,
+                        options: {
+                            emailRedirectTo: window.location.origin + '/auth.html'   // ← FIXED
+                        }
+                    });
+                    if (resendError) throw new Error(translateError(resendError));
+                },
+                async isEmailVerified() {
+                    const { data: { user }, error } = await supabase.auth.getUser();
+                    if (error || !user) return false;
+                    return !!user.email_confirmed_at;
+                },
+                signOut() {
+                    return supabase.auth.signOut();
                 }
-            } catch (error) {
-                incrementFailedAttempt();
-                showToast(getErrorMessage(error), "error");
-                setLoadingState("submit", false);
-            }
-        });
-
-        // Manual email verification check
-        checkVerificationBtn.addEventListener("click", async () => {
-            if (!auth.currentUser) return;
-            const verified = await checkEmailVerification();
-            if (verified) {
-                showToast("Email verified! Redirecting...");
-                redirectToApp();
-            } else {
-                verificationError.textContent = "Email not verified yet. Check spam folder or resend.";
-            }
-        });
-
-        resendVerificationBtn.addEventListener("click", async () => {
-            if (!auth.currentUser) return;
-            try {
-                await sendEmailVerification(auth.currentUser, { url: "https://horizon-llm.vercel.app/verify.html" });
-                showToast("Verification email resent.");
-            } catch (error) {
-                verificationError.textContent = getErrorMessage(error);
-            }
-        });
-
-        changeEmailLink.addEventListener("click", () => {
-            hideVerificationScreen();
-            auth.signOut().then(() => {
-                emailInput.value = "";
-                passwordInput.value = "";
-            });
-        });
-
-        // ── Network detection ──
-        window.addEventListener("offline", () => {
-            offlineMode = true;
-            showToast("You're offline. Check your connection.", "error");
-            submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = true;
-        });
-        window.addEventListener("online", () => {
-            offlineMode = false;
-            if (!isLocked()) {
-                submitButton.disabled = googleButton.disabled = githubButton.disabled = guestButton.disabled = false;
-            }
-            showToast("Back online.");
-        });
-
-        // ── Forgot Password Modal ──
-        const modalOverlay = document.getElementById("forgotPasswordModal");
-        const modalClose = document.getElementById("modalClose");
-        const forgotLink = document.getElementById("forgotLink");
-        const stepEmail = document.getElementById("stepEmail");
-        const stepSuccess = document.getElementById("stepSuccess");
-        const resetEmail = document.getElementById("resetEmail");
-        const resetEmailError = document.getElementById("resetEmailError");
-        const sendResetLinkBtn = document.getElementById("sendResetLinkBtn");
-        const resendInModal = document.getElementById("resendInModal");
-        const changeEmailInModal = document.getElementById("changeEmailInModal");
-        const modalSuccessError = document.getElementById("modalSuccessError");
-
-        function openModal() {
-            modalOverlay.classList.add("active");
-            stepEmail.classList.add("active");
-            stepSuccess.classList.remove("active");
-            resetEmail.value = "";
-            resetEmailError.textContent = modalSuccessError.textContent = "";
-        }
-        function closeModal() { modalOverlay.classList.remove("active"); }
-
-        forgotLink.addEventListener("click", e => { e.preventDefault(); openModal(); });
-        modalClose.addEventListener("click", closeModal);
-        modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) closeModal(); });
-
-        async function sendReset() {
-            const email = resetEmail.value.trim();
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                resetEmailError.textContent = "Enter a valid email.";
-                return;
-            }
-            sendResetLinkBtn.disabled = true;
-            sendResetLinkBtn.innerHTML = '<span class="spinner"></span> Sending...';
-            resetEmailError.textContent = "";
-            try {
-                await sendPasswordResetEmail(auth, email, { url: "https://horizon-llm.vercel.app/reset.html", handleCodeInApp: true });
-                stepEmail.classList.remove("active");
-                stepSuccess.classList.add("active");
-            } catch (error) {
-                resetEmailError.textContent = getErrorMessage(error);
-            } finally {
-                sendResetLinkBtn.disabled = false;
-                sendResetLinkBtn.textContent = "Send Reset Link";
-            }
-        }
-
-        sendResetLinkBtn.addEventListener("click", sendReset);
-        resendInModal.addEventListener("click", async (e) => {
-            e.preventDefault();
-            const email = resetEmail.value.trim();
-            if (!email) {
-                modalSuccessError.textContent = "No email to resend.";
-                return;
-            }
-            try {
-                await sendPasswordResetEmail(auth, email, { url: "https://horizon-llm.vercel.app/reset.html", handleCodeInApp: true });
-                showToast("Reset link resent.");
-            } catch (error) {
-                modalSuccessError.textContent = getErrorMessage(error);
-            }
-        });
-        changeEmailInModal.addEventListener("click", (e) => {
-            e.preventDefault();
-            stepSuccess.classList.remove("active");
-            stepEmail.classList.add("active");
-        });
-
-        // ── Mode switching ──
-        function setMode(nextMode) {
-            if (loading) return;
-            mode = nextMode;
-            const isSignup = mode === "signup";
-            loginTab.classList.toggle("active", !isSignup);
-            signupTab.classList.toggle("active", isSignup);
-            tabContainer.classList.toggle("signup-active", isSignup);
-            nameField.classList.toggle("hidden", !isSignup);
-            confirmField.classList.toggle("hidden", !isSignup);
-            loginMeta.classList.toggle("hidden", isSignup);
-            nameInput.required = isSignup;
-            passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
-            confirmInput.required = isSignup;
-            authTitle.textContent = isSignup ? "Create your account." : "Welcome back.";
-            authSubtitle.textContent = isSignup ? "One account, every model." : "Pick up where you left off.";
-            submitButton.textContent = isSignup ? "Create account →" : "Enter Horizon →";
-            clearAllErrors();
-            updatePasswordStrength();
-        }
-
-        loginTab.addEventListener("click", () => setMode("login"));
-        signupTab.addEventListener("click", () => setMode("signup"));
-
-        passwordToggle.addEventListener("click", () => {
-            const hidden = passwordInput.type === "password";
-            passwordInput.type = hidden ? "text" : "password";
-            passwordToggle.textContent = hidden ? "◎" : "◉";
-        });
-
-        // Inline validation on blur
-        [nameInput, emailInput, passwordInput, confirmInput].forEach(input => {
-            input.addEventListener("blur", () => {
-                if (input === nameInput && mode === "signup") validateField(nameInput, nameInput.value, nameError, { required: true, requiredMsg: "Name can't be empty." });
-                if (input === emailInput) validateField(emailInput, emailInput.value, emailError, { required: true, email: true });
-                if (input === passwordInput) {
-                    validateField(passwordInput, passwordInput.value, passwordError, { required: true, minLength: 6 });
-                    updatePasswordStrength();
-                }
-                if (input === confirmInput && mode === "signup") validateField(confirmInput, confirmInput.value, confirmError, { required: true, match: { value: passwordInput.value, msg: "Passwords don't match." } });
-            });
-        });
-
-        passwordInput.addEventListener("input", updatePasswordStrength);
-
-        // ── Initial Auth State ──
-        let initialAuthCheck = true;
-        onAuthStateChanged(auth, user => {
-            skeletonLoader.style.display = "none";
-            if (initialAuthCheck && user) {
-                if (user.isAnonymous || (user.emailVerified !== false)) {
-                    initialAuthCheck = false;
-                    redirectToApp();
-                    return;
-                } else if (user.email && !user.emailVerified) {
-                    initialAuthCheck = false;
-                    showVerificationScreen(user.email);
-                    pollVerification(user);
-                    return;
-                }
-            }
-            initialAuthCheck = false;
-        });
-
-        // ── Error message mapping ──
-        function getErrorMessage(error) {
-            const messages = {
-                "auth/invalid-credential": "Incorrect email or password.",
-                "auth/user-not-found": "No account exists with this email.",
-                "auth/wrong-password": "Incorrect password.",
-                "auth/email-already-in-use": "An account already uses this email.",
-                "auth/weak-password": "Use a password with at least 6 characters.",
-                "auth/invalid-email": "Enter a valid email address.",
-                "auth/popup-closed-by-user": "The sign-in window was closed.",
-                "auth/popup-blocked": "Your browser blocked the sign-in popup.",
-                "auth/account-exists-with-different-credential": "This email already uses another sign-in method.",
-                "auth/operation-not-allowed": "This login method is not enabled.",
-                "auth/network-request-failed": "Network error. Check your connection.",
-                "auth/too-many-requests": "Too many attempts. Try again later."
             };
-            return messages[error.code] || error.message || "Authentication failed.";
-        }
 
-        // ── Canvas animation (unchanged) ──
+            window._auth = auth;
+
+            supabase.auth.onAuthStateChange((event, session) => {
+                document.getElementById('skeletonLoader').style.display = 'none';
+                if (event === 'SIGNED_IN' && session?.user) {
+                    const user = session.user;
+                    if (user.is_anonymous || user.email_confirmed_at) {
+                        redirectToApp();
+                    } else {
+                        document.dispatchEvent(new CustomEvent('auth:verify-email', { detail: user.email }));
+                    }
+                }
+                if (event === 'INITIAL_SESSION' && session?.user) {
+                    const user = session.user;
+                    if (user.is_anonymous || user.email_confirmed_at) {
+                        redirectToApp();
+                    }
+                }
+            });
+
+            function redirectToApp() {
+                document.body.classList.add('fade-out');
+                setTimeout(() => location.replace('app.html'), 200);
+            }
+
+            window.addEventListener("offline", () => document.dispatchEvent(new CustomEvent('connection:offline')));
+            window.addEventListener("online", () => document.dispatchEvent(new CustomEvent('connection:online')));
+        })();
+
+        function authPage() {
+            return {
+                mode: 'login',
+                email: '',
+                password: '',
+                name: '',
+                confirmPassword: '',
+                rememberMe: false,
+                showPassword: false,
+                verificationScreen: false,
+                verificationError: '',
+                resendCooldown: 0,
+                resendCooldownInterval: null,
+                forgotOpen: false,
+                forgotSent: false,
+                resetEmail: '',
+                resetEmailError: '',
+                sendingReset: false,
+                toast: { show: false, message: '', error: false },
+                loading: { any: false, email: false, google: false, github: false, guest: false },
+                errors: { name: '', email: '', password: '', confirm: '' },
+                offline: false,
+
+                get auth() { return window._auth; },
+
+                get strength() {
+                    const val = this.password || '';
+                    let score = 0;
+                    if (val.length >= 6) score++;
+                    if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+                    if (/\d/.test(val)) score++;
+                    if (/[^a-zA-Z0-9]/.test(val)) score++;
+                    const percent = (score / 4) * 100;
+                    const colors = ["#ff4d6a", "#ffb347", "#b8d64b", "#4caf50"];
+                    const labels = ["Weak", "Fair", "Good", "Strong"];
+                    const idx = Math.max(0, Math.min(score - 1, colors.length - 1));
+                    return {
+                        percent: percent,
+                        color: colors[idx] || colors[0],
+                        label: labels[idx] || "Weak"
+                    };
+                },
+
+                init() {
+                    document.addEventListener('auth:verify-email', (e) => {
+                        this.email = e.detail;
+                        this.verificationScreen = true;
+                        this.setupVisibilityCheck();
+                    });
+                    document.addEventListener('connection:offline', () => {
+                        this.offline = true;
+                        this.showToast("You're offline. Check your connection.", true);
+                    });
+                    document.addEventListener('connection:online', () => {
+                        this.offline = false;
+                        this.showToast("Back online.", false);
+                    });
+                    this.offline = !navigator.onLine;
+                },
+
+                setupVisibilityCheck() {
+                    const check = async () => {
+                        if (!this.verificationScreen) return;
+                        const verified = await this.auth.isEmailVerified();
+                        if (verified) {
+                            this.teardownVisibilityCheck();
+                            this.showToast("Email verified! Signing you in...");
+                            setTimeout(() => this.redirect(), 600);
+                        }
+                    };
+                    this._visibilityHandler = () => {
+                        if (document.visibilityState === 'visible') check();
+                    };
+                    this._focusHandler = () => check();
+                    document.addEventListener('visibilitychange', this._visibilityHandler);
+                    window.addEventListener('focus', this._focusHandler);
+                },
+
+                teardownVisibilityCheck() {
+                    if (this._visibilityHandler) {
+                        document.removeEventListener('visibilitychange', this._visibilityHandler);
+                        this._visibilityHandler = null;
+                    }
+                    if (this._focusHandler) {
+                        window.removeEventListener('focus', this._focusHandler);
+                        this._focusHandler = null;
+                    }
+                    this.stopResendCooldown();
+                },
+
+                startResendCooldown() {
+                    this.stopResendCooldown();
+                    this.resendCooldown = 30;
+                    this.resendCooldownInterval = setInterval(() => {
+                        this.resendCooldown--;
+                        if (this.resendCooldown <= 0) {
+                            this.stopResendCooldown();
+                        }
+                    }, 1000);
+                },
+
+                stopResendCooldown() {
+                    if (this.resendCooldownInterval) {
+                        clearInterval(this.resendCooldownInterval);
+                        this.resendCooldownInterval = null;
+                    }
+                    this.resendCooldown = 0;
+                },
+
+                setMode(newMode) {
+                    if (this.loading.any) return;
+                    this.mode = newMode;
+                    this.clearErrors();
+                    this.verificationScreen = false;
+                    this.teardownVisibilityCheck();
+                },
+
+                validate(field) {
+                    let value = this[field] || '';
+                    if (typeof value === 'string') value = value.trim();
+                    let error = '';
+                    switch (field) {
+                        case 'name':
+                            if (this.mode === 'signup' && !value) error = "Name can't be empty.";
+                            break;
+                        case 'email':
+                            if (!value) error = "Email is required.";
+                            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Enter a valid email.";
+                            break;
+                        case 'password':
+                            if (!value) error = "Password is required.";
+                            else if (value.length < 6) error = "Must be at least 6 characters.";
+                            break;
+                        case 'confirm':
+                            if (this.mode === 'signup') {
+                                if (!value) error = "Please confirm your password.";
+                                else if (value !== this.password) error = "Passwords don't match.";
+                            }
+                            break;
+                    }
+                    this.errors[field] = error;
+                    return !error;
+                },
+
+                validateForm() {
+                    const fields = ['email', 'password'];
+                    if (this.mode === 'signup') fields.push('name', 'confirm');
+                    let valid = true;
+                    fields.forEach(f => { if (!this.validate(f)) valid = false; });
+                    return valid;
+                },
+
+                clearErrors() {
+                    this.errors = { name: '', email: '', password: '', confirm: '' };
+                },
+
+                showToast(message, error = false) {
+                    clearTimeout(this._toastTimer);
+                    this.toast = { show: true, message, error };
+                    this._toastTimer = setTimeout(() => this.toast.show = false, 3500);
+                },
+
+                setLoading(provider, state) {
+                    this.loading[provider] = state;
+                    this.loading.any = Object.values(this.loading).some(v => v);
+                },
+
+                // ── Guest login handler ──
+                async handleGuest() {
+                    this.setLoading('guest', true);
+                    try {
+                        await this.auth.guest();
+                        // Redirect is handled by onAuthStateChange listener
+                    } catch (e) {
+                        this.showToast(e.message, true);
+                    } finally {
+                        this.setLoading('guest', false);
+                    }
+                },
+
+                async handleEmailAuth() {
+                    if (this.loading.any || this.offline) return;
+                    this.clearErrors();
+                    if (!this.validateForm()) return;
+                    this.setLoading('email', true);
+                    try {
+                        if (this.mode === 'signup') {
+                            await this.auth.signup(this.email.trim(), this.password, this.name.trim());
+                            this.showToast("Account created. Verify your email to continue.");
+                            this.verificationScreen = true;
+                            this.setupVisibilityCheck();
+                        } else {
+                            await this.auth.login(this.email.trim(), this.password);
+                            // Successful login – redirect is automatic via onAuthStateChange, so we don't call redirect() here to avoid double redirect.
+                            this.showToast("Welcome back!");
+                        }
+                    } catch (error) {
+                        this.showToast(error.message, true);
+                    } finally {
+                        this.setLoading('email', false);
+                    }
+                },
+
+                async checkVerification() {
+                    const verified = await this.auth.isEmailVerified();
+                    if (verified) {
+                        this.teardownVisibilityCheck();
+                        this.showToast("Email verified! Redirecting...");
+                        this.redirect();
+                    } else {
+                        this.verificationError = "Email not verified yet. Check your spam folder or resend.";
+                    }
+                },
+
+                async resendVerification() {
+                    if (this.resendCooldown > 0) return;
+                    try {
+                        await this.auth.resendVerification();
+                        this.verificationError = '';
+                        this.showToast("Verification email resent.");
+                        this.startResendCooldown();
+                    } catch (error) {
+                        this.verificationError = error.message;
+                    }
+                },
+
+                async changeEmailFromVerification() {
+                    this.teardownVisibilityCheck();
+                    await this.auth.signOut().catch(() => {});
+                    this.verificationScreen = false;
+                    this.mode = 'signup';
+                    this.password = '';
+                    this.confirmPassword = '';
+                    this.showToast("You can now enter a different email.");
+                },
+
+                validateResetEmail() {
+                    const val = (this.resetEmail || '').trim();
+                    if (!val) {
+                        this.resetEmailError = "Email is required.";
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                        this.resetEmailError = "Enter a valid email.";
+                    } else {
+                        this.resetEmailError = '';
+                    }
+                },
+
+                async sendResetLink() {
+                    this.validateResetEmail();
+                    if (this.resetEmailError) return;
+                    this.sendingReset = true;
+                    try {
+                        await this.auth.sendPasswordReset(this.resetEmail.trim());
+                        this.forgotSent = true;
+                        this.resetEmailError = '';
+                    } catch (error) {
+                        this.resetEmailError = error.message;
+                    } finally {
+                        this.sendingReset = false;
+                    }
+                },
+
+                redirect() {
+                    document.body.classList.add("fade-out");
+                    setTimeout(() => location.replace("app.html"), 200);
+                }
+            };
+        }
+    </script>
+
+    <script>
         const canvas = document.getElementById("bendCanvas");
         const ctx = canvas.getContext("2d");
         let width, height, dpr = 1;
@@ -1252,13 +1678,14 @@
 
         window.addEventListener("pointermove", e => { mouse.targetX = e.clientX / width; mouse.targetY = e.clientY / height; });
         window.addEventListener("resize", resizeCanvas);
-        window.addEventListener("scroll", () => topbar.classList.toggle("scrolled", window.scrollY > 10), { passive: true });
+        window.addEventListener("scroll", () => document.getElementById("topbar").classList.toggle("scrolled", window.scrollY > 10), { passive: true });
 
         resizeCanvas();
         animate(0);
 
-        // Glow orb
+        const glowOrb = document.getElementById("glowOrb");
         let orbTimeout;
+
         function moveGlowOrb(x, y) {
             glowOrb.style.left = x + "px";
             glowOrb.style.top = y + "px";
